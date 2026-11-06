@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#171d20" />
+    <title>Servidores de Minecraft · Força Aliada · Protótipo</title>
+    <link rel="icon" href="./shared/images/app-icons/favicon-32.png" />
+    <link
+      rel="preload"
+      href="./shared/fonts/manrope-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./expansion.css" />
+    <link rel="stylesheet" href="./play.css" />
+    <link rel="stylesheet" href="./skin-studio.css" />
+    <script type="module" src="./app.mjs"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-skip-content>Ir para o conteúdo</a>
+    <div class="prototype-note">
+      Prévia da nova área Minecraft
+      <span>Teste à vontade · seus dados ficam neste navegador</span>
+    </div>
+    <header class="site-header">
+      <div class="header-inner">
+        <a
+          class="brand"
+          href="#/"
+          aria-label="Força Aliada, catálogo de servidores"
+          ><img
+            src="./shared/images/fa-icon-dark.png"
+            alt=""
+            width="35"
+            height="43"
+          /><span>Força Aliada<small>Minecraft</small></span></a
+        >
+        <nav class="main-nav" aria-label="Navegação principal">
+          <a href="#/" data-nav="catalog">Servidores</a
+          ><a href="#/skins" data-nav="skins">Skins</a>
+          <details class="tools-menu">
+            <summary>
+              Ferramentas
+              <i class="icon" data-icon="chevron-down" aria-hidden="true"></i>
+            </summary>
+            <div class="tools-popover">
+              <a
+                href="https://iamcal.github.io/enchant-order/"
+                target="_blank"
+                rel="noopener noreferrer"
+                ><i class="icon" data-icon="book" aria-hidden="true"></i
+                ><span
+                  >Ordem de encantamentos<small
+                    >Calculadora gratuita de iamcal</small
+                  ></span
+                ><i
+                  class="icon"
+                  data-icon="external-link"
+                  aria-hidden="true"
+                ></i
+              ></a>
+            </div>
+          </details>
+        </nav>
+        <div class="header-actions">
+          <button class="button header-create" data-action="create">
+            Criar página grátis
+            <i class="icon" data-icon="plus" aria-hidden="true"></i>
+          </button>
+          <div id="account-area"></div>
+        </div>
+      </div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer id="footer" class="site-footer">
+      <div class="footer-top">
+        <a class="brand" href="#/"
+          ><img
+            src="./shared/images/fa-icon-dark.png"
+            alt=""
+            width="30"
+            height="37"
+          /><span>Força Aliada</span></a
+        >
+        <div class="footer-social">
+          <span>Siga-nos</span
+          ><a
+            href="https://www.instagram.com/forcaaliada/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram"
+            ><i class="icon" data-icon="brand-instagram"></i></a
+          ><a
+            href="https://www.youtube.com/@ForcaAliada"
+            target="_blank"
+            rel="noopener"
+            aria-label="YouTube"
+            ><i class="icon" data-icon="brand-youtube"></i></a
+          ><a
+            href="https://www.tiktok.com/@forcaaliada"
+            target="_blank"
+            rel="noopener"
+            aria-label="TikTok"
+            ><i class="icon" data-icon="brand-tiktok"></i></a
+          ><a
+            href="https://x.com/ForcaAliada"
+            target="_blank"
+            rel="noopener"
+            aria-label="X"
+            ><i class="icon" data-icon="brand-x"></i></a
+          ><a
+            href="https://www.facebook.com/profile.php?id=61592685122143"
+            target="_blank"
+            rel="noopener"
+            aria-label="Facebook"
+            ><i class="icon" data-icon="brand-facebook"></i></a
+          ><a
+            href="https://www.linkedin.com/company/forcaaliada/"
+            target="_blank"
+            rel="noopener"
+            aria-label="LinkedIn"
+            ><i class="icon" data-icon="brand-linkedin"></i></a
+          ><a
+            href="https://discord.gg/xZmRkB7PWd"
+            target="_blank"
+            rel="noopener"
+            aria-label="Discord"
+            ><i class="icon" data-icon="brand-discord"></i></a
+          ><a
+            href="https://www.whatsapp.com/channel/0029VbC3kNoAzNc1wXb0130e"
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp"
+            ><i class="icon" data-icon="brand-whatsapp"></i></a
+          ><a
+            href="https://www.reddit.com/r/forcaaliada/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Reddit"
+            ><i class="icon" data-icon="brand-reddit"></i></a
+          ><a
+            href="https://github.com/Forca-Aliada"
+            target="_blank"
+            rel="noopener"
+            aria-label="GitHub"
+            ><i class="icon" data-icon="brand-github"></i></a
+          ><a
+            href="https://forcaaliada.com/community"
+            target="_blank"
+            rel="noopener"
+            aria-label="Community"
+            ><img
+              src="./shared/images/fa-icon-dark.png"
+              alt=""
+              width="20"
+              height="24"
+          /></a>
+        </div>
+      </div>
+      <div class="footer-inner">
+        <div>
+          <h2>O jogo é melhor em boa companhia.</h2>
+          <p>Servidores, skins e ferramentas para o seu Minecraft.</p>
+        </div>
+        <nav aria-label="Servidores">
+          <strong>Servidores</strong><a href="#/">Explorar o catálogo</a
+          ><a href="#/servidor/forca-aliada">Servidor Força Aliada</a
+          ><button class="text-link" data-action="create">
+            Criar minha página
+          </button>
+        </nav>
+        <nav aria-label="Ferramentas e ajuda">
+          <strong>Para jogar</strong><a href="#/skins">Catálogo de skins</a
+          ><a
+            href="https://iamcal.github.io/enchant-order/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Ordem de encantamentos
+            <i class="icon" data-icon="external-link"></i></a
+          ><a
+            href="https://forcaaliada.com/ajuda"
+            target="_blank"
+            rel="noopener"
+            >Central de ajuda</a
+          >
+        </nav>
+        <nav aria-label="Produtos Força Aliada">
+          <strong>Força Aliada</strong
+          ><a
+            href="https://forcaaliada.com/manager"
+            target="_blank"
+            rel="noopener"
+            >Manager <i class="icon" data-icon="external-link"></i></a
+          ><a
+            href="https://forcaaliada.com/community"
+            target="_blank"
+            rel="noopener"
+            >Community <i class="icon" data-icon="external-link"></i
+          ></a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span
+          >Protótipo da nova área Minecraft. Servidores de exemplo não aceitam
+          conexões.</span
+        ><span
+          >Produto independente, sem vínculo com a Mojang ou Microsoft.</span
+        >
+      </div>
+    </footer>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div class="dialog-inner">
+        <button
+          class="icon-button dialog-close"
+          data-action="close-dialog"
+          aria-label="Fechar"
+        >
+          <i class="icon" data-icon="x"></i>
+        </button>
+        <div id="dialog-content"></div>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
