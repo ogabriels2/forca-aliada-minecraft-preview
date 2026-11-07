@@ -1,38 +1,62 @@
-/* Finder only. Warm ink and amethyst frame the worlds; gold invites action. */
-body[data-surface="discovery"] {
-  --finder-ground: #191820;
-  --finder-panel: #252332;
-  --finder-ink: #fff8ef;
-  --finder-muted: #c2b9cf;
-  --finder-line: #514960;
-  --finder-gold: #ffcf6d;
-  --finder-lime: #b8f08c;
-  --finder-violet: #dfc5ff;
+/* A field atlas of Minecraft worlds: paper, spruce, sky, and clay. */
+body:is([data-surface="discovery"], [data-surface="server"]) {
+  --finder-ground: #f3f1e9;
+  --finder-panel: #fffdf7;
+  --finder-ink: #222a24;
+  --finder-muted: #4f5b50;
+  --finder-line: #cecfc2;
+  --finder-spruce: #202e27;
+  --finder-dark-panel: #2b3a31;
+  --finder-chalk: #f8f6e9;
+  --finder-dark-muted: #d3ddca;
+  --finder-leaf: #b9df86;
+  --finder-leaf-hover: #cceaa3;
+  --finder-action: #345c32;
+  --finder-action-hover: #284b26;
+  --finder-selected: #dfe9d5;
+  --finder-focus: #467a42;
+  --finder-seal: #77592e;
+  --finder-seal-bg: #f4e1b7;
+  --finder-java: #eee6d5;
+  --finder-java-ink: #514127;
+  --finder-bedrock: #d5e8ef;
+  --finder-bedrock-ink: #254e5c;
+  --finder-sky: #d6e7ed;
+  --finder-sky-action: #245c72;
+  --finder-clay: #eddbc3;
+  --finder-clay-action: #754823;
+  --finder-online: #c4eaa1;
+  --finder-offline: #f5beb0;
+  --finder-favorite: #873d2d;
+  --finder-favorite-bg: #f3c5b2;
   --finder-ease: cubic-bezier(.2,.75,.24,1);
+}
+
+body[data-surface="discovery"] {
   background: var(--finder-ground);
   color: var(--finder-ink);
 }
 
-body[data-surface="discovery"] .site-header {
-  background: #201e2a;
-  border-color: #383143;
+body:is([data-surface="discovery"], [data-surface="server"]) :is(.site-header, .site-footer) {
+  background: var(--finder-spruce);
+  border-color: #36453b;
 }
-body[data-surface="discovery"] .main-nav > [aria-current="page"] {
-  color: var(--finder-gold);
+body:is([data-surface="discovery"], [data-surface="server"]) .main-nav > [aria-current="page"] {
+  color: var(--finder-leaf);
 }
-body[data-surface="discovery"] .main-nav > [aria-current="page"]::after { background: var(--finder-gold); }
-body[data-surface="discovery"] .prototype-note {
-  background: #30253e;
-  color: #ebdcef;
+body:is([data-surface="discovery"], [data-surface="server"]) .main-nav > [aria-current="page"]::after { background: var(--finder-leaf); }
+body:is([data-surface="discovery"], [data-surface="server"]) .prototype-note {
+  background: #e9e4d7;
+  color: var(--finder-ink);
 }
-body[data-surface="discovery"] .prototype-note span { color: #d0b9d9; }
+body:is([data-surface="discovery"], [data-surface="server"]) .prototype-note span { color: var(--finder-muted); }
 body[data-surface="discovery"] #main :focus-visible {
-  outline: 2px solid #ffdc90;
+  outline: 2px solid var(--finder-focus);
   outline-offset: 3px;
 }
 body[data-surface="discovery"] #main ::selection {
-  background: #ffcf6d;
-  color: #241928;
+  background: var(--finder-selected);
+  color: var(--finder-ink);
 }
 
 .catalog-masthead { background: transparent; border: 0; }
@@ -49,7 +73,7 @@ body[data-surface="discovery"] #main ::selection {
   grid-template-columns: 1fr 1fr;
   min-height: 224px;
   border-radius: 18px;
-  background: #352753;
+  background: var(--finder-spruce);
 }
 .catalog-stage .catalog-intro {
   z-index: 1;
@@ -63,15 +87,15 @@ body[data-surface="discovery"] #main ::selection {
   line-height: 1;
   letter-spacing: -.04em;
   font-weight: 850;
-  color: var(--finder-ink);
+  color: var(--finder-chalk);
 }
 .catalog-stage h1 em {
-  color: var(--finder-gold);
+  color: inherit;
   font-style: normal;
 }
 .catalog-masthead .catalog-stage p {
   margin: 9px 0 15px;
-  color: #f1e7ff;
+  color: var(--finder-dark-muted);
   font-size: 14px;
   font-weight: 650;
   line-height: 1.4;
@@ -83,28 +107,28 @@ body[data-surface="discovery"] #main ::selection {
   padding: 4px 5px 4px 13px;
   gap: 8px;
   border: 0;
-  background: #fff9f3;
+  background: var(--finder-panel);
   border-radius: 10px;
 }
-.catalog-stage .search-form > .icon { color: #634a78; flex: 0 0 19px; }
-.catalog-stage .search-form:focus-within { outline: 2px solid #ffdb90; outline-offset: 3px; }
+.catalog-stage .search-form > .icon { color: var(--finder-muted); flex: 0 0 19px; }
+.catalog-stage .search-form:focus-within { outline: 2px solid var(--finder-leaf); outline-offset: 3px; }
 .catalog-stage .search-form input {
   min-width: 0;
-  color: #251b31;
-  caret-color: #624183;
+  color: var(--finder-ink);
+  caret-color: var(--finder-action);
   font-size: 16px;
 }
-.catalog-stage .search-form input::placeholder { color: #60536c; opacity: 1; }
+.catalog-stage .search-form input::placeholder { color: var(--finder-muted); opacity: 1; }
 .catalog-stage .search-form > .button {
-  background: var(--finder-gold);
-  color: #302014;
+  background: var(--finder-leaf);
+  color: var(--finder-spruce);
   border: 0;
   min-height: 44px;
   padding-inline: 13px;
   font-weight: 850;
   transition: background-color 140ms, transform 240ms var(--finder-ease);
 }
-.catalog-stage .search-form > .button:hover { background: #ffdf96; transform: translateY(-1px); }
+.catalog-stage .search-form > .button:hover { background: var(--finder-leaf-hover); transform: translateY(-1px); }
 .catalog-stage .search-form > .button:active { transform: scale(.96); }
 .catalog-stage-art {
   position: relative;
@@ -112,7 +136,7 @@ body[data-surface="discovery"] #main ::selection {
   min-width: 0;
   min-height: 100%;
   overflow: hidden;
-  background: #655084;
+  background: var(--finder-dark-panel);
 }
 .catalog-stage-art > img {
   position: absolute;
@@ -121,13 +145,6 @@ body[data-surface="discovery"] #main ::selection {
   object-fit: cover;
   object-position: 50% 51%;
   transition: transform 680ms var(--finder-ease);
-}
-.catalog-stage-art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg,#352753,transparent 22%);
 }
 .catalog-stage-caption {
   position: absolute;
@@ -139,13 +156,13 @@ body[data-surface="discovery"] #main ::selection {
   right: 13px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: #21192e;
-  color: #fff8ef;
+  background: var(--finder-spruce);
+  color: var(--finder-chalk);
   font-size: 11px;
   font-weight: 800;
 }
-.catalog-stage-caption .icon { width: 15px; height: 15px; color: var(--finder-gold); }
-.catalog-stage-caption:hover { background: #332541; }
+.catalog-stage-caption .icon { width: 15px; height: 15px; color: var(--finder-leaf); }
+.catalog-stage-caption:hover { background: var(--finder-dark-panel); }
 .catalog-stage-caption .icon:last-child { transition: transform 240ms var(--finder-ease); }
 @media (hover:hover) {
   .catalog-stage-art:hover img { transform: scale(1.075); }
@@ -188,22 +205,22 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main .catalog-toolbar .chip[hidden] { display: none; }
 .catalog-main .catalog-toolbar .filter-more {
   background: var(--finder-panel);
-  border-color: var(--finder-line);
+  border-color: #858c80;
   color: var(--finder-ink);
   margin-inline-start: auto;
 }
-.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover { background: #383247; color: var(--finder-ink); }
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover { background: #e8e9df; color: var(--finder-ink); }
 .catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: scale(.96); }
 .catalog-main .catalog-toolbar .icon { width: 16px; height: 16px; }
 .catalog-main .catalog-toolbar .chip[aria-pressed="true"],
 .catalog-main .catalog-toolbar .filter-more[aria-expanded="true"] {
-  background: #463655;
-  color: #f5e7ff;
+  background: var(--finder-selected);
+  color: var(--finder-ink);
 }
 .catalog-main .catalog-filter-panel:not([hidden]) {
   grid-template-columns: repeat(4, minmax(0,1fr));
   gap: 13px;
-  background: #2c2739;
+  background: var(--finder-panel);
   border: 1px solid var(--finder-line);
   color: var(--finder-ink);
   animation: finder-open 240ms var(--finder-ease) both;
@@ -212,7 +229,7 @@ body[data-surface="discovery"] #main ::selection {
   display: grid;
   gap: 5px;
   min-width: 0;
-  color: #eadfff;
+  color: var(--finder-ink);
   font-size: 13px;
   font-weight: 750;
 }
@@ -220,11 +237,11 @@ body[data-surface="discovery"] #main ::selection {
   width: 100%;
   min-width: 0;
   padding: 0 7px;
-  color-scheme: dark;
-  border: 1px solid #645770;
+  color-scheme: light;
+  border: 1px solid #858c80;
   border-radius: 8px;
-  background: #231f2d;
-  color: #f0e6fc;
+  background: var(--finder-panel);
+  color: var(--finder-ink);
   font: inherit;
 }
 .catalog-main .catalog-filter-panel .filter-panel-actions { border-color: var(--finder-line); }
@@ -234,15 +251,15 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main .catalog-filter-panel .button,
 .catalog-main .catalog-more .button,
 .catalog-main .empty .button {
-  background: var(--finder-gold);
-  color: #342518;
+  background: var(--finder-action);
+  color: var(--finder-chalk);
   border-color: transparent;
 }
-.catalog-main :is(.filter-panel-actions,.active-filters,.catalog-section-heading,.empty) .text-link { color: var(--finder-violet); }
-.catalog-main .filter-count { background: #ffdb92; color: #302147; }
+.catalog-main :is(.filter-panel-actions,.active-filters,.catalog-section-heading,.empty) .text-link { color: var(--finder-action); }
+.catalog-main .filter-count { background: var(--finder-selected); color: var(--finder-ink); }
 .catalog-main .active-filters { margin-block: 4px 11px; }
-.catalog-main .active-filter { background: #3b304d; color: #f4e8ff; border-color: #665477; }
-.catalog-main .active-filter:hover { background: #4b3b60; }
+.catalog-main .active-filter { background: var(--finder-selected); color: var(--finder-ink); border-color: #9da995; }
+.catalog-main .active-filter:hover { background: #d4e4c9; }
 .catalog-main .catalog-section-heading {
   display: flex;
   align-items: center;
@@ -261,18 +278,18 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main .catalog-section-heading h2 { color: var(--finder-ink); font-weight: 850; }
 .catalog-main .catalog-section-heading small { color: var(--finder-muted); }
 .catalog-main .catalog-footnote { color: var(--finder-muted); }
-.catalog-main .empty { color: var(--finder-ink); background: #292535; border-color: var(--finder-line); }
+.catalog-main .empty { color: var(--finder-ink); background: var(--finder-panel); border-color: var(--finder-line); }
 .catalog-main .empty p { color: var(--finder-muted); }
-.catalog-main .empty > .icon { color: var(--finder-gold); }
+.catalog-main .empty > .icon { color: var(--finder-action); }
 .catalog-main .results-grid.results-shelves { gap: 24px; }
 .catalog-main .shelf-heading { margin-bottom: 6px; }
 .catalog-main .shelf-heading h3 { font-weight: 850; }
-.catalog-main .shelf-heading h3 .icon { color: var(--finder-gold); transition: transform 220ms var(--finder-ease); }
+.catalog-main .shelf-heading h3 .icon { color: var(--finder-action); transition: transform 220ms var(--finder-ease); }
 .catalog-main .shelf-heading h3 a:hover .icon { transform: translateX(4px); }
 .catalog-main .shelf-actions > a { color: var(--finder-muted); }
 .catalog-main .shelf-actions button { background: var(--finder-panel); border-color: var(--finder-line); color: var(--finder-ink); min-width: 44px; min-height: 44px; }
-.catalog-main .shelf-actions button:hover:not(:disabled) { background: #453553; }
-.catalog-main .shelf-track { scrollbar-color: #716081 transparent; }
+.catalog-main .shelf-actions button:hover:not(:disabled) { background: var(--finder-selected); }
+.catalog-main .shelf-track { scrollbar-color: #7b8676 transparent; }
 .catalog-main .shelf-track.is-dragging { cursor: grabbing; }
 @media (min-width: 1080px) {
   .catalog-main [data-shelf-size="3"] .shelf-track {
@@ -281,17 +298,22 @@ body[data-surface="discovery"] #main ::selection {
 }
 
 body[data-surface="discovery"] #featured {
-  background: #4d2d57;
+  background: var(--finder-spruce);
   border-color: transparent;
 }
-body[data-surface="discovery"] #featured .featured-copy :is(p,.feature-disclosure) { color: #f2dff3; }
-body[data-surface="discovery"] #featured .button { background: var(--finder-gold); color: #332039; }
-body[data-surface="discovery"] #featured .tag { background: #613f6a; color: #fff3ff; }
-body[data-surface="discovery"] .player-studio { background: #dac4fb; }
-body[data-surface="discovery"] .join-platform { background: #30243c; color: var(--finder-ink); }
-body[data-surface="discovery"] .join-platform p { color: #eadff3; }
-body[data-surface="discovery"] .join-platform .publisher-manager { color: #f5dbff; }
-body[data-surface="discovery"] .join-platform .button { background: var(--finder-gold); color: #342518; }
+body[data-surface="discovery"] #featured .featured-copy :is(p,.feature-disclosure) { color: var(--finder-dark-muted); }
+body[data-surface="discovery"] #featured .button { background: var(--finder-leaf); color: var(--finder-spruce); }
+body[data-surface="discovery"] #featured .tag { background: var(--finder-dark-panel); color: var(--finder-chalk); }
+body[data-surface="discovery"] .player-studio { background: var(--finder-sky); }
+body[data-surface="discovery"] .player-studio-copy h2 { color: var(--finder-ink); }
+body[data-surface="discovery"] .player-studio-copy p { color: var(--finder-muted); }
+body[data-surface="discovery"] .player-studio-copy a { color: var(--finder-sky-action); }
+body[data-surface="discovery"] .player-studio-art > span { background: var(--finder-sky-action); color: var(--finder-chalk); }
+body[data-surface="discovery"] .join-platform { background: var(--finder-clay); color: var(--finder-ink); }
+body[data-surface="discovery"] .join-platform h2 { color: var(--finder-ink); }
+body[data-surface="discovery"] .join-platform p { color: var(--finder-muted); }
+body[data-surface="discovery"] .join-platform .publisher-manager { color: var(--finder-clay-action); }
+body[data-surface="discovery"] .join-platform .button { background: var(--finder-clay-action); color: var(--finder-chalk); }
 
 @keyframes finder-open {
   from { opacity: .55; transform: translateY(-6px); }
@@ -302,7 +324,13 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
   .catalog-stage .catalog-intro { padding: 18px 15px; }
   .catalog-masthead .catalog-stage h1 { font-size: clamp(30px, 8.9vw, 47px); }
   .catalog-stage-art { position: absolute; inset: 0 0 0 19%; z-index: -1; }
-  .catalog-stage-art::after { background: linear-gradient(90deg,#352753 10%,#352753a8 63%,#35275338); }
+  .catalog-stage-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg,var(--finder-spruce) 10%,#202e27c4 63%,#202e2760);
+  }
   .catalog-stage-caption { display: none; }
   .catalog-stage .catalog-search-area { max-width: 485px; }
 }
@@ -322,4 +350,15 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
   .catalog-stage .search-form > .button:is(:hover,:active),
   .catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: none; }
   .catalog-main .catalog-filter-panel:not([hidden]) { animation: none; }
+}
+
+body[data-surface="discovery"] :is(.catalog-stage, #featured) :focus-visible {
+  outline-color: var(--finder-leaf);
+}
+body[data-surface="discovery"] #featured .featured-copy h2 { color: var(--finder-chalk); }
+body[data-surface="discovery"] #featured .feature-reel button[aria-pressed="true"] { border-color: var(--finder-leaf); }
+body[data-surface="discovery"] .join-platform .button:hover { background: #5e371a; }
+.catalog-main :is(.catalog-filter-panel,.catalog-more,.empty) .button:hover {
+  background: var(--finder-action-hover);
+  color: var(--finder-chalk);
 }

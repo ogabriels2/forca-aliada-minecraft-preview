@@ -37,8 +37,8 @@
 }
 
 .official-server .official-hero-actions .button:not(.secondary) {
-  background: #c8ee7a;
-  color: #172413;
+  background: var(--finder-leaf);
+  color: var(--finder-spruce);
 }
 
 .official-server .official-entry {
@@ -46,11 +46,11 @@
 }
 
 .play-panel {
-  --play-ink: #f7f7e9;
-  --play-muted: #c5d4c1;
-  --play-surface: #27352d;
-  --play-lime: #c8ee7a;
-  --play-dark: #172413;
+  --play-ink: var(--finder-chalk);
+  --play-muted: var(--finder-dark-muted);
+  --play-surface: var(--finder-dark-panel);
+  --play-lime: var(--finder-leaf);
+  --play-dark: var(--finder-spruce);
   position: static;
   display: grid;
   grid-template-columns: minmax(13rem, 0.25fr) minmax(0, 1fr);
@@ -61,7 +61,7 @@
   padding: clamp(16px, 2.25vw, 28px);
   border: 0;
   border-radius: 14px;
-  background: #17231d;
+  background: var(--finder-spruce);
   color: var(--play-ink);
   scroll-margin-top: 100px;
 }
@@ -128,9 +128,9 @@
 }
 
 .play-panel .follow-server[aria-pressed="true"] {
-  color: #ffd0db;
-  background: #503046;
-  border-color: #935876;
+  color: var(--finder-favorite-bg);
+  background: #55382e;
+  border-color: #a67461;
 }
 
 .play-panel .edition-tabs {
@@ -169,10 +169,6 @@
   box-shadow: none;
 }
 
-.play-panel .edition-tabs [data-edition="Bedrock"][aria-selected="true"] {
-  background: #d9cbff;
-  color: #271a42;
-}
 
 .play-panel .connection-status-line {
   display: flex;
@@ -185,7 +181,7 @@
 
 .play-panel .availability {
   margin: 0;
-  color: #ffdd91;
+  color: var(--play-muted);
   font-size: 12px;
   font-weight: 800;
 }
@@ -195,11 +191,11 @@
 }
 
 .play-panel .availability.online {
-  color: #c8ee7a;
+  color: var(--finder-online);
 }
 
 .play-panel .availability.offline {
-  color: #ffb7b5;
+  color: var(--finder-offline);
 }
 
 .play-panel .connection-players {
@@ -289,7 +285,7 @@
 }
 
 .play-panel .connection-copy.copied {
-  background: #e4f9bf;
+  background: var(--finder-leaf-hover);
 }
 
 .play-panel .connection-copy.copied .icon {
@@ -327,7 +323,7 @@
   clip-path: none;
   padding-bottom: 3px;
   font-size: 12px;
-  color: #ffdd91;
+  color: #e9cf94;
 }
 
 .play-panel .connection-demo-note {
@@ -335,7 +331,7 @@
   display: flex;
   align-items: start;
   gap: 6px;
-  color: #ffdd91;
+  color: #e9cf94;
   font-size: 12px;
   line-height: 1.5;
   margin: 0;
@@ -354,7 +350,7 @@
   }
 
   .play-panel .connection-copy:hover {
-    background: #dcf6a3;
+    background: var(--finder-leaf-hover);
   }
 
   .play-panel .edition-tabs button:not([aria-selected="true"]):hover {
