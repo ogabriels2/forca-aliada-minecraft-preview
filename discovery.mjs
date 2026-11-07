@@ -1,3 +1,5 @@
+import { GAMEPLAY, MODES } from "./model.mjs";
+
 // Presentation only. Real server data and illustrative records stay distinct.
 const photoCaptions = {
   "galeria10.webp": "Uma galinha gigante no telhado da praça",
@@ -41,14 +43,13 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref }) {
     <div class="card-art art-${esc(d.theme)}">
       <div class="card-picture-link">${cover(d, { card: true })}</div>
       <button class="favorite card-favorite" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${favorite}" aria-label="${favorite ? "Remover dos favoritos:" : "Favoritar"} ${esc(d.name)}">${icon("heart")}</button>
-      ${d.official ? `<span class="official-label">${icon("shield-check")} Da Força Aliada</span>` : ""}
     </div>
     <div class="card-body">
       <div class="card-heading">
         <span class="card-server-icon" aria-hidden="true">${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="36" height="36" loading="lazy" decoding="async">` : esc(initial)}</span>
         <h3><a href="${esc(href)}"><span>${esc(d.name)}</span>${icon("arrow-right")}</a></h3>
       </div>
-      <div class="card-editions">${editionBadges(d, esc)}</div>
+      <div class="card-editions">${editionBadges(d, esc)}${d.editionStatus ? "" : `<span class="availability ${esc(d.status)}">${esc(d.statusText)}</span>`}</div>
       <div class="card-facts"><span>${access}</span>${version ? `<span>${esc(version)}</span>` : ""}</div>
       <p>${esc(d.summary)}</p>
       ${d.address ? `<div class="card-address ${d.example ? "card-address-example" : ""}">
@@ -57,7 +58,7 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref }) {
         ${d.example ? '<small>Exemplo</small>' : `<button type="button" data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço de ${esc(d.name)}">${icon("copy")}<span data-copy-label>Copiar</span></button>`}
         <span class="sr-only" data-copy-feedback role="status"></span>
       </div>` : ""}
-      <div class="card-bottom"><span>${esc(d.mode)} · ${esc(d.language)}</span>${checkedAt ? `<small class="card-checked" title="Horário local da última consulta de disponibilidade">Consulta às ${checkedAt}</small>` : ""}${d.editionStatus ? "" : `<span class="availability ${esc(d.status)}">${esc(d.statusText)}</span>`}</div>
+      <div class="card-bottom"><span>${esc(d.mode)} · ${esc(d.language)}</span>${d.official ? `<span class="catalog-house" title="Mantido pela equipe da Força Aliada">${icon("shield-check")} Servidor da casa</span>` : ""}${checkedAt ? `<small class="card-checked" title="Horário local da última consulta de disponibilidade">Consulta às ${checkedAt}</small>` : ""}</div>
     </div>
   </article>`;
 }
@@ -79,12 +80,33 @@ function filterGroup(name, label, choices, icon) {
   </fieldset>`;
 }
 
+export function catalogShelves(servers, card, { esc, icon }) {
+  const groups = MODES.map((name) => ({ name, key: "mode", matches: servers.filter((s) => s.mode === name) }));
+  for (const name of GAMEPLAY) {
+    const matches = servers.filter((s) => s.features?.includes(name));
+    // An overlapping topic earns a shelf once it has a meaningful selection.
+    if (matches.length >= 2 && matches.filter((s) => !s.example).length >= 2 && !groups.some((group) =>
+      group.matches.length === matches.length && group.matches.every((s, i) => s.id === matches[i].id)
+    )) groups.push({ name, key: "feature", matches });
+  }
+  return groups.filter(({ matches }) => matches.length).map(({ name, key, matches }) => {
+    const href = `#/?${new URLSearchParams({ [key]: name })}`;
+    return `<section class="catalog-shelf" data-shelf="${esc(name)}">
+      <div class="shelf-heading">
+        <h3><a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a></h3>
+        <div class="shelf-actions"><a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a><button type="button" data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button></div>
+      </div>
+      <div class="shelf-track">${matches.slice(0, 9).map(card).join("")}</div>
+    </section>`;
+  }).join("");
+}
+
 export function catalogMarkup(f, { esc, icon, featured, extra }) {
   const browsing = !Object.entries(f).some(([k, v]) => k !== "sort" && v);
-  return `<section class="catalog-masthead"><div class="catalog-hero container"><div class="catalog-intro"><h1>Servidores de Minecraft</h1><p>Encontre onde jogar no Java ou no Bedrock.</p></div><div class="catalog-search-area"><form class="search-form" id="search-form" role="search">${icon("search")}<label class="sr-only" for="server-search">Buscar servidores</label><input id="server-search" name="q" type="search" placeholder="Nome, endereço ou modo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160"><button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button></form><div class="quick-modes" role="group" aria-label="Explorar por modo de jogo"><button class="chip" data-action="mode" data-value="" aria-pressed="${!f.mode}">Todos</button>${["Survival", "Criativo", "Aventura"].map((m) => `<button class="chip" data-action="mode" data-value="${m}" aria-pressed="${f.mode === m}">${m}</button>`).join("")}<button class="chip" data-action="favorites" aria-label="Favoritos" title="Favoritos" aria-pressed="${Boolean(f.favorites)}">${icon("heart")} <span>Favoritos</span></button></div></div></div></section>
+  return `<section class="catalog-masthead"><div class="catalog-hero container"><div class="catalog-intro"><h1>Servidores de Minecraft</h1><p>Encontre onde jogar no Java ou no Bedrock.</p></div><div class="catalog-search-area"><form class="search-form" id="search-form" role="search">${icon("search")}<label class="sr-only" for="server-search">Buscar servidores</label><input id="server-search" name="q" type="search" placeholder="Nome, endereço ou modo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160"><button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button></form><div class="quick-modes" role="group" aria-label="Explorar por modo de jogo"><button class="chip" data-action="mode" data-value="" aria-pressed="${!f.mode && !f.feature}">Todos</button>${["Survival", "Criativo", "Aventura"].map((m) => `<button class="chip" data-action="mode" data-value="${m}" aria-pressed="${f.mode === m}">${m}</button>`).join("")}<button class="chip" data-action="favorites" aria-label="Favoritos" title="Favoritos" aria-pressed="${Boolean(f.favorites)}">${icon("heart")} <span>Favoritos</span></button></div></div></div></section>
   <section class="catalog-main container" id="catalog-results" aria-label="Catálogo de servidores"><div class="catalog-toolbar"><h2><span data-catalog-title>Servidores</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><div class="filter-row" id="filters">
       <label class="select-wrap catalog-edition"><select name="edition" aria-label="Edição do Minecraft"><option value="">Todas as edições</option><option>Java</option><option>Bedrock</option></select>${icon("chevron-down")}</label>
-      <button class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button>
+      <button class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button><details class="gameplay-directory" id="gameplay-directory"><summary>Estilos ${icon("chevron-down")}</summary><nav aria-label="Estilos de jogo">${GAMEPLAY.map((name) => `<a class="chip" href="#/?${esc(new URLSearchParams({ feature: name }))}">${esc(name)}</a>`).join("")}</nav></details>
     </div></div>
     <div class="extra-filters catalog-filter-panel" id="extra-filters" ${extra ? "" : "hidden"}>
       ${filterGroup("edition", "Edição", [["", "Todas"], ["Java", "Java"], ["Bedrock", "Bedrock"]], icon)}

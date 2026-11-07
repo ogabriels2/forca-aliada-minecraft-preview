@@ -62,17 +62,20 @@ export const MODULES = Object.freeze([
     hint: "Discord, site e outros canais que você escolher.",
   },
 ]);
+export const MODES = Object.freeze(["Survival", "Criativo", "Aventura", "Minigames", "RPG"]);
+export const GAMEPLAY = Object.freeze([
+  "Minigames", "Mods", "PvP", "BedWars", "RPG", "Skyblock", "Hardcore",
+  "Parkour", "Roleplay", "Economia", "Exploração", "Construção em equipe",
+  "Vanilla", "SMP", "Factions", "Modpacks",
+]);
 export const FEATURES = Object.freeze([
-  "Construção em equipe",
-  "Exploração",
-  "Economia",
-  "PvP",
-  "Mods",
+  ...GAMEPLAY,
   "Para jogar com amigos",
 ]);
 export const SERVERS = Object.freeze([
   {
     id: "forca-aliada",
+    features: ["Construção em equipe", "Exploração", "Vanilla"],
     name: "Força Aliada",
     summary:
       "Survival vanilla, grandes farms, cidades e caminhos que conectam tudo.",
@@ -108,6 +111,7 @@ export const SERVERS = Object.freeze([
   },
   {
     id: "vale-do-ipe",
+    features: ["Construção em equipe"],
     name: "Vale do Ipê",
     summary:
       "Survival sem pressa, construções em conjunto e uma comunidade pequena.",
@@ -133,6 +137,7 @@ export const SERVERS = Object.freeze([
   },
   {
     id: "atelie",
+    features: ["Construção em equipe"],
     name: "Ateliê",
     summary: "Um espaço criativo para testar ideias e construir em equipe.",
     description:
@@ -157,6 +162,7 @@ export const SERVERS = Object.freeze([
   },
   {
     id: "horizonte",
+    features: ["Exploração"],
     name: "Horizonte",
     summary: "Exploração, trilhas e novas aventuras para quem joga no Bedrock.",
     description:
@@ -181,6 +187,7 @@ export const SERVERS = Object.freeze([
   },
   {
     id: "redwood",
+    features: ["Construção em equipe"],
     name: "Redwood",
     summary: "A small survival world for friends who enjoy building together.",
     description:
@@ -204,6 +211,7 @@ export const SERVERS = Object.freeze([
   },
   {
     id: "la-isla",
+    features: ["Construção em equipe"],
     name: "La Isla",
     summary: "Una comunidad creativa para construir y compartir proyectos.",
     description:
@@ -300,7 +308,8 @@ export function normalize(value) {
 export function catalogFilters(params) {
   const options = {
     edition: ["Java", "Bedrock"],
-    mode: ["Survival", "Criativo", "Aventura"],
+    mode: MODES,
+    feature: GAMEPLAY,
     language: ["Português", "English", "Español"],
     access: ["open", "whitelist"],
     status: ["online", "offline", "unknown"],
@@ -370,6 +379,7 @@ export function filterServers(servers, filters = {}) {
     const availability = serverAvailability(server, edition);
     if ((edition && !server.editions.includes(edition))
       || (filters.mode && server.mode !== filters.mode)
+      || (filters.feature && server.mode !== filters.feature && !server.features?.includes(filters.feature))
       || (filters.language && server.language !== filters.language)
       || (statusFilter && availability !== statusFilter)
       || (filters.access && server.access !== filters.access)) continue;
@@ -499,7 +509,7 @@ export function safeDraft(value) {
   if (["open", "whitelist"].includes(value.access)) base.access = value.access;
   if (base.layout === "spotlight" && base.plan !== "pro")
     base.layout = "landscape";
-  if (["Survival", "Criativo", "Aventura"].includes(value.mode))
+  if (MODES.includes(value.mode))
     base.mode = value.mode;
   if (["Português", "English", "Español"].includes(value.language))
     base.language = value.language;

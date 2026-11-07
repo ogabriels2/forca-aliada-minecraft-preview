@@ -2617,3 +2617,261 @@ a {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Shelves keep covers prominent while leaving the filters and category index nearby. */
+.results-grid.results-shelves {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.catalog-shelf {
+  min-width: 0;
+}
+.shelf-heading,
+.shelf-actions,
+.shelf-heading h3 a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.shelf-heading {
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.shelf-heading h3 {
+  font-size: clamp(20px, 2.1vw, 27px);
+  letter-spacing: -.025em;
+}
+.shelf-heading a {
+  color: inherit;
+}
+.shelf-heading a:hover {
+  text-decoration: underline;
+}
+.shelf-heading h3 .icon {
+  width: 15px;
+  color: #4c7151;
+}
+.shelf-actions > a {
+  font-size: 12px;
+  color: #325b3c;
+  font-weight: 750;
+  white-space: nowrap;
+  padding: 9px 4px;
+}
+.shelf-actions button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ced9ca;
+  border-radius: 8px;
+  color: #2b5033;
+  background: #fff;
+}
+.shelf-actions button:hover:not(:disabled) { background: #e3eee2; }
+.shelf-actions button:disabled { opacity: .48; }
+.shelf-actions button[hidden] { display: none; }
+.shelf-actions .icon { width: 16px; height: 16px; }
+.shelf-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(248px, 25.5%, 340px);
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 4px 9px;
+  margin: 0 -4px;
+  scroll-snap-type: x proximity;
+  scrollbar-color: #a8b9a3 transparent;
+  scrollbar-width: thin;
+}
+.shelf-track.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
+.shelf-track .server-card { scroll-snap-align: start; }
+.catalog-main .server-card .card-art { aspect-ratio: 16 / 8; }
+.catalog-main .server-card .card-body { padding: 13px; min-height: 0; }
+.catalog-main .server-card .card-heading h3 { font-size: 18px; }
+.catalog-main .server-card .card-editions { margin-top: 8px; align-items: center; }
+.catalog-main .server-card .card-facts { font-size: 12px; margin-top: 6px; }
+.catalog-main .server-card .card-body p { margin: 6px 0 9px; min-height: 0; }
+.catalog-main .server-card .card-address { margin-bottom: 7px; }
+.catalog-main .server-card .card-bottom { font-size: 11px; padding-top: 7px; }
+.catalog-house {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  color: #59451d;
+  background: #f4ead2;
+  border-radius: 5px;
+  padding: 4px 6px;
+  font-weight: 800;
+}
+.catalog-house .icon { width: 12px; height: 12px; }
+.gameplay-directory { margin: 0 0 14px; }
+.gameplay-directory summary {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 36px;
+  color: #35543a;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.gameplay-directory nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.gameplay-directory a.chip { color: #324d35; text-decoration: none; }
+.gameplay-directory a:hover { background: #dce8d9; }
+.results-shelves #discovery {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+.results-shelves .featured,
+.results-shelves .featured-art,
+.results-shelves .featured-art > img { min-height: 235px; }
+.results-shelves .featured-copy { padding: 20px 24px; }
+.results-shelves .featured-copy h2 { font-size: 25px; }
+.results-shelves .featured-copy p { margin-block: 7px; }
+.results-shelves .feature-reel { margin-top: 12px; }
+#account-area { display: flex; gap: 3px; align-items: center; }
+.prototype-notifications { position: relative; }
+.prototype-notifications summary,
+.catalog-help summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+  border-radius: 9px;
+}
+.prototype-notifications summary::-webkit-details-marker,
+.catalog-help summary::-webkit-details-marker { display: none; }
+.prototype-notifications summary { color: #e0e8df; }
+.prototype-notifications[open] summary,
+.prototype-notifications summary:hover { background: #303931; }
+.prototype-notifications summary .icon,
+.catalog-help summary .icon { width: 19px; height: 19px; }
+.prototype-account .account-initial,
+.account-profile .account-initial {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  background: #dceadc;
+  color: #2d5136;
+  font-size: 13px;
+  font-weight: 850;
+}
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e4ebe2;
+}
+.account-profile small { display: block; }
+.notifications-popover { min-width: 224px; }
+.notifications-popover p { margin: 8px 0; font-size: 13px; }
+.catalog-help {
+  position: fixed;
+  z-index: 30;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+}
+.catalog-help summary {
+  gap: 7px;
+  padding: 0 13px;
+  background: #203c29;
+  color: #fff;
+  box-shadow: 0 4px 15px #1e372d26;
+  font-size: 12px;
+  font-weight: 750;
+}
+.catalog-help-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: grid;
+  width: min(245px, calc(100vw - 32px));
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #d5e0d4;
+  color: #203127;
+  box-shadow: 0 9px 25px #253e2820;
+}
+.catalog-help-panel strong { padding: 8px; }
+.catalog-help-panel :is(a,button) {
+  background: transparent;
+  border: 0;
+  text-align: start;
+  color: #295737;
+  text-decoration: none;
+  padding: 9px 8px;
+  min-height: 40px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.catalog-help-panel :is(a,button):hover { background: #eef5ec; }
+body.studio-open .catalog-help { display: none; }
+@media (max-width: 620px) {
+  .shelf-track { grid-auto-columns: clamp(225px, 75vw, 300px); }
+  .results-shelves .featured-art,
+  .results-shelves .featured-art > img { min-height: 188px; }
+  .results-shelves .featured-copy { padding: 17px; }
+  .prototype-notifications { position: static; }
+  .notifications-popover { right: 12px; top: calc(100% + 2px); }
+  .catalog-help summary span { display: none; }
+  .catalog-help summary { padding: 0; border-radius: 50%; }
+  .catalog-help { right: 11px; bottom: max(11px, env(safe-area-inset-bottom)); }
+}
+@media (max-width: 400px) {
+  .site-header .header-inner { column-gap: 4px; }
+  .site-header .main-nav { gap: 7px; }
+  .site-header .prototype-account summary { padding-inline: 4px; }
+  .site-header #account-area { gap: 0; }
+}
+.catalog-main .catalog-toolbar .filter-row {
+  position: relative;
+  flex-wrap: wrap;
+}
+.catalog-main .gameplay-directory { margin: 0; }
+.catalog-main .gameplay-directory summary {
+  padding-inline: 9px;
+  min-height: 44px;
+  border-radius: 8px;
+  background: #edf0e7;
+}
+.gameplay-directory[open] summary { background: #dfe9db; }
+.catalog-main .gameplay-directory nav {
+  position: absolute;
+  z-index: 10;
+  inset-inline-end: 0;
+  top: calc(100% + 6px);
+  width: min(390px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid #d6dfd1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px #28392817;
+}
+.catalog-main .gameplay-directory:not([open]) nav { display: none; }
+@media (max-width: 560px) {
+  .catalog-main .catalog-toolbar .filter-row { width: 100%; }
+  .catalog-main .catalog-toolbar .catalog-edition select { max-width: 128px; }
+}

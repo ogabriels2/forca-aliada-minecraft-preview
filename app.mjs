@@ -4,6 +4,7 @@ import {
   featuredImages,
   featuredPhotoLabel,
   catalogMarkup,
+  catalogShelves,
 } from "./discovery.mjs";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
@@ -13,6 +14,7 @@ import {
   THEMES,
   MODULES,
   FEATURES,
+  MODES,
   initialDraft,
   filterServers,
   catalogFilters,
@@ -548,6 +550,70 @@ function focusCatalogHeading() {
   heading.tabIndex = -1;
   heading.focus();
 }
+function shelfPositions() {
+  return Object.fromEntries([...document.querySelectorAll(".shelf-track")].map(
+    (track) => [track.closest("[data-shelf]").dataset.shelf, track.scrollLeft],
+  ));
+}
+function syncShelfControls(track) {
+  const shelf = track.closest(".catalog-shelf");
+  const previous = shelf.querySelector('[data-direction="-1"]');
+  const next = shelf.querySelector('[data-direction="1"]');
+  const limit = track.scrollWidth - track.clientWidth;
+  previous.hidden = next.hidden = limit <= 1;
+  previous.disabled = track.scrollLeft <= 1;
+  next.disabled = track.scrollLeft >= limit - 1;
+}
+function restoreShelfPositions(positions = {}) {
+  document.querySelectorAll(".shelf-track").forEach((track) => {
+    track.scrollLeft = positions[track.closest("[data-shelf]").dataset.shelf] || 0;
+    syncShelfControls(track);
+  });
+}
+let shelfDrag;
+let dragClick;
+main.addEventListener("pointerdown", (event) => {
+  const track = event.target.closest(".shelf-track");
+  if (!track || event.pointerType !== "mouse" || event.button !== 0
+      || event.target.closest("button") || track.scrollWidth <= track.clientWidth) return;
+  shelfDrag = { track, id: event.pointerId, x: event.clientX, start: track.scrollLeft, moved: false };
+});
+main.addEventListener("pointermove", (event) => {
+  if (!shelfDrag || event.pointerId !== shelfDrag.id || !event.buttons) return;
+  const distance = event.clientX - shelfDrag.x;
+  if (!shelfDrag.moved && Math.abs(distance) < 7) return;
+  if (!shelfDrag.moved) {
+    shelfDrag.moved = true;
+    shelfDrag.track.setPointerCapture(event.pointerId);
+    shelfDrag.track.classList.add("is-dragging");
+  }
+  shelfDrag.track.scrollLeft = shelfDrag.start - distance;
+});
+main.addEventListener("dragstart", (event) => {
+  if (event.target.closest(".shelf-track")) event.preventDefault();
+});
+function endShelfDrag(event) {
+  if (!shelfDrag || event.pointerId !== shelfDrag.id) return;
+  if (shelfDrag.moved) {
+    shelfDrag.track.classList.remove("is-dragging");
+    dragClick = shelfDrag.track;
+    setTimeout(() => { dragClick = undefined; }, 0);
+  }
+  shelfDrag = undefined;
+}
+window.addEventListener("pointerup", endShelfDrag);
+window.addEventListener("pointercancel", endShelfDrag);
+main.addEventListener("click", (event) => {
+  if (dragClick?.contains(event.target)) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+}, true);
+main.addEventListener("scroll", (event) => {
+  if (event.target.matches?.(".shelf-track")) syncShelfControls(event.target);
+}, true);
+window.addEventListener("resize", () => document.querySelectorAll(".shelf-track").forEach(syncShelfControls));
+
 function updateResults() {
   const results = document.querySelector("#results");
   if (!results) return;
@@ -559,7 +625,7 @@ function updateResults() {
   const savedEmpty = state.filters.favorites && !state.favorites.size;
   const checkingAvailability = !found.length && state.filters.status && pendingServerSamples.size > 0;
   const relaxedFilter = !found.length && !savedEmpty
-    ? ["language", "mode", "access", "status"].find((key) => {
+    ? ["language", "mode", "feature", "access", "status"].find((key) => {
         if (!state.filters[key]) return false;
         return catalogResults({ ...state.filters, [key]: "" }).length > 0;
       })
@@ -567,6 +633,7 @@ function updateResults() {
   const labels = {
     q: "Busca",
     mode: "Modalidade",
+    feature: "Estilo de jogo",
     edition: "Edição",
     language: "Idioma",
     favorites: "Favoritos",
@@ -578,8 +645,13 @@ function updateResults() {
       ? labels[key]
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
+  const browsing = !Object.entries(state.filters).some(([key, value]) => key !== "sort" && value);
+  const editorial = document.querySelector("#discovery");
+  const scrollPositions = shelfPositions();
+  editorial?.remove();
+  results.classList.toggle("results-shelves", browsing && found.length > 0);
   results.innerHTML = found.length
-    ? found.slice(0, catalogLimit).map(card).join("")
+    ? browsing ? catalogShelves(found, card, { esc, icon }) : found.slice(0, catalogLimit).map(card).join("")
     : `<div class="empty">
         ${icon("search")}
         <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : "Nenhum servidor encontrado."}</h3>
@@ -587,10 +659,18 @@ function updateResults() {
         <button class="button secondary" data-action="clear-filters">Explorar todos</button>
         ${relaxedFilter ? `<button class="text-link" data-action="remove-filter" data-key="${relaxedFilter}">Remover filtro de ${labels[relaxedFilter].toLocaleLowerCase("pt-BR")}</button>` : ""}
       </div>`;
-  document.querySelector(".catalog-more").hidden = found.length <= catalogLimit;
+  if (editorial) {
+    editorial.hidden = !browsing || !SERVERS.some((server) => server.official);
+    const firstShelf = results.querySelector(".catalog-shelf");
+    if (!editorial.hidden && firstShelf) firstShelf.after(editorial);
+    else results.after(editorial);
+  }
+  restoreShelfPositions(scrollPositions);
+  document.querySelector(".catalog-more").hidden = browsing || found.length <= catalogLimit;
   document.querySelector("[data-catalog-title]").textContent =
     state.filters.favorites ? "Seus favoritos"
       : state.filters.q ? "Resultados da busca"
+      : state.filters.feature || state.filters.mode ? state.filters.feature || state.filters.mode
       : state.filters.edition ? `Servidores para ${state.filters.edition}`
       : "Servidores";
   const count = document.querySelector("[data-result-count]");
@@ -611,15 +691,12 @@ function updateResults() {
     .join("");
   if (active.childElementCount > 0)
     active.insertAdjacentHTML("beforeend", '<button class="text-link" data-action="clear-filters">Limpar filtros</button>');
-  document.querySelector("#discovery").hidden =
-    !SERVERS.some((s) => s.official) ||
-    Object.entries(state.filters).some(([k, v]) => k !== "sort" && v);
   document
     .querySelectorAll('[data-action="mode"]')
     .forEach((button) =>
       button.setAttribute(
         "aria-pressed",
-        String((state.filters.mode || "") === button.dataset.value),
+        String((state.filters.mode || "") === button.dataset.value && (Boolean(button.dataset.value) || !state.filters.feature)),
       ),
     );
   document
@@ -715,7 +792,7 @@ function wizardBody(d, step) {
   if (step === 1)
     return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
   if (step === 2)
-    return `<h2 id="dialog-title">Como é jogar aqui?</h2><p>Uma boa apresentação ajuda a pessoa a entender se este é o mundo que procura.</p>${field("summary", d.summary, { area: true, max: 180, hint: "Uma frase sobre a experiência, sem precisar de um slogan." })}${field("description", d.description, { area: true, max: 4000, label: "Conte um pouco mais (opcional)" })}<div class="field-row">${select("mode", "Modalidade", ["Survival", "Criativo", "Aventura"], d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${field("version", d.version, { label: "Versão compatível (opcional)" })}<h3>O que as pessoas encontram?</h3>${featureChoices(d)}`;
+    return `<h2 id="dialog-title">Como é jogar aqui?</h2><p>Uma boa apresentação ajuda a pessoa a entender se este é o mundo que procura.</p>${field("summary", d.summary, { area: true, max: 180, hint: "Uma frase sobre a experiência, sem precisar de um slogan." })}${field("description", d.description, { area: true, max: 4000, label: "Conte um pouco mais (opcional)" })}<div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${field("version", d.version, { label: "Versão compatível (opcional)" })}<h3>O que as pessoas encontram?</h3>${featureChoices(d)}`;
   if (step === 3)
     return `<h2 id="dialog-title">Prepare a chegada da comunidade.</h2><p>Regras e canais de contato ajudam as pessoas a começar. Todos estes campos são opcionais.</p>${field("rules", d.rules, { area: true, max: 4000 })}${field("discord", d.discord, { label: "Link do Discord", hint: "Use um endereço https:// completo." })}${field("website", d.website, { label: "Site ou outro canal" })}<label class="switch"><input type="checkbox" name="community" ${d.community ? "checked" : ""}><span>Criar um perfil do servidor no Community</span></label><p class="field-help">Opcional e gratuito. O perfil é simulado nesta prévia.</p><details class="optional-setup"><summary>Adicionar novidade ou encontro (opcional)</summary>${field("newsTitle", d.newsTitle)}${field("newsBody", d.newsBody, { area: true, max: 4000 })}${field("eventTitle", d.eventTitle)}${field("eventDate", d.eventDate, { label: "Data e hora do encontro", type: "datetime-local" })}${select("eventZone", "Fuso horário", ["America/Sao_Paulo", "UTC", "Europe/Lisbon"], d.eventZone)}${field("eventDescription", d.eventDescription, { area: true, max: 4000 })}</details>`;
   if (step === 4)
@@ -1029,7 +1106,7 @@ function renderSettings() {
       })
       .join("")}</div>`;
   else if (state.settings === "content")
-    content = `<h3>Conexão e compatibilidade</h3>${field("address", d.address, { required: true })}<div class="field-row">${field("port", d.port, { label: "Porta Bedrock", max: 5 })}${field("version", d.version)}</div><div class="field-row">${select("mode", "Modalidade", ["Survival", "Criativo", "Aventura"], d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${select("access", "Entrada", ["Aberta", "Com whitelist"], d.access === "whitelist" ? "Com whitelist" : "Aberta")}<h3>Características</h3>${featureChoices(d)}<h3>Links da comunidade</h3>${field("discord", d.discord, { label: "Discord" })}${field("website", d.website, { label: "Site ou outro canal" })}<label class="switch"><input type="checkbox" name="community" ${d.community ? "checked" : ""}><span>Perfil do servidor no Community (demonstração)</span></label><h3>Próximo encontro</h3>${field("eventTitle", d.eventTitle)}${field("eventDate", d.eventDate, { label: "Data e hora do encontro", type: "datetime-local" })}${select("eventZone", "Fuso horário", ["America/Sao_Paulo", "UTC", "Europe/Lisbon"], d.eventZone)}<p class="field-help">O horário aparece com o fuso escolhido. Não é ajustado silenciosamente ao horário do visitante.</p>`;
+    content = `<h3>Conexão e compatibilidade</h3>${field("address", d.address, { required: true })}<div class="field-row">${field("port", d.port, { label: "Porta Bedrock", max: 5 })}${field("version", d.version)}</div><div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${select("access", "Entrada", ["Aberta", "Com whitelist"], d.access === "whitelist" ? "Com whitelist" : "Aberta")}<h3>Características</h3>${featureChoices(d)}<h3>Links da comunidade</h3>${field("discord", d.discord, { label: "Discord" })}${field("website", d.website, { label: "Site ou outro canal" })}<label class="switch"><input type="checkbox" name="community" ${d.community ? "checked" : ""}><span>Perfil do servidor no Community (demonstração)</span></label><h3>Próximo encontro</h3>${field("eventTitle", d.eventTitle)}${field("eventDate", d.eventDate, { label: "Data e hora do encontro", type: "datetime-local" })}${select("eventZone", "Fuso horário", ["America/Sao_Paulo", "UTC", "Europe/Lisbon"], d.eventZone)}<p class="field-help">O horário aparece com o fuso escolhido. Não é ajustado silenciosamente ao horário do visitante.</p>`;
   else
     content = `${visibilityChoices(d)}<div class="notice">Seu rascunho é separado da última publicação. Nesta prévia, publicar atualiza apenas os dados deste navegador.</div><button class="button" type="button" data-action="publish">Publicar alterações ${icon("arrow-right")}</button><div class="form-divider"></div><button class="text-link" type="button" data-action="reset">Recomeçar a demonstração</button>`;
   openDialog(
@@ -1272,7 +1349,24 @@ function updateHeader() {
   const n = document.querySelector("#account-area");
   if (!n) return;
   n.innerHTML = state.account
-    ? `<details class="prototype-account"><summary aria-label="Minha conta">${icon("users")}<span>Minha conta</span>${icon("chevron-down")}</summary><div class="account-popover"><strong>Conta de demonstração</strong><small>Sem conexão com a sua conta real</small>${state.created ? '<a href="#/servidor/minha-pagina">Minha página</a>' : '<button data-action="create">Criar página grátis</button>'}<a href="#/perfil/demonstracao/skins">Minhas skins</a><button data-action="logout">${icon("logout")} Testar sem conta</button></div></details>`
+    ? `<details class="prototype-notifications">
+        <summary aria-label="Notificações">${icon("bell")}</summary>
+        <div class="account-popover notifications-popover">
+          <strong>Notificações</strong>
+          ${state.publication ? '<a href="#/servidor/minha-pagina">Sua página está pronta nesta prévia</a>' : '<p>Nenhuma notificação por aqui.</p>'}
+          <small>Atividade deste navegador</small>
+        </div>
+      </details>
+      <details class="prototype-account">
+        <summary aria-label="Minha conta"><span class="account-initial" aria-hidden="true">D</span><span>Minha conta</span>${icon("chevron-down")}</summary>
+        <div class="account-popover">
+          <div class="account-profile"><span class="account-initial" aria-hidden="true">D</span><div><strong>Perfil de demonstração</strong><small>Dados salvos neste navegador</small></div></div>
+          ${state.created ? '<a href="#/servidor/minha-pagina">Minha página</a>' : '<button data-action="create">Criar página grátis</button>'}
+          <a href="#/perfil/demonstracao/skins">Minhas skins</a>
+          <a href="https://forcaaliada.com/assinatura">Planos da Força Aliada</a>
+          <button data-action="logout">${icon("logout")} Sair da demonstração</button>
+        </div>
+      </details>`
     : `<button class="button secondary small" data-action="login">${icon("users")} Entrar na prévia</button>`;
   paintIcons(n);
 }
@@ -1353,11 +1447,16 @@ function route({ focus = true } = {}) {
   updateHeader();
   paintIcons();
   if (focus) {
+    restoreShelfPositions(catalogReturn?.shelves);
     const returnLink = catalogReturn?.id
       ? [...document.querySelectorAll("#results .server-card")].find(
-          (card) => card.dataset.id === catalogReturn.id,
+          (card) => card.dataset.id === catalogReturn.id
+            && (!catalogReturn.shelf || card.closest("[data-shelf]")?.dataset.shelf === catalogReturn.shelf),
         )?.querySelector(".card-heading a")
-      : catalogReturn?.featured ? document.querySelector("#featured a.button") : undefined;
+      : catalogReturn?.featured ? document.querySelector("#featured a.button")
+      : [...document.querySelectorAll(".catalog-shelf")].find(
+          (shelf) => shelf.dataset.shelf === catalogReturn?.shelf,
+        )?.querySelector(".shelf-heading h3 a");
     (returnLink || main).focus({ preventScroll: true });
     window.scrollTo({ top: catalogReturn?.scroll || 0, behavior: "instant" });
   }
@@ -1397,19 +1496,21 @@ document.addEventListener("click", (e) => {
     main.scrollIntoView({ block: "start" });
     return;
   }
-  const account = document.querySelector(".prototype-account");
-  if (account?.open && !e.target.closest(".prototype-account"))
-    account.open = false;
+  for (const disclosure of document.querySelectorAll(".prototype-account[open], .prototype-notifications[open], .catalog-help[open], .gameplay-directory[open]")) {
+    if (!disclosure.contains(e.target) || e.target.closest(".account-popover a, .account-popover button, .catalog-help-panel a, .catalog-help-panel button")) disclosure.open = false;
+  }
   const tools = document.querySelector(".tools-menu");
   if (tools?.open && (!e.target.closest(".tools-menu") || e.target.closest(".tools-popover a, .compact-create-link")))
     tools.open = false;
-  const catalogLink = e.target.closest('#results .card-heading a, #featured a.button');
+  const catalogLink = e.target.closest('#results .card-heading a, #results .shelf-heading a, #featured a.button');
   if (catalogLink && !e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
     history.replaceState({
       catalogReturn: {
         id: catalogLink.closest(".server-card")?.dataset.id,
         featured: Boolean(catalogLink.closest("#featured")),
         scroll: window.scrollY,
+        shelves: shelfPositions(),
+        shelf: catalogLink.closest("[data-shelf]")?.dataset.shelf,
         limit: catalogLimit,
         extra: state.extra,
       },
@@ -1448,6 +1549,7 @@ document.addEventListener("click", (e) => {
       }
     });
   } else if (a === "mode" || a === "collection") {
+    if (a === "mode" && !b.dataset.value) delete state.filters.feature;
     state.filters.mode =
       (state.filters.mode || "") === b.dataset.value ? "" : b.dataset.value;
     updateResults();
@@ -1455,6 +1557,12 @@ document.addEventListener("click", (e) => {
       document
         .querySelector("#catalog-results")
         .scrollIntoView({ block: "start", behavior: "smooth" });
+  } else if (a === "scroll-shelf") {
+    const track = b.closest(".catalog-shelf")?.querySelector(".shelf-track");
+    track?.scrollBy({
+      left: Number(b.dataset.direction) * track.clientWidth * 0.85,
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    });
   } else if (a === "filters") {
     state.extra = !state.extra;
     b.setAttribute("aria-expanded", String(state.extra));
@@ -1872,8 +1980,11 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (e.key === "Escape") {
-    const account = document.querySelector(".prototype-account");
-    if (account) account.open = false;
+    for (const disclosure of document.querySelectorAll(".prototype-account[open], .prototype-notifications[open], .catalog-help[open], .gameplay-directory[open]")) {
+      const focused = disclosure.contains(document.activeElement);
+      disclosure.open = false;
+      if (focused) disclosure.querySelector("summary")?.focus();
+    }
     const tools = document.querySelector(".tools-menu");
     if (tools?.open) {
       const focusInside = tools.contains(document.activeElement);
