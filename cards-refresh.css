@@ -35,50 +35,41 @@
   transition: transform 480ms var(--tile-out);
 }
 
-.server-card--cover .card-presence {
+.server-card--cover .card-sample-label {
   position: absolute;
   inset: 10px auto auto 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: calc(100% - 67px);
-  min-height: 30px;
   padding: 4px 8px;
-  border: 1px solid #ffffff28;
-  border-radius: 7px;
+  border-radius: 6px;
   background: var(--finder-night);
   color: var(--finder-chalk);
   font-size: 11px;
-  font-weight: 800;
-  line-height: 1.25;
+  font-weight: 750;
+}
+.server-card--cover .card-presence {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-inline-start: auto;
+  min-height: 24px;
+  color: var(--tile-muted);
+  font-size: 11px;
+  font-weight: 750;
   white-space: nowrap;
 }
-
-.server-card--cover .card-presence--online { color: var(--finder-online); }
-.server-card--cover .card-presence--offline { color: var(--finder-offline); }
-.server-card--cover .card-presence--sample { color: var(--finder-chalk); }
-
-.card-presence-dot {
-  width: 7px;
-  height: 7px;
-  flex: none;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-}
-
-.card-presence--online .card-presence-dot { background: currentColor; }
-
+.card-status-symbol { display: inline-flex; align-items: center; }
+.card-status-symbol :is(.icon,.card-signal) { width: 14px; height: 14px; }
+.card-signal { fill: currentColor; }
+.card-presence--online .card-status-symbol { color: #167542; }
+.card-presence--offline .card-status-symbol { color: #bc2d3d; }
 .card-player-count {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-inline-start: 2px;
-  padding-inline-start: 7px;
-  border-inline-start: 1px solid #ffffff38;
-  color: var(--finder-chalk);
+  gap: 3px;
+  margin-inline-start: 3px;
+  color: var(--tile-ink);
   font-variant-numeric: tabular-nums;
 }
-
 .card-player-count .icon { width: 14px; height: 14px; }
 
 .catalog-main .server-card--cover .card-favorite {
@@ -141,25 +132,21 @@
 }
 
 .card-house-mark {
-  display: grid;
+  display: inline-grid;
   place-items: center;
-  width: 21px;
-  height: 21px;
+  width: 23px;
+  height: 23px;
   flex: none;
-  color: var(--finder-seal);
-  border-radius: 6px;
-  background: var(--finder-seal-bg);
 }
-
-.catalog-main .server-card--cover .card-heading a .card-house-mark .icon {
-  width: 15px;
-  height: 15px;
-  color: inherit;
-}
+.card-house-mark svg { width: 23px; height: 23px; overflow: visible; }
+.verified-seal { fill: #f5b629; stroke: #a56a08; stroke-width: .7; stroke-linejoin: round; }
+.verified-check { fill: none; stroke: #352608; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .catalog-main .server-card--cover .card-editions {
   margin: 0;
-  gap: 5px;
+  gap: 4px 8px;
+  flex-wrap: wrap;
+  align-items: center;
   font-size: 11px;
   line-height: 1.25;
 }
@@ -190,8 +177,10 @@
 .edition-indicator.offline { color: var(--finder-error-ink); }
 .edition-indicator.unknown { color: var(--finder-muted); }
 
+.card-compatibility { display: inline-flex; align-items: center; gap: 4px; }
 .card-mode {
-  margin-inline-start: auto;
+  flex-basis: 100%;
+  margin-inline-start: 0;
   color: var(--tile-muted);
   font-weight: 700;
 }
@@ -229,3 +218,6 @@
     transform: none;
   }
 }
+
+/* A shelf already names the game mode. Keep search results self-contained. */
+.results-shelves .server-card--cover .card-mode { display: none; }

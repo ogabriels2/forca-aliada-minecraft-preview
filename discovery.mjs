@@ -1,4 +1,4 @@
-import { GAMEPLAY, MODES } from "./model.mjs";
+import { GAMEPLAY, MODES, serverAvailability } from "./model.mjs";
 
 // Presentation only. Real server data and illustrative records stay distinct.
 const photoCaptions = {
@@ -36,18 +36,31 @@ function editionBadges(server, esc, icon) {
 }
 
 function cardAvailability(server, edition, esc, icon) {
-  if (server.example && server.id !== "minha-pagina")
-    return '<span class="card-presence card-presence--sample">Exemplo</span>';
-
-  const status = Object.hasOwn(availabilityLabels, server.status) ? server.status : "unknown";
-  const label = availabilityLabels[status];
-  const countedEdition = (edition && server.editions.includes(edition) ? [edition] : server.editions)
-    .find((key) => Number.isSafeInteger(server.editionPlayers?.[key]?.online));
-  const count = server.editionPlayers?.[countedEdition]?.online;
-  return `<span class="card-presence card-presence--${status}">
-    <span class="card-presence-dot" aria-hidden="true"></span>${label}
-    ${status === "online" && count >= 0 ? `<span class="card-player-count" title="${esc(`Jogadores online · ${countedEdition}`)}">${icon("users")} ${playerNumber.format(count)}<span class="sr-only"> jogadores em ${esc(countedEdition)}</span></span>` : ""}
+  if (server.example && server.id !== "minha-pagina") return "";
+  const measuredStatus = serverAvailability(server, edition);
+  const status = Object.hasOwn(availabilityLabels, measuredStatus) ? measuredStatus : "unknown";
+  const candidates = edition && server.editions.includes(edition) ? [edition] : server.editions;
+  // Java and Bedrock can share players. Display one valid measurement, never their sum.
+  const countedEdition = candidates.find((key) =>
+    (!server.editionStatus || server.editionStatus[key] === "online")
+    && Number.isSafeInteger(server.editionPlayers?.[key]?.online)
+    && server.editionPlayers[key].online >= 0);
+  const count = status === "online" ? server.editionPlayers?.[countedEdition]?.online : undefined;
+  const hasCount = Number.isSafeInteger(count);
+  const label = status === "unknown" ? "Status não confirmado" : availabilityLabels[status];
+  const description = hasCount
+    ? `${label} · ${playerNumber.format(count)} ${count === 1 ? "jogador" : "jogadores"} em ${countedEdition}`
+    : label;
+  const signal = '<svg class="card-signal" viewBox="0 0 18 18" aria-hidden="true"><rect x="1" y="11" width="3" height="5" rx="1"/><rect x="7" y="7" width="3" height="9" rx="1"/><rect x="13" y="2" width="3" height="14" rx="1"/></svg>';
+  return `<span class="card-presence card-presence--${status}" role="img" aria-label="${esc(description)}" title="${esc(description)}">
+    <span aria-hidden="true" class="card-status-symbol">${status === "online" ? signal : icon(status === "offline" ? "x" : "help-circle")}</span>
+    <span aria-hidden="true">${status === "unknown" ? "Sem status" : label}</span>
+    ${hasCount ? `<span class="card-player-count" aria-hidden="true">${icon("users")}${playerNumber.format(count)}</span>` : ""}
   </span>`;
+}
+
+function officialMark() {
+  return '<span class="card-house-mark" title="Oficial da Força Aliada"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="verified-seal" d="m12 1 2.8 2.4 3.7-.3.8 3.6 3.1 2-1.5 3.3 1.5 3.3-3.1 2-.8 3.6-3.7-.3L12 23l-2.8-2.4-3.7.3-.8-3.6-3.1-2L3.1 12 1.6 8.7l3.1-2 .8-3.6 3.7.3Z"/><path class="verified-check" d="m7.7 12.1 2.7 2.8 5.8-5.8"/></svg><span class="sr-only">Oficial da Força Aliada</span></span>';
 }
 
 export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition }) {
@@ -56,18 +69,21 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition 
   return `<article class="server-card server-card--cover" data-id="${esc(d.id)}">
     <div class="card-art art-${esc(d.theme)}">
       <div class="card-picture-link">${cover(d, { card: true })}</div>
-      ${cardAvailability(d, edition, esc, icon)}
+      ${d.example && d.id !== "minha-pagina" ? '<span class="card-sample-label">Exemplo</span>' : ""}
       <button class="favorite card-favorite" type="button" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${favorite}" aria-label="${favorite ? "Remover dos favoritos:" : "Favoritar"} ${esc(d.name)}">${icon("heart")}</button>
     </div>
     <div class="card-body">
       <div class="card-heading">
         <span class="card-server-icon" aria-hidden="true"><span>${esc(initial)}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async">` : ""}</span>
-        <h3><a href="${esc(href)}" title="${esc(d.name)}"><span class="card-label"><span class="card-name">${esc(d.name)}</span>${d.official ? `<span class="card-house-mark" title="Servidor da casa">${icon("shield-check")}<span class="sr-only">Servidor da casa</span></span>` : ""}</span>${icon("arrow-right")}</a></h3>
+        <h3><a href="${esc(href)}" title="${esc(d.name)}"><span class="card-label"><span class="card-name">${esc(d.name)}</span>${d.official ? officialMark() : ""}</span>${icon("arrow-right")}</a></h3>
       </div>
       <div class="card-editions">
-        ${editionBadges(d, esc, icon)}
+        <span class="card-compatibility">
+          ${editionBadges(d, esc, icon)}
+          ${d.access === "whitelist" ? `<span class="card-access" title="Entrada com aprovação">${icon("lock")}<span class="sr-only">Entrada com aprovação</span></span>` : ""}
+        </span>
+        ${cardAvailability(d, edition, esc, icon)}
         <span class="card-mode">${esc(d.mode)}</span>
-        ${d.access === "whitelist" ? `<span class="card-access" title="Entrada com aprovação">${icon("lock")}<span class="sr-only">Entrada com aprovação</span></span>` : ""}
       </div>
     </div>
   </article>`;
