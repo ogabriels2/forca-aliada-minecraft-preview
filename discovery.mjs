@@ -19,47 +19,46 @@ export function featuredImages(server) {
   return [...new Set([openingPhoto, ...gallery, server.cover].filter(Boolean))].slice(0, 5);
 }
 
-function cardAvailability(server, esc) {
-  const statuses = server.editionStatus;
-  if (!statuses) return `<span class="availability ${esc(server.status)}">${esc(server.statusText)}</span>`;
-  const labels = { online: "Online", offline: "Offline", unknown: "Sem confirmação" };
-  const states = server.editions.map((edition) => statuses[edition] || "unknown");
-  if (states.every((state) => state === states[0]))
-    return `<span class="availability ${esc(states[0])}">${labels[states[0]]}</span>`;
-  return server.editions.map((edition, index) =>
-    `<span class="availability ${esc(states[index])}">${esc(edition)} · ${labels[states[index]]}</span>`,
-  ).join("");
+function editionBadges(server, esc) {
+  const statusLabels = { online: "Online", offline: "Offline", unknown: "Sem confirmação" };
+  return server.editions.map((edition) => {
+    const status = server.editionStatus?.[edition];
+    const label = statusLabels[status];
+    return `<span class="server-edition server-edition--${edition === "Bedrock" ? "bedrock" : "java"}">
+      <strong>${esc(edition)}</strong>
+      ${label ? `<span class="availability ${status}">${label}</span>` : ""}
+    </span>`;
+  }).join("");
 }
 
 export function serverCard(d, { esc, icon, cover, favorite, serverHref }) {
   const href = serverHref ? serverHref(d) : `#/servidor/${d.id}`;
   const access = d.access === "whitelist" ? "Com aprovação" : "Entrada livre";
   const version = /^\d/.test(d.version) ? d.version.split(" · ")[0] : "";
-  const initials = d.name.trim().split(/\s+/).slice(0, 2)
-    .map((word) => [...word][0]).join("").toLocaleUpperCase("pt-BR") || "?";
-  const metadata = [d.mode, d.language, access, version].filter(Boolean).join(" · ");
-  return `<article class="server-card server-tile" data-id="${esc(d.id)}">
+  const initial = [...d.name.trim()][0]?.toLocaleUpperCase("pt-BR") || "?";
+  const checkedAt = Number.isFinite(d.statusCheckedAt)
+    ? new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(d.statusCheckedAt)
+    : "";
+  return `<article class="server-card" data-id="${esc(d.id)}">
     <div class="card-art art-${esc(d.theme)}">
       <div class="card-picture-link">${cover(d, { card: true })}</div>
       <button class="favorite card-favorite" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${favorite}" aria-label="${favorite ? "Remover dos favoritos:" : "Favoritar"} ${esc(d.name)}">${icon("heart")}</button>
     </div>
     <div class="card-body">
-      <div class="tile-identity">
-        <span class="card-server-icon" aria-hidden="true"><span>${esc(initials)}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="40" height="40" loading="lazy" decoding="async">` : ""}</span>
-        <div class="card-heading">
-          <h3><a href="${esc(href)}"><span>${esc(d.name)}</span>${icon("arrow-right")}</a></h3>
-          <div class="tile-status">${cardAvailability(d, esc)}</div>
-        </div>
+      <div class="card-heading">
+        <span class="card-server-icon" aria-hidden="true">${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="36" height="36" loading="lazy" decoding="async">` : esc(initial)}</span>
+        <h3><a href="${esc(href)}"><span>${esc(d.name)}</span>${icon("arrow-right")}</a></h3>
       </div>
-      <div class="tile-editions">${esc(d.editions.join(" + "))}${d.official ? '<span class="catalog-house" title="Mantido pela equipe da Força Aliada">Da casa</span>' : ""}</div>
-      <p class="tile-description">${esc(d.summary)}</p>
-      <div class="tile-meta">${esc(metadata)}</div>
-      ${d.address ? `<div class="card-address">
+      <div class="card-editions">${editionBadges(d, esc)}${d.editionStatus ? "" : `<span class="availability ${esc(d.status)}">${esc(d.statusText)}</span>`}</div>
+      <div class="card-facts"><span>${access}</span>${version ? `<span>${esc(version)}</span>` : ""}</div>
+      <p>${esc(d.summary)}</p>
+      ${d.address ? `<div class="card-address ${d.example ? "card-address-example" : ""}">
         <div><code data-copy-source tabindex="-1">${esc(d.address)}</code>
-        ${d.editions.includes("Bedrock") && d.port ? `<small>Bedrock · porta ${esc(d.port)}</small>` : ""}</div>
+        ${d.editions.includes("Bedrock") && d.port ? `<small>Porta Bedrock: ${esc(d.port)}</small>` : ""}</div>
         ${d.example ? '<small>Exemplo</small>' : `<button type="button" data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço de ${esc(d.name)}">${icon("copy")}<span data-copy-label>Copiar</span></button>`}
         <span class="sr-only" data-copy-feedback role="status"></span>
       </div>` : ""}
+      <div class="card-bottom"><span>${esc(d.mode)} · ${esc(d.language)}</span>${d.official ? `<span class="catalog-house" title="Mantido pela equipe da Força Aliada">${icon("shield-check")} Servidor da casa</span>` : ""}${checkedAt ? `<small class="card-checked" title="Horário local da última consulta de disponibilidade">Consulta às ${checkedAt}</small>` : ""}</div>
     </div>
   </article>`;
 }
