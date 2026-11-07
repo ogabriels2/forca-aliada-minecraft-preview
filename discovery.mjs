@@ -80,14 +80,11 @@ export function featuredServer(d, index, { esc, icon }) {
     <div class="featured-copy"><h2>Força Aliada</h2><p>No survival da Força Aliada, as cidades são ligadas por rotas construídas pelos próprios jogadores.</p><div class="card-tags"><span class="tag">Survival vanilla</span><span class="tag">Java + Bedrock</span></div><a class="button" href="#/servidor/${esc(d.id)}">Conhecer o servidor ${icon("arrow-right")}</a><div class="feature-reel" role="group" aria-label="Imagens do servidor em destaque">${images.map((src, n) => `<button data-action="featured-photo" data-index="${n}" aria-label="Ver foto: ${esc(featuredPhotoLabel(src))}" aria-pressed="${n === i}"><img src="${esc(src)}" alt="" width="120" height="68" loading="lazy"></button>`).join("")}</div><span class="feature-disclosure">Servidor da casa</span></div>`;
 }
 
-function filterGroup(name, label, choices, icon) {
-  return `<fieldset class="filter-group">
-    <legend>${label}</legend>
-    ${choices.map(([value, text]) => `<label class="filter-choice">
-      <input type="radio" name="${name}" value="${value}">
-      <span>${text}</span>${icon("check")}
-    </label>`).join("")}
-  </fieldset>`;
+function filterField(name, label, choices, esc) {
+  return `<label class="catalog-filter-field">
+    <span>${label}</span>
+    <select name="${name}">${choices.map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join("")}</select>
+  </label>`;
 }
 
 export function catalogShelves(servers, card, { esc, icon }) {
@@ -113,8 +110,9 @@ export function catalogShelves(servers, card, { esc, icon }) {
 
 export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
   const browsing = !Object.entries(f).some(([k, v]) => k !== "sort" && v);
-  const chip = (action, label, glyph, pressed, value = "") =>
-    `<button type="button" class="chip" data-action="${action}" data-value="${value}" aria-pressed="${Boolean(pressed)}">${glyph ? icon(glyph) : ""}<span>${label}</span></button>`;
+  const view = (action, label, pressed) =>
+    `<button type="button" class="chip" data-action="${action}" aria-pressed="${Boolean(pressed)}">${label}</button>`;
+  const categories = (items, all) => [["", all], ...items.map((name) => [name, name])];
   return `<section class="catalog-masthead"><div class="catalog-hero container">
     <div class="catalog-stage">
       <div class="catalog-intro">
@@ -130,34 +128,21 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
   </div></section>
   <section class="catalog-main container" id="catalog-results" aria-label="Catálogo de servidores">
     <div class="catalog-toolbar">
-      <div class="catalog-compat" role="group" aria-label="Edição e disponibilidade">
-        ${chip("quick-edition", "Java", "device-desktop", f.edition === "Java", "Java")}
-        ${chip("quick-edition", "Bedrock", "device-mobile", f.edition === "Bedrock", "Bedrock")}
-        ${chip("quick-online", "Online agora", "", f.status === "online")}
-        <button class="filter-more" data-action="filters" aria-label="Filtros" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} <span class="filter-label">Filtros</span><span class="filter-count" hidden></span></button>
+      <div class="catalog-views" role="group" aria-label="Listas de servidores">
+        ${view("explore", "Explorar", !f.favorites && !f.recent)}
+        ${view("favorites", "Favoritos", f.favorites)}
+        ${hasRecent || f.recent ? view("recent", "Recentes", f.recent) : ""}
       </div>
-      <div class="filter-row catalog-tools" id="filters">
-        ${chip("favorites", "Favoritos", "heart", f.favorites)}
-        ${hasRecent || f.recent ? chip("recent", "Recentes", "clock", f.recent) : ""}
-      </div>
-      <div class="catalog-modes">
-        <div class="quick-modes" role="group" aria-label="Explorar por modo de jogo">
-          ${chip("mode", "Todos", "", !f.mode && !f.feature)}
-          ${MODES.map((m) => chip("mode", esc(m), "", f.mode === m, esc(m))).join("")}
-        </div>
-        <details class="gameplay-directory" id="gameplay-directory"><summary><span>Estilos</span> ${icon("chevron-down")}</summary><nav aria-label="Estilos de jogo">${GAMEPLAY.map((name) => `<a class="chip" href="#/?${esc(new URLSearchParams({ ...f, mode: "", feature: name }))}">${esc(name)}</a>`).join("")}</nav></details>
-      </div>
+      <button type="button" class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button>
     </div>
     <div class="extra-filters catalog-filter-panel" id="extra-filters" ${extra ? "" : "hidden"}>
-      ${filterGroup("edition", "Edição", [["", "Todas"], ["Java", "Java"], ["Bedrock", "Bedrock"]], icon)}
-      ${filterGroup("language", "Idioma", [["", "Todos"], ["Português", "Português"], ["English", "Inglês"], ["Español", "Espanhol"]], icon)}
-      <fieldset class="filter-group"><legend>Acesso</legend>
-        <label class="filter-choice"><input name="access" type="radio" value=""> <span>Qualquer acesso</span>${icon("check")}</label>
-        <label class="filter-choice"><input name="access" type="radio" value="open"> <span>Entrada livre</span>${icon("check")}</label>
-        <label class="filter-choice"><input name="access" type="radio" value="whitelist"> <span>Com aprovação</span>${icon("check")}</label>
-      </fieldset>
-      ${filterGroup("status", "Disponibilidade", [["", "Todas"], ["online", "Online"], ["offline", "Offline"], ["unknown", "Sem confirmação"]], icon)}
-      ${filterGroup("sort", "Ordenar por", [["", "Relevância"], ["name", "Nome: A a Z"]], icon)}
+      ${filterField("edition", "Edição do Minecraft", categories(["Java", "Bedrock"], "Todas"), esc)}
+      ${filterField("status", "Disponibilidade", [["", "Qualquer estado"], ["online", "Online agora"], ["offline", "Offline"], ["unknown", "Sem confirmação"]], esc)}
+      ${filterField("mode", "Modo de jogo", categories(MODES, "Todos"), esc)}
+      ${filterField("feature", "Características", categories(GAMEPLAY, "Todas"), esc)}
+      ${filterField("language", "Idioma", [["", "Todos"], ["Português", "Português"], ["English", "Inglês"], ["Español", "Espanhol"]], esc)}
+      ${filterField("access", "Entrada", [["", "Qualquer acesso"], ["open", "Entrada livre"], ["whitelist", "Com aprovação"]], esc)}
+      ${filterField("sort", "Ordenar por", [["", "Relevância"], ["name", "Nome de A a Z"]], esc)}
       <div class="filter-panel-actions">
         <button class="text-link edition-help" data-action="edition-help">Qual edição eu uso?</button>
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>

@@ -153,36 +153,20 @@ body[data-surface="discovery"] #main ::selection {
 }
 
 .catalog-main .catalog-toolbar {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
-  gap: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
   padding-block: 4px 10px;
 }
 .catalog-masthead + .catalog-main.container { margin-top: 0; padding-top: 0; }
-.catalog-main .catalog-compat,
-.catalog-main .catalog-modes,
-.catalog-main .catalog-tools {
+.catalog-main .catalog-views {
   display: flex;
   align-items: center;
-  min-width: 0;
-  gap: 6px;
+  gap: 2px;
 }
-.catalog-main .catalog-modes { grid-column: 1 / -1; justify-content: space-between; }
-.catalog-main .catalog-compat .filter-more { width: auto; position: relative; }
-.catalog-main .catalog-toolbar .catalog-tools { width: auto; justify-content: flex-end; }
-.catalog-main .quick-modes {
-  min-width: 0;
-  gap: 6px;
-  flex-wrap: nowrap;
-  padding: 4px;
-  margin: -4px;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #514960 transparent;
-}
-.catalog-main .catalog-toolbar .chip,
-.catalog-main .catalog-toolbar .filter-more,
-.catalog-main .gameplay-directory summary {
+.catalog-main .catalog-toolbar :is(.chip,.filter-more) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -192,67 +176,61 @@ body[data-surface="discovery"] #main ::selection {
   max-width: none;
   min-height: 44px;
   padding: 0 11px;
-  border: 1px solid var(--finder-line);
+  border: 1px solid transparent;
   border-radius: 9px;
-  background: var(--finder-panel);
-  color: var(--finder-ink);
+  background: transparent;
+  color: var(--finder-muted);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   transition: background-color 160ms, border-color 160ms, transform 230ms var(--finder-ease);
 }
 .catalog-main .catalog-toolbar .chip[hidden] { display: none; }
-.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover,
-.catalog-main .gameplay-directory summary:hover { background: #383247; border-color: #8978a2; }
-.catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: scale(.94); }
-.catalog-main .catalog-toolbar .icon { width: 16px; height: 16px; flex: 0 0 16px; }
+.catalog-main .catalog-toolbar .filter-more {
+  background: var(--finder-panel);
+  border-color: var(--finder-line);
+  color: var(--finder-ink);
+  margin-inline-start: auto;
+}
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover { background: #383247; color: var(--finder-ink); }
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: scale(.96); }
+.catalog-main .catalog-toolbar .icon { width: 16px; height: 16px; }
 .catalog-main .catalog-toolbar .chip[aria-pressed="true"],
 .catalog-main .catalog-toolbar .filter-more[aria-expanded="true"] {
-  background: var(--finder-violet);
-  border-color: var(--finder-violet);
-  color: #302147;
+  background: #463655;
+  color: #f5e7ff;
 }
-.catalog-main .catalog-compat [data-value="Java"] { color: #ffdc97; }
-.catalog-main .catalog-compat [data-value="Bedrock"] { color: #ade9ff; }
-.catalog-main .catalog-compat [data-value="Java"][aria-pressed="true"] { background: #ffdc97; border-color: #ffdc97; color: #352513; }
-.catalog-main .catalog-compat [data-value="Bedrock"][aria-pressed="true"] { background: #ade9ff; border-color: #ade9ff; color: #193240; }
-.catalog-main .catalog-compat [data-action="quick-online"]::before {
-  content: "";
-  background: var(--finder-lime);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex: 0 0 7px;
-}
-.catalog-main .catalog-compat [data-action="quick-online"][aria-pressed="true"] { background: var(--finder-lime); border-color: var(--finder-lime); color: #203614; }
-.catalog-main .catalog-compat [data-action="quick-online"][aria-pressed="true"]::before { background: #31531e; }
-.catalog-main .gameplay-directory { flex: 0 0 auto; position: relative; }
-.catalog-main .gameplay-directory nav {
-  width: min(340px,calc(100vw - 36px));
-  background: #302940;
-  color: var(--finder-ink);
-  border-color: #655676;
-  z-index: 4;
-}
-.catalog-main .gameplay-directory nav .chip { display: inline-flex; min-height: 38px; }
 .catalog-main .catalog-filter-panel:not([hidden]) {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 13px;
   background: #2c2739;
   border: 1px solid var(--finder-line);
   color: var(--finder-ink);
   animation: finder-open 240ms var(--finder-ease) both;
 }
-.catalog-main .catalog-filter-panel legend { color: #eadfff; }
-.catalog-main .catalog-filter-panel .filter-choice {
-  border-color: #645770;
+.catalog-main .catalog-filter-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: #eadfff;
+  font-size: 13px;
+  font-weight: 750;
+}
+.catalog-main .catalog-filter-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 7px;
+  color-scheme: dark;
+  border: 1px solid #645770;
+  border-radius: 8px;
   background: #231f2d;
   color: #f0e6fc;
+  font: inherit;
 }
-.catalog-main .catalog-filter-panel .filter-choice:has(input:checked) {
-  background: var(--finder-violet);
-  color: #302147;
-  border-color: var(--finder-violet);
+.catalog-main .catalog-filter-panel .filter-panel-actions { border-color: var(--finder-line); }
+@media (max-width: 700px) {
+  .catalog-main .catalog-filter-panel:not([hidden]) { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
-.catalog-main .catalog-filter-panel .filter-choice .icon { color: inherit; }
 .catalog-main .catalog-filter-panel .button,
 .catalog-main .catalog-more .button,
 .catalog-main .empty .button {
@@ -319,11 +297,6 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
   from { opacity: .55; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@media (min-width: 1240px) {
-  .catalog-main .catalog-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
-  .catalog-main .catalog-modes { grid-column: 2; grid-row: 1; justify-content: flex-start; }
-  .catalog-main .catalog-tools { grid-column: 3; grid-row: 1; }
-}
 @media (max-width: 750px) {
   .catalog-stage { grid-template-columns: minmax(0, 1fr); min-height: 172px; }
   .catalog-stage .catalog-intro { padding: 18px 15px; }
@@ -332,38 +305,12 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
   .catalog-stage-art::after { background: linear-gradient(90deg,#352753 10%,#352753a8 63%,#35275338); }
   .catalog-stage-caption { display: none; }
   .catalog-stage .catalog-search-area { max-width: 485px; }
-  .catalog-main .catalog-toolbar { gap: 7px 8px; }
-  .catalog-main .catalog-tools .chip { min-width: 44px; }
-  .catalog-main .catalog-tools .chip span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .catalog-main .quick-modes .chip { min-height: 44px; }
 }
 @media (max-width: 490px) {
   .catalog-masthead .catalog-hero.container { padding-block: 12px 9px; }
-  .catalog-main .catalog-toolbar { grid-template-columns: minmax(0,1fr) auto; position: relative; }
-  .catalog-main .catalog-compat { grid-column: 1 / -1; }
-  .catalog-main .catalog-modes { grid-column: 1; grid-row: 2; }
-  .catalog-main .catalog-toolbar .catalog-tools { grid-column: 2; grid-row: 2; }
-  .catalog-main .catalog-compat .chip { padding-inline: 10px; }
   .catalog-stage .search-form > .button { padding-inline: 10px; }
   .catalog-stage .search-form > .button > .icon { display: inline-block; }
-  .catalog-main .catalog-compat .filter-more { margin-left: auto; min-width: 44px; }
-  .catalog-main .catalog-compat .filter-label { display: none; }
-  .catalog-main .catalog-compat .filter-count:not([hidden]) { position: absolute; right: -3px; top: -3px; }
-  .catalog-main .gameplay-directory { position: static; }
-  .catalog-main .gameplay-directory nav { inset: 100% 0 auto auto; }
-  .catalog-main .catalog-toolbar .chip,
-  .catalog-main .catalog-toolbar .filter-more,
-  .catalog-main .gameplay-directory summary { padding-inline: 8px; }
-}
-@media (max-width: 350px) {
-  .catalog-main .catalog-compat [data-action="quick-edition"] > .icon { display: none; }
+  .catalog-main .catalog-toolbar :is(.chip,.filter-more) { padding-inline: 8px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .catalog-stage-art > img,

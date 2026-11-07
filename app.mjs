@@ -552,7 +552,7 @@ function featured() {
   return featuredServer(SERVERS[0], state.featured, { esc, icon });
 }
 const CATALOG_BATCH = 9;
-const panelFilters = ["edition", "language", "status", "access", "sort"];
+const panelFilters = ["edition", "status", "mode", "feature", "language", "access", "sort"];
 let catalogLimit = CATALOG_BATCH;
 let catalogFilterKey;
 
@@ -683,14 +683,14 @@ function updateResults() {
     feature: "Estilo de jogo",
     edition: "Edição",
     language: "Idioma",
-    favorites: "Favoritos",
-    recent: "Recentes",
+    sort: "Ordenação",
     status: "Disponibilidade",
     access: state.filters.access === "whitelist" ? "Entrada com aprovação" : "Entrada livre",
   };
   const displayFilter = (key, value) =>
-    ["favorites", "recent", "access"].includes(key)
+    key === "access"
       ? labels[key]
+      : key === "sort" ? "Nome de A a Z"
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
   const browsing = !Object.entries(state.filters).some(([key, value]) => key !== "sort" && value);
@@ -738,14 +738,8 @@ function updateResults() {
     .join("");
   if (active.childElementCount > 0)
     active.insertAdjacentHTML("beforeend", '<button class="text-link" data-action="clear-filters">Limpar filtros</button>');
-  document
-    .querySelectorAll('[data-action="mode"]')
-    .forEach((button) =>
-      button.setAttribute(
-        "aria-pressed",
-        String((state.filters.mode || "") === button.dataset.value && (Boolean(button.dataset.value) || !state.filters.feature)),
-      ),
-    );
+  document.querySelector('[data-action="explore"]')
+    ?.setAttribute("aria-pressed", String(!state.filters.favorites && !state.filters.recent));
   document
     .querySelector('[data-action="favorites"]')
     ?.setAttribute("aria-pressed", String(Boolean(state.filters.favorites)));
@@ -755,11 +749,6 @@ function updateResults() {
     recent.setAttribute("aria-pressed", String(Boolean(state.filters.recent)));
   }
   document.querySelector('[data-action="clear-recent"]').hidden = !state.filters.recent || !recentlyViewed.length;
-  document.querySelectorAll('[data-action="quick-edition"]').forEach((button) => {
-    button.setAttribute("aria-pressed", String(state.filters.edition === button.dataset.value));
-  });
-  document.querySelector('[data-action="quick-online"]')
-    ?.setAttribute("aria-pressed", String(state.filters.status === "online"));
   const advancedCount = panelFilters.filter(
     (key) => state.filters[key],
   ).length;
@@ -769,16 +758,13 @@ function updateResults() {
   const search = document.querySelector("#server-search");
   if (search && search.value !== (state.filters.q || ""))
     search.value = state.filters.q || "";
-  const editionSelect = document.querySelector('#filters select[name="edition"]');
-  if (editionSelect) editionSelect.value = state.filters.edition || "";
-  document.querySelectorAll('#extra-filters input[type="radio"]').forEach((input) => {
-    input.checked = input.value === (state.filters[input.name] || "");
+  document.querySelectorAll("#extra-filters select").forEach((select) => {
+    const value = state.filters[select.name] || "";
+    if (select.value !== value) {
+      const option = [...select.options].find((item) => item.value === value);
+      if (option) option.selected = true;
+    }
   });
-  document
-    .querySelectorAll('#extra-filters input[type="checkbox"]')
-    .forEach((input) => {
-      input.checked = input.name === "access" ? state.filters.access === "open" : Boolean(state.filters[input.name]);
-    });
   const params = new URLSearchParams(
     Object.entries(state.filters).filter(([, v]) => v),
   );
@@ -1705,16 +1691,6 @@ document.addEventListener("click", (e) => {
         d.address = d.address || "meu-mundo.example";
       }
     });
-  } else if (a === "mode" || a === "collection") {
-    delete state.filters.feature;
-    state.filters.mode =
-      (state.filters.mode || "") === b.dataset.value ? "" : b.dataset.value;
-    updateResults();
-    animateCatalogResults();
-    if (a === "collection")
-      document
-        .querySelector("#catalog-results")
-        .scrollIntoView({ block: "start", behavior: "smooth" });
   } else if (a === "scroll-shelf") {
     const track = b.closest(".catalog-shelf")?.querySelector(".shelf-track");
     track?.scrollBy({
@@ -1734,12 +1710,10 @@ document.addEventListener("click", (e) => {
   } else if (a === "clear-panel-filters") {
     for (const key of panelFilters) delete state.filters[key];
     updateResults();
-  } else if (a === "quick-edition") {
-    state.filters.edition = state.filters.edition === b.dataset.value ? "" : b.dataset.value;
-    updateResults();
-    animateCatalogResults();
-  } else if (a === "quick-online") {
-    state.filters.status = state.filters.status === "online" ? "" : "online";
+  } else if (a === "explore") {
+    if (!state.filters.favorites && !state.filters.recent) return;
+    delete state.filters.favorites;
+    delete state.filters.recent;
     updateResults();
     animateCatalogResults();
   } else if (a === "favorites") {
@@ -2072,19 +2046,9 @@ document.addEventListener("change", (e) => {
     uploadImages(e.target);
     return;
   }
-  if (e.target.closest("#filters,#extra-filters")) {
-    const k = e.target.name;
-    if (k) {
-      state.filters[k] =
-        e.target.type === "checkbox"
-          ? e.target.checked
-            ? k === "access"
-              ? "open"
-              : true
-            : ""
-          : e.target.value;
-      updateResults();
-    }
+  if (e.target.matches("#extra-filters select")) {
+    state.filters[e.target.name] = e.target.value;
+    updateResults();
     return;
   }
   if (e.target.name === "coverPosition" && dialogMode === "media") {
