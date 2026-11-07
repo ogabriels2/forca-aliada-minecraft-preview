@@ -2,6 +2,7 @@ import {
   serverCard,
   featuredServer,
   featuredImages,
+  featuredPhotoLabel,
   catalogMarkup,
 } from "./discovery.mjs";
 import { createSkinLibrary } from "./skins.mjs";
@@ -14,6 +15,7 @@ import {
   FEATURES,
   initialDraft,
   filterServers,
+  catalogFilters,
   slugify,
   validateDraft,
   safeDraft,
@@ -22,6 +24,8 @@ import {
   safeMedia,
   eventUTC,
 } from "./model.mjs";
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
 const main = document.querySelector("#main"),
   dialog = document.querySelector("#dialog");
 const esc = (v) =>
@@ -293,23 +297,31 @@ function availableServers() {
     ? [...SERVERS, state.publication]
     : SERVERS;
 }
+function serverHref(server) {
+  const edition = state.filters.edition;
+  const query = edition && server.editions.includes(edition) ? `?edition=${edition}` : "";
+  return `#/servidor/${encodeURIComponent(server.id)}${query}`;
+}
 function card(d) {
   return serverCard(d, {
     esc,
     icon,
     cover,
     favorite: state.favorites.has(d.id),
+    serverHref,
   });
 }
 function featured() {
   return featuredServer(SERVERS[0], state.featured, { esc, icon });
 }
 const CATALOG_BATCH = 9;
+const panelFilters = ["edition", "language", "online", "access", "sort"];
 let catalogLimit = CATALOG_BATCH;
 let catalogFilterKey;
 
-function renderCatalog() {
-  catalogLimit = CATALOG_BATCH;
+function renderCatalog(limit = CATALOG_BATCH) {
+  catalogLimit = limit;
+  catalogFilterKey = filterKey();
   activeServer = null;
   main.innerHTML = catalogMarkup(state.filters, {
     esc,
@@ -320,41 +332,80 @@ function renderCatalog() {
   updateResults();
   paintIcons();
 }
+function filterKey() {
+  return JSON.stringify(Object.entries(state.filters).filter(([, value]) => value));
+}
+function catalogResults(filters) {
+  const found = filterServers(availableServers(), filters);
+  return filters.favorites
+    ? found.filter((server) => state.favorites.has(server.id))
+    : found;
+}
+function focusCatalogHeading() {
+  const heading = document.querySelector("#catalog-results h2");
+  if (!heading) return;
+  heading.tabIndex = -1;
+  heading.focus();
+}
 function updateResults() {
-  const n = document.querySelector("#results");
-  if (!n) return;
-  const filterKey = JSON.stringify(Object.entries(state.filters).filter(([, value]) => value));
-  if (filterKey !== catalogFilterKey) catalogLimit = CATALOG_BATCH;
-  catalogFilterKey = filterKey;
-  let found = filterServers(availableServers(), state.filters);
-  if (state.filters.favorites)
-    found = found.filter((s) => state.favorites.has(s.id));
-  n.innerHTML = found.length
-    ? found.slice(0, catalogLimit).map(card).join("")
-    : `<div class="empty">${icon("search")}<h3>${state.filters.favorites && !state.favorites.size ? "Nenhum servidor salvo ainda." : "Não encontramos servidores com esses filtros."}</h3><p>${state.filters.favorites && !state.favorites.size ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p><button class="button secondary" data-action="clear-filters">Explorar todos</button></div>`;
-  document.querySelector(".catalog-more").hidden = found.length <= catalogLimit;
-  document.querySelector("[data-catalog-title]").textContent = state.filters.favorites ? "Seus favoritos" : state.filters.q ? "Resultados da busca" : "Servidores";
-  document.querySelector("[data-result-count]").textContent =
-    `${found.length} ${found.length === 1 ? "resultado" : "resultados"}`;
+  const results = document.querySelector("#results");
+  if (!results) return;
+  const currentKey = filterKey();
+  if (currentKey !== catalogFilterKey) catalogLimit = CATALOG_BATCH;
+  catalogFilterKey = currentKey;
+  const found = catalogResults(state.filters);
+  const label = found.length === 1 ? "resultado" : "resultados";
+  const savedEmpty = state.filters.favorites && !state.favorites.size;
+  const relaxedFilter = !found.length && !savedEmpty
+    ? ["language", "mode", "access", "online"].find((key) => {
+        if (!state.filters[key]) return false;
+        return catalogResults({ ...state.filters, [key]: "" }).length > 0;
+      })
+    : undefined;
   const labels = {
     q: "Busca",
     mode: "Modalidade",
     edition: "Edição",
     language: "Idioma",
     favorites: "Favoritos",
-    online: "Online",
-    access: "Entrada livre",
+    online: "Online na simulação",
+    access: state.filters.access === "whitelist" ? "Entrada com aprovação" : "Entrada livre",
   };
-  document.querySelector("#active-filters").innerHTML = Object.entries(
-    state.filters,
-  )
-    .filter(([k, v]) => labels[k] && v)
-    .map(
-      ([k, v]) =>
-        `<button class="active-filter" data-action="remove-filter" data-key="${k}" aria-label="Remover filtro: ${esc(labels[k])}">${esc(["favorites", "online", "access"].includes(k) ? labels[k] : v)} ${icon("x")}</button>`,
-    )
-    .join("");
+  const displayFilter = (key, value) =>
+    ["favorites", "online", "access"].includes(key)
+      ? labels[key]
+      : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
+  results.innerHTML = found.length
+    ? found.slice(0, catalogLimit).map(card).join("")
+    : `<div class="empty">
+        ${icon("search")}
+        <h3>${savedEmpty ? "Nenhum servidor salvo ainda." : "Nenhum servidor encontrado."}</h3>
+        <p>${savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p>
+        <button class="button secondary" data-action="clear-filters">Explorar todos</button>
+        ${relaxedFilter ? `<button class="text-link" data-action="remove-filter" data-key="${relaxedFilter}">Remover filtro de ${labels[relaxedFilter].toLocaleLowerCase("pt-BR")}</button>` : ""}
+      </div>`;
+  document.querySelector(".catalog-more").hidden = found.length <= catalogLimit;
+  document.querySelector("[data-catalog-title]").textContent =
+    state.filters.favorites ? "Seus favoritos"
+      : state.filters.q ? "Resultados da busca"
+      : state.filters.edition ? `Servidores para ${state.filters.edition}`
+      : "Servidores";
+  const count = document.querySelector("[data-result-count]");
+  const countText = `${found.length} ${label}`;
+  if (count.textContent !== countText) count.textContent = countText;
+  const filterDone = document.querySelector("[data-filter-done]");
+  if (filterDone)
+    filterDone.textContent = found.length
+      ? `Ver ${found.length} ${found.length === 1 ? "servidor" : "servidores"}`
+      : "Ver resultados";
   const active = document.querySelector("#active-filters");
+  active.innerHTML = Object.entries(state.filters)
+    .filter(([key, value]) => labels[key] && value)
+    .map(([key, value]) => {
+      const text = esc(displayFilter(key, value));
+      return `<button class="active-filter" data-action="remove-filter" data-key="${key}" aria-label="${text}, remover filtro">${text} ${icon("x")}</button>`;
+    })
+    .join("");
   if (active.childElementCount > 0)
     active.insertAdjacentHTML("beforeend", '<button class="text-link" data-action="clear-filters">Limpar filtros</button>');
   document.querySelector("#discovery").hidden =
@@ -371,7 +422,7 @@ function updateResults() {
   document
     .querySelector('[data-action="favorites"]')
     ?.setAttribute("aria-pressed", String(Boolean(state.filters.favorites)));
-  const advancedCount = ["edition", "language", "online", "access", "sort"].filter(
+  const advancedCount = panelFilters.filter(
     (key) => state.filters[key],
   ).length;
   const filterCount = document.querySelector(".filter-count");
@@ -380,18 +431,21 @@ function updateResults() {
   const search = document.querySelector("#server-search");
   if (search && search.value !== (state.filters.q || ""))
     search.value = state.filters.q || "";
+  const editionSelect = document.querySelector('#filters select[name="edition"]');
+  if (editionSelect) editionSelect.value = state.filters.edition || "";
   document.querySelectorAll('#extra-filters input[type="radio"]').forEach((input) => {
     input.checked = input.value === (state.filters[input.name] || "");
   });
   document
     .querySelectorAll('#extra-filters input[type="checkbox"]')
     .forEach((input) => {
-      input.checked = Boolean(state.filters[input.name]);
+      input.checked = input.name === "access" ? state.filters.access === "open" : Boolean(state.filters[input.name]);
     });
   const params = new URLSearchParams(
     Object.entries(state.filters).filter(([, v]) => v),
   );
-  history.replaceState(null, "", `#/${params.size ? "?" + params : ""}`);
+  const catalogUrl = `#/${params.size ? "?" + params : ""}`;
+  if (location.hash !== catalogUrl) history.replaceState(null, "", catalogUrl);
   paintIcons(main);
 }
 
@@ -888,15 +942,60 @@ function showJoin() {
   const edition = d.editions.includes(state.selectedEdition)
     ? state.selectedEdition
     : d.editions[0];
-  openDialog(
-    `<h2 id="dialog-title">Como entrar pelo ${edition}</h2>${d.example ? '<div class="notice">Este endereço é demonstrativo e não aceita conexões.</div>' : ""}${d.access === "whitelist" ? "<p>Você precisa de aprovação da equipe. Consulte as regras e os canais da comunidade antes de tentar entrar.</p>" : ""}<ol class="instruction-list"><li>Abra uma versão compatível do Minecraft ${edition}.</li><li>${edition === "Java" ? "Acesse Multijogador → Adicionar servidor." : "Acesse Jogar → Servidores → Adicionar servidor."}</li><li>Informe o endereço${edition === "Bedrock" ? " e a porta" : ""} abaixo.</li></ol><div class="address-field"><code>${esc(d.address)}</code><button data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço">${icon("copy")}</button></div>${edition === "Bedrock" ? `<p>Porta: <strong>${esc(d.port || "19132")}</strong></p>` : ""}<p>Você não precisa usar o Manager para jogar.</p><button class="button full" data-action="close-dialog">Entendi</button>`,
-  );
+  const notice = d.example
+    ? '<div class="notice">Este endereço é demonstrativo e não aceita conexões.</div>'
+    : "";
+  if (d.access === "whitelist") {
+    const contact = safeLink(d.discord) || safeLink(d.website);
+    const action = contact && !d.example
+      ? `<a class="button full" href="${esc(contact)}" target="_blank" rel="noopener noreferrer ugc">Falar com a equipe ${icon("external-link")}</a>`
+      : '<button class="button secondary full" data-action="close-dialog">Voltar à página</button>';
+    openDialog(`<h2 id="dialog-title">Como pedir acesso</h2>
+      ${notice}
+      <p>O servidor usa uma lista de acesso. Confira as regras e peça à equipe para incluir seu nome de jogador antes de se conectar.</p>
+      ${action}`);
+    return;
+  }
+
+  const bedrock = edition === "Bedrock";
+  const instructions = bedrock
+    ? "No celular ou PC, abra Jogar → Servidores → Adicionar servidor."
+    : "Acesse Multijogador → Adicionar servidor.";
+  const version = d.version && !/^(a informar|consulte a equipe)$/i.test(d.version)
+    ? `Versão indicada: ${esc(d.version)}.`
+    : "Confirme a versão compatível com a equipe.";
+  openDialog(`<h2 id="dialog-title">Como entrar pelo ${edition}</h2>
+    ${notice}
+    <ol class="instruction-list">
+      <li>Abra o Minecraft ${edition}. ${version}</li>
+      <li>${instructions}</li>
+      <li>Informe o endereço${bedrock ? " e a porta" : ""} abaixo.</li>
+    </ol>
+    <div class="address-field"><code data-copy-source tabindex="-1">${esc(d.address)}</code></div>
+    ${bedrock ? `<p>Porta Bedrock: <strong>${esc(d.port || "19132")}</strong>.</p>
+      <p class="field-help">Em alguns consoles, a opção de adicionar servidores personalizados pode não aparecer.</p>` : ""}
+    <p class="field-help" data-copy-feedback role="status"></p>
+    ${d.example
+      ? '<button class="button secondary full" data-action="close-dialog">Voltar à página</button>'
+      : `<button class="button full" data-action="copy-address" data-value="${esc(d.address)}">${icon("copy")} <span data-copy-label>Copiar endereço</span></button>`}`);
 }
-async function copyText(text) {
+async function copyText(text, trigger) {
+  const feedback = trigger?.closest("dialog")?.querySelector("[data-copy-feedback]");
   try {
     await navigator.clipboard.writeText(text);
-    toast("Endereço copiado.");
+    if (feedback) {
+      feedback.textContent = "Endereço copiado.";
+      const label = trigger.querySelector("[data-copy-label]");
+      if (label) label.textContent = "Copiar novamente";
+    } else {
+      toast("Endereço copiado.");
+    }
   } catch {
+    if (feedback) {
+      feedback.textContent = "A cópia automática não está disponível. Selecione e copie o endereço acima.";
+      trigger.closest("dialog")?.querySelector("[data-copy-source]")?.focus();
+      return;
+    }
     openDialog(
       `<h2 id="dialog-title">Copie o endereço</h2><p>A cópia automática não está disponível. Selecione e copie o texto abaixo.</p><div class="address-field"><code tabindex="0">${esc(text)}</code></div><button class="button full" data-action="close-dialog">Concluir</button>`,
     );
@@ -938,6 +1037,10 @@ function route({ focus = true } = {}) {
   skinLibrary.dispose();
   skinStudio.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
+  const params = new URLSearchParams(query);
+  const toolsMenu = document.querySelector(".tools-menu");
+  if (toolsMenu) toolsMenu.open = false;
+  let catalogReturn;
   document.body.classList.toggle("studio-open", path === "/skins/editor");
   document.body.dataset.surface =
     path === "/"
@@ -946,8 +1049,10 @@ function route({ focus = true } = {}) {
         ? "skins"
         : "server";
   if (path === "/") {
-    state.filters = Object.fromEntries(new URLSearchParams(query));
-    renderCatalog();
+    state.filters = catalogFilters(params);
+    catalogReturn = history.state?.catalogReturn;
+    state.extra = Boolean(catalogReturn?.extra);
+    renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
   } else if (path === "/skins/editor") {
     activeServer = null;
@@ -963,6 +1068,8 @@ function route({ focus = true } = {}) {
     try {
       id = decodeURIComponent(path.slice(10));
     } catch {}
+    const edition = params.get("edition");
+    state.selectedEdition = ["Java", "Bedrock"].includes(edition) ? edition : undefined;
     renderPage(id);
     document.title = `${activeServer?.name || "Servidor"} · Servidores de Minecraft · Prévia`;
   } else if (path === "/editor") {
@@ -995,8 +1102,13 @@ function route({ focus = true } = {}) {
   updateHeader();
   paintIcons();
   if (focus) {
-    window.scrollTo({ top: 0, behavior: "instant" });
-    main.focus({ preventScroll: true });
+    const returnLink = catalogReturn?.id
+      ? [...document.querySelectorAll("#results .server-card")].find(
+          (card) => card.dataset.id === catalogReturn.id,
+        )?.querySelector(".card-heading a")
+      : catalogReturn?.featured ? document.querySelector("#featured a.button") : undefined;
+    (returnLink || main).focus({ preventScroll: true });
+    window.scrollTo({ top: catalogReturn?.scroll || 0, behavior: "instant" });
   }
 }
 function contextRefresh() {
@@ -1038,7 +1150,20 @@ document.addEventListener("click", (e) => {
   if (account?.open && !e.target.closest(".prototype-account"))
     account.open = false;
   const tools = document.querySelector(".tools-menu");
-  if (tools?.open && !e.target.closest(".tools-menu")) tools.open = false;
+  if (tools?.open && (!e.target.closest(".tools-menu") || e.target.closest(".compact-catalog-link")))
+    tools.open = false;
+  const catalogLink = e.target.closest('#results .card-heading a, #featured a.button');
+  if (catalogLink && !e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+    history.replaceState({
+      catalogReturn: {
+        id: catalogLink.closest(".server-card")?.dataset.id,
+        featured: Boolean(catalogLink.closest("#featured")),
+        scroll: window.scrollY,
+        limit: catalogLimit,
+        extra: state.extra,
+      },
+    }, "");
+  }
   if (e.target.closest("[data-close-dialog]")) closeDialog();
   const b = e.target.closest("[data-action]");
   if (!b) return;
@@ -1083,6 +1208,15 @@ document.addEventListener("click", (e) => {
     state.extra = !state.extra;
     b.setAttribute("aria-expanded", String(state.extra));
     document.querySelector("#extra-filters").hidden = !state.extra;
+  } else if (a === "finish-filters") {
+    const trigger = document.querySelector('.filter-more[data-action="filters"]');
+    state.extra = false;
+    trigger.setAttribute("aria-expanded", "false");
+    document.querySelector("#extra-filters").hidden = true;
+    trigger.focus();
+  } else if (a === "clear-panel-filters") {
+    for (const key of panelFilters) delete state.filters[key];
+    updateResults();
   } else if (a === "favorites") {
     state.filters.favorites = state.filters.favorites ? "" : true;
     updateResults();
@@ -1090,15 +1224,21 @@ document.addEventListener("click", (e) => {
     const previous = catalogLimit;
     catalogLimit += CATALOG_BATCH;
     updateResults();
-    document.querySelectorAll("#results .card-picture-link")[previous]?.focus();
+    document.querySelectorAll("#results .card-heading a")[previous]?.focus();
   } else if (a === "clear-filters") {
     state.filters = {};
     updateResults();
-    document.querySelector("#server-search")?.focus({ preventScroll: true });
+    if (b.closest("#catalog-results")) focusCatalogHeading();
+    else document.querySelector("#server-search")?.focus();
   } else if (a === "remove-filter") {
+    const chips = [...document.querySelectorAll("#active-filters .active-filter")];
+    const chipIndex = chips.indexOf(b);
     delete state.filters[b.dataset.key];
     updateResults();
-    document.querySelector("#server-search")?.focus({ preventScroll: true });
+    const remaining = document.querySelectorAll("#active-filters .active-filter");
+    if (chipIndex < 0) focusCatalogHeading();
+    else (remaining[Math.min(chipIndex, remaining.length - 1)] ||
+      document.querySelector('.filter-more[data-action="filters"]'))?.focus();
   } else if (a === "featured-photo") {
     const photos = featuredImages(SERVERS[0]);
     const index = Number(b.dataset.index);
@@ -1106,38 +1246,51 @@ document.addEventListener("click", (e) => {
     state.featured = index;
     const image = document.querySelector("#feature-image");
     image.src = photos[index];
-    image.alt = `Imagem ${index + 1} do mundo da Força Aliada`;
+    const photoLabel = featuredPhotoLabel(photos[index]);
+    image.alt = photoLabel;
+    const caption = document.querySelector("[data-feature-caption]");
+    if (caption) caption.textContent = photoLabel;
     document.querySelector("[data-feature-counter]").textContent =
       `${index + 1} / ${photos.length}`;
     document
       .querySelectorAll('[data-action="featured-photo"]')
       .forEach((n) => n.setAttribute("aria-pressed", String(n === b)));
-    if (e.detail && !matchMedia("(prefers-reduced-motion: reduce)").matches)
-      image.animate(
-        [
-          { opacity: 0.6, transform: "scale(1.015)" },
-          { opacity: 1, transform: "scale(1)" },
-        ],
-        { duration: 260, easing: "cubic-bezier(.16,1,.3,1)" },
-      );
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches && image.animate)
+      image.animate([{ opacity: 0.78 }, { opacity: 1 }], {
+        duration: 180,
+        easing: "ease-out",
+      });
   } else if (a === "edition-help") {
     openDialog(
       `<h2 id="dialog-title">Qual Minecraft você usa?</h2><div class="edition-guide"><section><h3>Java Edition</h3><p>No computador, o Launcher mostra “Minecraft: Java Edition”. Use o filtro Java para encontrar servidores compatíveis.</p></section><section><h3>Bedrock Edition</h3><p>É a edição do celular e dos consoles, também chamada “Minecraft for Windows” no PC. A conexão pode pedir endereço e porta. Nos consoles, servidores externos têm limitações.</p></section></div><p class="field-help">O servidor precisa oferecer a edição e a versão que você usa. Ter Java e Bedrock na mesma página só indica que a equipe declarou suporte às duas.</p><button class="button" data-action="close-dialog">Entendi</button>`,
     );
   } else if (a === "favorite") {
     const id = b.dataset.id;
-    state.favorites.has(id)
-      ? state.favorites.delete(id)
-      : state.favorites.add(id);
+    const saved = !state.favorites.has(id);
+    if (saved) state.favorites.add(id);
+    else state.favorites.delete(id);
     persist();
-    if (activeServer) refreshPage();
-    else updateResults();
-    toast(
-      state.favorites.has(id)
-        ? "Servidor guardado nos favoritos."
-        : "Servidor removido dos favoritos.",
-    );
-  } else if (a === "copy-address") copyText(b.dataset.value);
+    if (activeServer) {
+      b.setAttribute("aria-pressed", String(saved));
+      b.innerHTML = `${icon("heart")} ${saved ? "Salvo nos favoritos" : "Guardar nos favoritos"}`;
+      paintIcons(b);
+    } else if (state.filters.favorites) {
+      const hearts = [...document.querySelectorAll('#results [data-action="favorite"]')];
+      const position = hearts.indexOf(b);
+      updateResults();
+      const remaining = document.querySelectorAll('#results [data-action="favorite"]');
+      const next = remaining[Math.min(position, remaining.length - 1)];
+      if (next) next.focus();
+      else focusCatalogHeading();
+    } else {
+      const server = availableServers().find((entry) => entry.id === id);
+      b.setAttribute("aria-pressed", String(saved));
+      if (server) b.setAttribute("aria-label", saved
+        ? `Remover dos favoritos: ${server.name}`
+        : `Favoritar ${server.name}`);
+    }
+    toast(saved ? "Servidor guardado nos favoritos." : "Servidor removido dos favoritos.");
+  } else if (a === "copy-address") copyText(b.dataset.value, b);
   else if (a === "edition") {
     state.selectedEdition = b.dataset.edition;
     const panel = b.closest("[data-connection]");
@@ -1300,9 +1453,7 @@ document.addEventListener("submit", (e) => {
     e.preventDefault();
     state.filters.q = e.target.elements.q.value.trim();
     updateResults();
-    const heading = document.querySelector("#catalog-results h2");
-    heading.tabIndex = -1;
-    heading.focus();
+    focusCatalogHeading();
   } else if (e.target.id === "wizard-form") {
     e.preventDefault();
     wizardNext();
@@ -1472,7 +1623,11 @@ document.addEventListener("keydown", (e) => {
     const account = document.querySelector(".prototype-account");
     if (account) account.open = false;
     const tools = document.querySelector(".tools-menu");
-    if (tools) tools.open = false;
+    if (tools?.open) {
+      const focusInside = tools.contains(document.activeElement);
+      tools.open = false;
+      if (focusInside) tools.querySelector("summary")?.focus();
+    }
   }
   if (inline && e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();

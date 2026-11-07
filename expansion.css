@@ -1271,3 +1271,100 @@ dialog.skin-detail {
     transform: none;
   }
 }
+
+/* The same disclosure serves tools on desktop and extra routes on compact screens. */
+.site-header .header-more-label,
+.site-header .header-more-icon,
+.site-header .compact-create-link,
+.site-header .tools-popover .compact-catalog-link {
+  display: none;
+}
+@media (max-width: 1100px) {
+  .site-header .tools-label {
+    display: none;
+  }
+  .site-header .header-more-label {
+    display: inline;
+  }
+  .site-header .compact-create-link {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    text-align: start;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .site-header .compact-create-link:hover {
+    background: #edf6ef;
+  }
+}
+@media (max-width: 620px) {
+  .site-header .main-nav .tools-menu {
+    display: block;
+    position: static;
+  }
+  .site-header .tools-menu summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 8px;
+  }
+  .site-header .tools-menu[open] summary,
+  .site-header .tools-menu summary:hover {
+    background: #303931;
+    color: #fff;
+  }
+  .site-header .tools-menu .tools-chevron {
+    display: none;
+  }
+  .site-header .tools-menu .header-more-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+  }
+  .site-header .header-more-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .site-header .main-nav .tools-popover {
+    top: calc(100% - 4px);
+    right: 12px;
+    min-width: 0;
+    width: min(280px, calc(100vw - 24px));
+  }
+  .site-header #account-area [data-action="login"] {
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 0;
+    gap: 0;
+  }
+  .site-header #account-area [data-action="login"] .icon {
+    width: 19px;
+    height: 19px;
+  }
+}
+@media (max-width: 360px) {
+  .site-header .main-nav > [data-nav="catalog"] {
+    display: none;
+  }
+  .site-header .tools-popover .compact-catalog-link {
+    display: flex;
+  }
+}
+.site-header .tools-popover a,
+.site-header .tools-popover .compact-create-link {
+  color: #25372a;
+}

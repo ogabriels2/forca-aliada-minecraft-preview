@@ -296,25 +296,63 @@ export function normalize(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLocaleLowerCase("pt-BR");
 }
+export function catalogFilters(params) {
+  const options = {
+    edition: ["Java", "Bedrock"],
+    mode: ["Survival", "Criativo", "Aventura"],
+    language: ["Português", "English", "Español"],
+    access: ["open", "whitelist"],
+    sort: ["name"],
+  };
+  const filters = {};
+  const query = params.get("q")?.trim().slice(0, 160);
+  if (query) filters.q = query;
+  for (const [key, values] of Object.entries(options)) {
+    const value = params.get(key);
+    if (values.includes(value)) filters[key] = value;
+  }
+  for (const key of ["favorites", "online"]) {
+    if (params.get(key) === "true" || params.get(key) === "1") filters[key] = true;
+  }
+  return filters;
+}
+
 export function filterServers(servers, filters = {}) {
-  const query = normalize(filters.q).trim();
-  return servers
-    .filter(
-      (s) =>
-        (!query ||
-          normalize([s.name, s.summary, s.mode].join(" ")).includes(query)) &&
-        (!filters.edition || s.editions.includes(filters.edition)) &&
-        (!filters.mode || s.mode === filters.mode) &&
-        (!filters.language || s.language === filters.language) &&
-        (!filters.online || s.status === "online") &&
-        (!filters.access || s.access === filters.access),
-    )
+  const query = normalize(filters.q).trim().replace(/\s+/g, " ");
+  const terms = query ? query.split(" ") : [];
+  const compatible = servers.filter(
+    (server) =>
+      (!filters.edition || server.editions.includes(filters.edition)) &&
+      (!filters.mode || server.mode === filters.mode) &&
+      (!filters.language || server.language === filters.language) &&
+      (!filters.online || server.status === "online") &&
+      (!filters.access || server.access === filters.access),
+  );
+  const ranked = [];
+  for (const server of compatible) {
+    if (!query) {
+      ranked.push({ server, relevance: 0 });
+      continue;
+    }
+    const name = normalize(server.name);
+    const searchable = normalize([
+      server.name, server.mode, ...server.editions, server.language,
+      { English: "Inglês", Español: "Espanhol" }[server.language],
+      server.version, server.summary, ...(server.features || []),
+    ].join(" "));
+    if (!terms.every((term) => searchable.includes(term))) continue;
+    let relevance = terms.filter((term) => name.includes(term)).length;
+    if (name === query) relevance += terms.length + 2;
+    else if (name.startsWith(query)) relevance += terms.length + 1;
+    ranked.push({ server, relevance });
+  }
+  return ranked
     .sort((a, b) =>
       filters.sort === "name"
-        ? a.name.localeCompare(b.name, "pt-BR")
-        : Number(normalize(b.name) === query) -
-          Number(normalize(a.name) === query),
-    );
+        ? a.server.name.localeCompare(b.server.name, "pt-BR")
+        : b.relevance - a.relevance,
+    )
+    .map(({ server }) => server);
 }
 export function slugify(value) {
   return (
