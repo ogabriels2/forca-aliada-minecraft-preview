@@ -16,6 +16,9 @@ import {
   initialDraft,
   filterServers,
   catalogFilters,
+  serverAvailability,
+  readProviderAvailability,
+  readProviderIcon,
   slugify,
   validateDraft,
   safeDraft,
@@ -292,10 +295,208 @@ function cover(d, { card = false } = {}) {
       ? `<span class="illustrated-server illustrated-${d.mode === "Criativo" ? "build" : d.mode === "Aventura" ? "explore" : "survival"}"><span class="illustrated-scene"><img src="./shared/images/manager/worlds-illustration.webp" alt="Cena ilustrativa de Minecraft, não é captura deste servidor" loading="lazy" width="1976" height="784"></span></span><span class="cover-edition">Ilustração · exemplo</span>`
       : "";
 }
+const liveServerSamples = new Map();
+const pendingServerSamples = new Map();
+let availabilityExpiryTimer;
+
+function publicServerAddress(server) {
+  if (!server || (server.example && server.id !== "minha-pagina")) return null;
+  const parts = String(server.address || "").split(":");
+  if (parts.length > 2) return null;
+  const [hostValue, javaPortValue] = parts;
+  const host = hostValue.toLowerCase();
+  const javaPort = javaPortValue ? Number(javaPortValue) : 25565;
+  const bedrockPort = Number(server.port || 19132);
+  if (host.length > 253 || !host.includes(".")
+    || !host.split(".").every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+    || /(?:^|\.)(?:localhost|local|internal|example|test|invalid)$/.test(host)
+    || /(?:^|\.)example\.(?:com|net|org)$/.test(host)
+    || !Number.isInteger(javaPort) || javaPort < 1 || javaPort > 65535
+    || !Number.isInteger(bedrockPort) || bedrockPort < 1 || bedrockPort > 65535) return null;
+  if (/^[0-9.]+$/.test(host)) {
+    const octets = host.split(".").map(Number);
+    if (octets.length !== 4 || octets.some((octet) => octet > 255)
+      || octets[0] === 0 || octets[0] === 10 || octets[0] === 127 || octets[0] >= 224
+      || (octets[0] === 169 && octets[1] === 254)
+      || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
+      || (octets[0] === 192 && octets[1] === 168)
+      || (octets[0] === 100 && octets[1] >= 64 && octets[1] <= 127)) return null;
+  }
+  return { host, javaPort, bedrockPort };
+}
+
+function liveServerKey(server) {
+  const address = publicServerAddress(server);
+  return address ? JSON.stringify([address, server.editions]) : undefined;
+}
+
+function withServerAvailability(server, edition) {
+  if (server.example && server.id !== "minha-pagina") return server;
+  const sample = liveServerSamples.get(liveServerKey(server));
+  const now = Date.now();
+  const editionStatus = Object.fromEntries(server.editions.map((key) => {
+    const current = sample?.editions[key];
+    return [key, current?.expiresAt > now ? current.status : "unknown"];
+  }));
+  // A chosen custom image wins over an automatically imported server icon.
+  const customAvatar = server.official ? undefined : server.avatar;
+  const current = { ...server, avatar: customAvatar || sample?.icon || server.avatar, editionStatus };
+  const status = serverAvailability(current, edition);
+  const reachableEdition = current.editions.find((key) => editionStatus[key] === "online");
+  const mixed = !edition && current.editions.some((key) => editionStatus[key] !== "online");
+  const statusText = status === "online"
+    ? mixed ? `Online em ${reachableEdition}` : "Online"
+    : status === "offline" ? "Offline na consulta" : "Status não confirmado";
+  const currentSamples = server.editions.map((key) => sample?.editions[key]).filter(
+    (value) => value?.expiresAt > now && value.checkedAt,
+  );
+  const statusCheckedAt = currentSamples.length
+    ? Math.min(...currentSamples.map((value) => value.checkedAt)) : undefined;
+  return { ...current, status, statusText, statusCheckedAt };
+}
+
+async function decodedServerIcon(value) {
+  const validated = readProviderIcon(value);
+  if (!validated || typeof Image === "undefined") return undefined;
+  const image = new Image();
+  let timeout;
+  try {
+    image.src = validated;
+    await Promise.race([
+      image.decode(),
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(new Error("Icon decoding timed out")), 2_000);
+      }),
+    ]);
+    return image.naturalWidth === 64 && image.naturalHeight === 64 ? validated : undefined;
+  } catch {
+    return undefined;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function queryServerStatus(address, edition) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8_000);
+  try {
+    const port = edition === "Bedrock" ? address.bedrockPort : address.javaPort;
+    const endpoint = `${address.host}:${port}`;
+    const response = await fetch(
+      `https://api.mcstatus.io/v2/status/${edition.toLowerCase()}/${encodeURIComponent(endpoint)}`,
+      { credentials: "omit", cache: "no-store", signal: controller.signal },
+    );
+    if (!response.ok) return { status: "unknown" };
+    const sample = await response.json();
+    const status = readProviderAvailability(sample, edition, address.host);
+    return {
+      status,
+      expiresAt: status === "unknown" ? 0 : sample.expires_at,
+      checkedAt: status === "unknown" ? undefined : sample.retrieved_at,
+      icon: edition === "Java" && status === "online" ? await decodedServerIcon(sample.icon) : undefined,
+    };
+  } catch {
+    return { status: "unknown" };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function refreshLiveAvailabilityUI() {
+  updateConnectionAvailability();
+  if (state.wizard && dialogMode === "wizard") {
+    const draft = state.wizard.draft;
+    const avatar = withServerAvailability(draft).avatar;
+    const placeholder = !draft.avatar && avatar
+      ? dialog.querySelector(".avatar-control .media-placeholder") : null;
+    if (placeholder) {
+      const image = document.createElement("img");
+      image.src = avatar;
+      image.alt = "Ícone importado do servidor";
+      placeholder.replaceWith(image);
+      const caption = dialog.querySelector(".avatar-control .media-upload-caption");
+      if (caption) caption.textContent = "Ícone automático · personalizar";
+    }
+    updateMini();
+  }
+  if (!document.querySelector("#results")) return;
+  const focused = document.activeElement;
+  const focusedCard = focused?.closest("#results .server-card");
+  const recoveryAction = focused?.dataset.action;
+  const chipKey = focused?.closest("#active-filters") ? focused.dataset.key : undefined;
+  const clearFocused = focused?.closest("#active-filters") && recoveryAction === "clear-filters";
+  updateResults();
+  if (focusedCard) {
+    const card = [...document.querySelectorAll("#results .server-card")].find(
+      (item) => item.dataset.id === focusedCard.dataset.id,
+    );
+    const button = [...(card?.querySelectorAll("button[data-action]") || [])].find(
+      (item) => item.dataset.action === recoveryAction,
+    );
+    const destination = button || card?.querySelector(".card-heading a")
+      || document.querySelector(".filter-more");
+    destination?.focus({ preventScroll: true });
+  } else if (chipKey || clearFocused) {
+    const chip = [...document.querySelectorAll("#active-filters button")].find(
+      (item) => chipKey ? item.dataset.key === chipKey : item.dataset.action === recoveryAction,
+    );
+    (chip || document.querySelector(".filter-more"))?.focus({ preventScroll: true });
+  }
+}
+
+function scheduleAvailabilityExpiry() {
+  clearTimeout(availabilityExpiryTimer);
+  const expiries = [...liveServerSamples.values()].flatMap((sample) =>
+    Object.values(sample.editions).map((edition) => edition.expiresAt),
+  ).filter((expiry) => expiry > Date.now());
+  if (expiries.length) availabilityExpiryTimer = setTimeout(() => {
+    refreshLiveAvailabilityUI();
+    scheduleAvailabilityExpiry();
+    void refreshServerStatuses();
+  }, Math.max(10, Math.min(...expiries) - Date.now() + 10));
+}
+
+function refreshServerSample(server) {
+  const key = liveServerKey(server);
+  if (!key || !/^https?:$/.test(location.protocol)) return Promise.resolve();
+  const previous = liveServerSamples.get(key);
+  if (pendingServerSamples.has(key)) return pendingServerSamples.get(key);
+  if (previous && Date.now() - previous.requestedAt < 45_000) return Promise.resolve();
+  const requestedAt = Date.now();
+  const address = publicServerAddress(server);
+  const task = (async () => {
+    const editions = Object.fromEntries(await Promise.all(server.editions.map(async (edition) =>
+      [edition, await queryServerStatus(address, edition)],
+    )));
+    liveServerSamples.set(key, {
+      editions,
+      requestedAt,
+      icon: editions.Java?.icon || previous?.icon,
+    });
+    scheduleAvailabilityExpiry();
+  })().finally(() => {
+    pendingServerSamples.delete(key);
+    refreshLiveAvailabilityUI();
+  });
+  pendingServerSamples.set(key, task);
+  if (state.filters.status && document.querySelector("#results")) updateResults();
+  return task;
+}
+
+async function refreshServerStatuses() {
+  if (!/^https?:$/.test(location.protocol) || document.hidden) return;
+  refreshLiveAvailabilityUI();
+  const servers = document.querySelector("#results")
+    ? [...SERVERS, ...(state.publication ? [state.publication] : [])]
+    : activeServer ? [activeServer] : [];
+  await Promise.all(servers.filter((server) => publicServerAddress(server)).map(refreshServerSample));
+}
+
 function availableServers() {
+  const servers = SERVERS.map((server) => withServerAvailability(server));
   return state.publication?.visibility === "listed"
-    ? [...SERVERS, state.publication]
-    : SERVERS;
+    ? [...servers, withServerAvailability(state.publication)]
+    : servers;
 }
 function serverHref(server) {
   const edition = state.filters.edition;
@@ -303,7 +504,7 @@ function serverHref(server) {
   return `#/servidor/${encodeURIComponent(server.id)}${query}`;
 }
 function card(d) {
-  return serverCard(d, {
+  return serverCard(withServerAvailability(d, state.filters.edition), {
     esc,
     icon,
     cover,
@@ -315,7 +516,7 @@ function featured() {
   return featuredServer(SERVERS[0], state.featured, { esc, icon });
 }
 const CATALOG_BATCH = 9;
-const panelFilters = ["edition", "language", "online", "access", "sort"];
+const panelFilters = ["edition", "language", "status", "access", "sort"];
 let catalogLimit = CATALOG_BATCH;
 let catalogFilterKey;
 
@@ -356,8 +557,9 @@ function updateResults() {
   const found = catalogResults(state.filters);
   const label = found.length === 1 ? "resultado" : "resultados";
   const savedEmpty = state.filters.favorites && !state.favorites.size;
+  const checkingAvailability = !found.length && state.filters.status && pendingServerSamples.size > 0;
   const relaxedFilter = !found.length && !savedEmpty
-    ? ["language", "mode", "access", "online"].find((key) => {
+    ? ["language", "mode", "access", "status"].find((key) => {
         if (!state.filters[key]) return false;
         return catalogResults({ ...state.filters, [key]: "" }).length > 0;
       })
@@ -368,19 +570,20 @@ function updateResults() {
     edition: "Edição",
     language: "Idioma",
     favorites: "Favoritos",
-    online: "Online na simulação",
+    status: "Disponibilidade",
     access: state.filters.access === "whitelist" ? "Entrada com aprovação" : "Entrada livre",
   };
   const displayFilter = (key, value) =>
     ["favorites", "online", "access"].includes(key)
       ? labels[key]
+      : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
   results.innerHTML = found.length
     ? found.slice(0, catalogLimit).map(card).join("")
     : `<div class="empty">
         ${icon("search")}
-        <h3>${savedEmpty ? "Nenhum servidor salvo ainda." : "Nenhum servidor encontrado."}</h3>
-        <p>${savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p>
+        <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : "Nenhum servidor encontrado."}</h3>
+        <p>${checkingAvailability ? "Os resultados aparecerão quando a consulta terminar." : savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p>
         <button class="button secondary" data-action="clear-filters">Explorar todos</button>
         ${relaxedFilter ? `<button class="text-link" data-action="remove-filter" data-key="${relaxedFilter}">Remover filtro de ${labels[relaxedFilter].toLocaleLowerCase("pt-BR")}</button>` : ""}
       </div>`;
@@ -391,7 +594,7 @@ function updateResults() {
       : state.filters.edition ? `Servidores para ${state.filters.edition}`
       : "Servidores";
   const count = document.querySelector("[data-result-count]");
-  const countText = `${found.length} ${label}`;
+  const countText = checkingAvailability ? "Consultando…" : `${found.length} ${label}`;
   if (count.textContent !== countText) count.textContent = countText;
   const filterDone = document.querySelector("[data-filter-done]");
   if (filterDone)
@@ -486,9 +689,14 @@ function newWizard() {
   persist();
   renderWizard();
 }
+function serverIconMaxSize(draft) {
+  return draft.plan === "pro" ? 384 : 160;
+}
+
 function imageControl(d, target, label) {
-  const src = target === "gallery" ? d.gallery?.[0] : d[target];
-  return `<div class="media-control ${target === "avatar" ? "avatar-control" : ""}"><label class="media-dropzone">${src ? `<img src="${esc(src)}" alt="${label}">` : `<span class="media-placeholder">${icon(target === "avatar" ? "camera" : "photo")}<span>${label}</span></span>`}<span class="media-upload-caption">${icon("upload")} ${src ? "Trocar imagem" : "Escolher imagem"}</span><input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Enviar ${label}" data-upload="${target}" ${target === "gallery" ? "multiple" : ""}></label>${src ? `<button class="text-link" type="button" data-action="remove-media" data-target="${target}">Remover</button>` : ""}</div>`;
+  const src = target === "gallery" ? d.gallery?.[0] : target === "avatar" ? withServerAvailability(d).avatar : d[target];
+  const importedIcon = target === "avatar" && src && !d.avatar;
+  return `<div class="media-control ${target === "avatar" ? "avatar-control" : ""}"><label class="media-dropzone">${src ? `<img src="${esc(src)}" alt="${label}">` : `<span class="media-placeholder">${icon(target === "avatar" ? "camera" : "photo")}<span>${label}</span></span>`}<span class="media-upload-caption">${icon("upload")} ${importedIcon ? "Ícone automático · personalizar" : src ? "Trocar imagem" : "Escolher imagem"}</span><input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Enviar ${label}" data-upload="${target}" ${target === "gallery" ? "multiple" : ""}></label>${src && !importedIcon ? `<button class="text-link" type="button" data-action="remove-media" data-target="${target}">Remover</button>` : ""}</div>`;
 }
 function themeChoices(d) {
   return `<div class="theme-options">${Object.entries(THEMES)
@@ -505,7 +713,7 @@ function wizardBody(d, step) {
   if (step === 0)
     return `<h2 id="dialog-title">Vamos começar pelo seu servidor.</h2><p>Você só precisa de um nome e um endereço de jogo. O restante pode ser personalizado depois.</p><div class="source-tabs"><button type="button" data-action="source" data-value="manual" aria-pressed="${d.source === "manual"}">Informar manualmente</button><button type="button" data-action="source" data-value="manager" aria-pressed="${d.source === "manager"}">Trazer do Manager</button></div>${d.source === "manager" ? '<div class="notice">Importação de exemplo. Confira o que ficará público; nenhuma conta do Manager é consultada.</div>' : ""}${field("name", d.name, { required: true, max: 64 })}${field("address", d.address, { required: true, hint: "Sem https://. Para testar, use meu-servidor.example." })}<div class="field"><span>Edição</span><div class="appearance-choice">${["Java", "Bedrock"].map((v) => `<button type="button" data-action="toggle-edition" data-value="${v}" aria-pressed="${d.editions.includes(v)}">${v}</button>`).join("")}</div></div>${d.editions.includes("Bedrock") ? field("port", d.port, { label: "Porta Bedrock", max: 5 }) : ""}`;
   if (step === 1)
-    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha uma foto e uma capa. Sem imagens? A página já tem uma composição tipográfica pronta.</p><div class="wizard-media"><div><h3>Foto do servidor</h3>${imageControl(d, "avatar", "Foto do servidor")}</div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
+    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
   if (step === 2)
     return `<h2 id="dialog-title">Como é jogar aqui?</h2><p>Uma boa apresentação ajuda a pessoa a entender se este é o mundo que procura.</p>${field("summary", d.summary, { area: true, max: 180, hint: "Uma frase sobre a experiência, sem precisar de um slogan." })}${field("description", d.description, { area: true, max: 4000, label: "Conte um pouco mais (opcional)" })}<div class="field-row">${select("mode", "Modalidade", ["Survival", "Criativo", "Aventura"], d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${field("version", d.version, { label: "Versão compatível (opcional)" })}<h3>O que as pessoas encontram?</h3>${featureChoices(d)}`;
   if (step === 3)
@@ -528,11 +736,13 @@ function wizardBody(d, step) {
     )}</dl>${visibilityChoices(d)}<div class="notice">Esta é uma publicação de demonstração, salva neste navegador. Prova de controle, moderação e publicação real não são executadas.</div>`;
 }
 function miniPreview(d) {
+  d = withServerAvailability(d);
   return `<div class="wizard-preview-inner" style="${themeStyle(d)}"><div class="mini-cover ${d.cover ? "" : "typographic"}">${d.cover ? `<img src="${esc(d.cover)}" alt="Prévia da capa">` : ""}</div><div class="mini-content">${d.avatar ? `<img class="mini-avatar" src="${esc(d.avatar)}" alt="">` : ""}<strong data-mini-name>${esc(d.name || "Seu servidor")}</strong><p data-mini-summary>${esc(d.summary || "A apresentação do seu servidor aparece aqui.")}</p><div class="card-tags">${d.editions.map((v) => `<span class="tag">${v}</span>`).join("")}<span class="tag">${esc(d.mode)}</span></div><span class="mini-address">${icon("copy")}<span data-mini-address>${esc(d.address || "seu-endereco.example")}</span></span></div></div><small>Prévia da sua página</small>`;
 }
 function renderWizard() {
   const w = state.wizard;
   if (!w) return;
+  if (w.step > 0) void refreshServerSample(w.draft);
   const oldStep = dialog.dataset.wizardStep;
   dialog.dataset.wizardStep = String(w.step);
   openDialog(
@@ -608,6 +818,7 @@ function wizardNext() {
     toast("Página criada nesta prévia. Passe sobre um texto para editar.");
     return;
   }
+  if (w.step === 0) void refreshServerSample(w.draft);
   w.step++;
   w.maxStep = Math.max(w.maxStep || 0, w.step);
   persist();
@@ -698,7 +909,17 @@ function connection(d) {
   const edition = d.editions.includes(state.selectedEdition)
     ? state.selectedEdition
     : d.editions[0];
-  return `<aside class="connect-panel" id="section-connect" data-connection><h2>${d.access === "whitelist" ? "Como participar" : "Entre no servidor"}</h2><span class="availability ${esc(d.status)}">${esc(d.statusText || "Estado não consultado")}</span><div class="edition-tabs" role="tablist" aria-label="Edição do Minecraft">${d.editions.map((v) => `<button role="tab" data-action="edition" data-edition="${v}" aria-selected="${edition === v}" tabindex="${edition === v ? 0 : -1}">${v}</button>`).join("")}</div><div class="address-field"><code>${esc(d.address)}</code><button data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço">${icon("copy")}</button>${canEdit() ? `<button data-action="inline-edit" data-key="address" aria-label="Editar endereço do servidor">${icon("pencil")}</button>` : ""}</div><p data-port class="port-note" ${edition === "Bedrock" ? "" : "hidden"}>Porta Bedrock: <strong>${esc(d.port || "19132")}</strong></p><button class="button full" data-action="join">${d.access === "whitelist" ? "Como pedir acesso" : "Como entrar"} ${icon("arrow-right")}</button><button class="follow-server" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${state.favorites.has(d.id)}">${icon("heart")} ${state.favorites.has(d.id) ? "Salvo nos favoritos" : "Guardar nos favoritos"}</button><div class="connection-details"><div><span>Modalidade</span><strong>${esc(d.mode)}</strong></div><div><span>Idioma</span><strong>${esc(d.language)}</strong></div><div><span>Versão</span><strong>${esc(d.version)}</strong></div></div><p class="connection-note">${d.example ? "Endereço de exemplo: não aceita conexões." : "Disponibilidade não consultada nesta prévia. Confirme a versão com a equipe."}</p></aside>`;
+  const availability = withServerAvailability(d, edition);
+  return `<aside class="connect-panel" id="section-connect" data-connection><h2>${d.access === "whitelist" ? "Como participar" : "Entre no servidor"}</h2><span class="availability ${esc(availability.status)}" data-connection-availability>${esc(availability.statusText || "Status não confirmado")}</span><div class="edition-tabs" role="tablist" aria-label="Edição do Minecraft">${d.editions.map((v) => `<button role="tab" data-action="edition" data-edition="${v}" aria-selected="${edition === v}" tabindex="${edition === v ? 0 : -1}">${v}</button>`).join("")}</div><div class="address-field"><code>${esc(d.address)}</code><button data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço">${icon("copy")}</button>${canEdit() ? `<button data-action="inline-edit" data-key="address" aria-label="Editar endereço do servidor">${icon("pencil")}</button>` : ""}</div><p data-port class="port-note" ${edition === "Bedrock" ? "" : "hidden"}>Porta Bedrock: <strong>${esc(d.port || "19132")}</strong></p><button class="button full" data-action="join">${d.access === "whitelist" ? "Como pedir acesso" : "Como entrar"} ${icon("arrow-right")}</button><button class="follow-server" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${state.favorites.has(d.id)}">${icon("heart")} ${state.favorites.has(d.id) ? "Salvo nos favoritos" : "Guardar nos favoritos"}</button><div class="connection-details"><div><span>Modalidade</span><strong>${esc(d.mode)}</strong></div><div><span>Idioma</span><strong>${esc(d.language)}</strong></div><div><span>Versão</span><strong>${esc(d.version)}</strong></div></div><p class="connection-note">${d.example ? "Endereço de exemplo: não aceita conexões." : "Confirme a versão compatível com a equipe."}</p></aside>`;
+}
+function updateConnectionAvailability() {
+  if (!activeServer?.official) return;
+  const badge = document.querySelector("[data-connection-availability]");
+  if (!badge) return;
+  const edition = state.selectedEdition || activeServer.editions[0];
+  const availability = withServerAvailability(activeServer, edition);
+  badge.className = `availability ${availability.status}`;
+  badge.textContent = availability.statusText;
 }
 function ownerBar() {
   return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">Publicar alterações ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
@@ -720,10 +941,11 @@ function renderPage(id) {
     paintIcons();
     return;
   }
+  const displayServer = withServerAvailability(activeServer);
   main.innerHTML =
     activeServer.id === "forca-aliada"
-      ? officialPage(activeServer, { icon, connection, gallery: mediaGallery })
-      : `<div class="container page-controls"><nav class="page-breadcrumb" aria-label="Caminho"><a href="#/">Servidores</a>${icon("chevron-right")}<span>${esc(activeServer.name)}</span></nav>${!ownPage() ? '<button class="text-link" data-action="create">Criar uma página como esta</button>' : ""}</div>${ownPage() ? ownerBar() : ""}${serverDocument(activeServer)}`;
+      ? officialPage(displayServer, { icon, connection, gallery: mediaGallery })
+      : `<div class="container page-controls"><nav class="page-breadcrumb" aria-label="Caminho"><a href="#/">Servidores</a>${icon("chevron-right")}<span>${esc(activeServer.name)}</span></nav>${!ownPage() ? '<button class="text-link" data-action="create">Criar uma página como esta</button>' : ""}</div>${ownPage() ? ownerBar() : ""}${serverDocument(displayServer)}`;
   if (activeServer.id === "forca-aliada") bindOfficialStories(main);
   paintIcons();
   updateSaveStatus();
@@ -832,11 +1054,11 @@ function mediaDialog(target) {
   state.media = target;
   const d = state.draft;
   openDialog(
-    `<h2 id="dialog-title">${target === "avatar" ? "Foto do servidor" : target === "cover" ? "Capa da página" : "Galeria do seu mundo"}</h2><p>Escolha imagens do seu servidor. Elas serão preparadas para a prévia e guardadas apenas neste navegador.</p>${imageControl(d, target, target === "avatar" ? "Foto do servidor" : target === "cover" ? "Capa da página" : "Galeria")}${target === "gallery" && d.gallery.length ? `<div class="media-gallery-manager">${d.gallery.map((src, i) => `<div><img src="${esc(src)}" alt="Imagem ${i + 1}"><button class="icon-button" data-action="remove-gallery" data-index="${i}" aria-label="Remover imagem ${i + 1}">${icon("x")}</button></div>`).join("")}</div>` : ""}${target === "cover" && d.cover ? `<label class="field"><span>Enquadramento vertical da capa</span><input type="range" name="coverPosition" min="0" max="100" value="${d.coverPosition}"></label>` : ""}<p class="field-help">PNG, JPG ou WebP · até 5 MB cada · galeria com até 6 imagens nesta prévia.</p><div class="invalid-box" data-form-error hidden></div><div class="dialog-actions"><button class="button" data-action="close-dialog">Concluir</button></div>`,
+    `<h2 id="dialog-title">${target === "avatar" ? "Ícone do servidor" : target === "cover" ? "Capa da página" : "Galeria do seu mundo"}</h2><p>Escolha imagens do seu servidor. Elas serão preparadas para a prévia e guardadas apenas neste navegador.</p>${imageControl(d, target, target === "avatar" ? "Ícone do servidor" : target === "cover" ? "Capa da página" : "Galeria")}${target === "gallery" && d.gallery.length ? `<div class="media-gallery-manager">${d.gallery.map((src, i) => `<div><img src="${esc(src)}" alt="Imagem ${i + 1}"><button class="icon-button" data-action="remove-gallery" data-index="${i}" aria-label="Remover imagem ${i + 1}">${icon("x")}</button></div>`).join("")}</div>` : ""}${target === "cover" && d.cover ? `<label class="field"><span>Enquadramento vertical da capa</span><input type="range" name="coverPosition" min="0" max="100" value="${d.coverPosition}"></label>` : ""}<p class="field-help">PNG, JPG ou WebP · até 5 MB cada · galeria com até 6 imagens nesta prévia.</p><div class="invalid-box" data-form-error hidden></div><div class="dialog-actions"><button class="button" data-action="close-dialog">Concluir</button></div>`,
     "media",
   );
 }
-async function prepareImage(file, target) {
+async function prepareImage(file, target, draft) {
   if (
     !["image/png", "image/jpeg", "image/webp"].includes(file.type) ||
     file.size > 5 * 1024 * 1024
@@ -849,12 +1071,21 @@ async function prepareImage(file, target) {
       "A imagem é grande demais. Escolha uma versão com até 40 megapixels.",
     );
   }
-  const max = target === "avatar" ? 160 : target === "cover" ? 1280 : 960;
+  const max = target === "avatar" ? serverIconMaxSize(draft) : target === "cover" ? 1280 : 960;
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const imageWidth = Math.max(1, Math.round(bitmap.width * scale));
+  const imageHeight = Math.max(1, Math.round(bitmap.height * scale));
+  const squareIcon = target === "avatar";
+  canvas.width = squareIcon ? Math.max(imageWidth, imageHeight) : imageWidth;
+  canvas.height = squareIcon ? canvas.width : imageHeight;
+  canvas.getContext("2d").drawImage(
+    bitmap,
+    (canvas.width - imageWidth) / 2,
+    (canvas.height - imageHeight) / 2,
+    imageWidth,
+    imageHeight,
+  );
   bitmap.close();
   let quality = 0.8,
     data = canvas.toDataURL("image/webp", quality);
@@ -888,7 +1119,7 @@ async function uploadImages(input) {
   const error = dialog.querySelector("[data-form-error]");
   try {
     const images = [];
-    for (const f of files) images.push(await prepareImage(f, target));
+    for (const f of files) images.push(await prepareImage(f, target, d));
     if (target === "gallery") d.gallery.push(...images);
     else d[target] = images[0];
     if (!d.modules.includes("gallery") && target === "gallery")
@@ -980,20 +1211,40 @@ function showJoin() {
       : `<button class="button full" data-action="copy-address" data-value="${esc(d.address)}">${icon("copy")} <span data-copy-label>Copiar endereço</span></button>`}`);
 }
 async function copyText(text, trigger) {
-  const feedback = trigger?.closest("dialog")?.querySelector("[data-copy-feedback]");
+  const scope = trigger?.closest(".card-address, dialog");
+  const feedback = scope?.querySelector("[data-copy-feedback]");
+  const isCard = scope?.classList.contains("card-address");
   try {
     await navigator.clipboard.writeText(text);
-    if (feedback) {
+    if (feedback?.isConnected) {
       feedback.textContent = "Endereço copiado.";
+      scope.classList.remove("copy-failed");
       const label = trigger.querySelector("[data-copy-label]");
-      if (label) label.textContent = "Copiar novamente";
+      if (label) label.textContent = isCard ? "Copiado" : "Copiar novamente";
     } else {
       toast("Endereço copiado.");
     }
   } catch {
-    if (feedback) {
-      feedback.textContent = "A cópia automática não está disponível. Selecione e copie o endereço acima.";
-      trigger.closest("dialog")?.querySelector("[data-copy-source]")?.focus();
+    if (feedback?.isConnected) {
+      feedback.textContent = "A cópia automática não está disponível. Copie o endereço selecionado.";
+      scope.classList.add("copy-failed");
+      const label = trigger.querySelector("[data-copy-label]");
+      if (label) label.textContent = isCard ? "Copiar" : "Copiar endereço";
+      const source = scope.querySelector("[data-copy-source]");
+      if (source) {
+        source.focus();
+        const selection = window.getSelection?.();
+        if (selection) {
+          const range = document.createRange();
+          range.selectNodeContents(source);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+      return;
+    }
+    if (trigger && !trigger.isConnected) {
+      toast("Não foi possível copiar o endereço.");
       return;
     }
     openDialog(
@@ -1150,7 +1401,7 @@ document.addEventListener("click", (e) => {
   if (account?.open && !e.target.closest(".prototype-account"))
     account.open = false;
   const tools = document.querySelector(".tools-menu");
-  if (tools?.open && (!e.target.closest(".tools-menu") || e.target.closest(".compact-catalog-link")))
+  if (tools?.open && (!e.target.closest(".tools-menu") || e.target.closest(".tools-popover a, .compact-create-link")))
     tools.open = false;
   const catalogLink = e.target.closest('#results .card-heading a, #featured a.button');
   if (catalogLink && !e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
@@ -1300,6 +1551,7 @@ document.addEventListener("click", (e) => {
     });
     panel.querySelector("[data-port]").hidden =
       state.selectedEdition !== "Bedrock";
+    updateConnectionAvailability();
   } else if (a === "join") showJoin();
   else if (a === "community") showCommunity();
   else if (a === "page-section") {
@@ -1637,8 +1889,10 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("hashchange", () => {
   if (dialog.open) closeDialog();
   route();
+  void refreshServerStatuses();
 });
 window.addEventListener("pagehide", persist);
+document.addEventListener("visibilitychange", refreshServerStatuses);
 let editorSeed = null;
 const skinLibrary = createSkinLibrary({
   main,
@@ -1669,3 +1923,7 @@ const skinStudio = createSkinStudio({
   account: () => state.account,
 });
 route({ focus: false });
+if (/^https?:$/.test(location.protocol)) {
+  void refreshServerStatuses();
+  window.setInterval(refreshServerStatuses, 60_000);
+}

@@ -1272,20 +1272,85 @@ dialog.skin-detail {
   }
 }
 
-/* The same disclosure serves tools on desktop and extra routes on compact screens. */
+/* Products and tools share a disclosure, keeping the catalog routes primary. */
 .site-header .header-more-label,
 .site-header .header-more-icon,
 .site-header .compact-create-link,
 .site-header .tools-popover .compact-catalog-link {
   display: none;
 }
+.site-header .main-nav .tools-menu {
+  align-self: center;
+}
+.site-header .tools-menu summary {
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.site-header .tools-menu[open] summary,
+.site-header .tools-menu summary:hover {
+  background: #303931;
+  color: #fff;
+}
+.site-header .tools-menu .tools-chevron {
+  transition: transform 160ms ease;
+}
+.site-header .tools-menu[open] .tools-chevron {
+  transform: rotate(180deg);
+}
+.site-header .main-nav .tools-popover {
+  top: calc(100% + 10px);
+  left: 0;
+  right: auto;
+  width: 305px;
+  min-width: 0;
+  max-height: min(540px, calc(100dvh - 125px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid #e0e8df;
+}
+.header-menu-heading {
+  padding: 6px 12px;
+  color: #536254;
+  font-size: 12px;
+  font-weight: 750;
+}
+.header-menu-group .icon:first-child {
+  color: #3a6447;
+}
+.header-menu-group a {
+  min-height: 48px;
+}
+.header-menu-group a b {
+  font-weight: 750;
+}
+.header-menu-group a small {
+  margin-top: 2px;
+  color: #58685d;
+  line-height: 1.4;
+}
+.header-menu-group .menu-link-arrow {
+  width: 16px;
+  height: 16px;
+  color: #607065;
+}
+.header-menu-tools {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #e0e8df;
+}
+.site-header .tools-popover :is(a, button):focus-visible {
+  outline-offset: -2px;
+}
+@media (min-width: 621px) and (max-width: 1000px) {
+  .site-header .main-nav .tools-popover {
+    left: auto;
+    right: 0;
+  }
+}
 @media (max-width: 1100px) {
-  .site-header .tools-label {
-    display: none;
-  }
-  .site-header .header-more-label {
-    display: inline;
-  }
   .site-header .compact-create-link {
     display: flex;
     width: 100%;
@@ -1302,6 +1367,11 @@ dialog.skin-detail {
   }
   .site-header .compact-create-link:hover {
     background: #edf6ef;
+  }
+  .site-header .compact-create-link + .header-menu-group {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid #e0e8df;
   }
 }
 @media (max-width: 620px) {
@@ -1325,12 +1395,16 @@ dialog.skin-detail {
   .site-header .tools-menu .tools-chevron {
     display: none;
   }
+  .site-header .tools-label {
+    display: none;
+  }
   .site-header .tools-menu .header-more-icon {
     display: inline-block;
     width: 20px;
     height: 20px;
   }
   .site-header .header-more-label {
+    display: block;
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1339,10 +1413,10 @@ dialog.skin-detail {
     white-space: nowrap;
   }
   .site-header .main-nav .tools-popover {
-    top: calc(100% - 4px);
+    top: calc(100% + 2px);
+    left: auto;
     right: 12px;
-    min-width: 0;
-    width: min(280px, calc(100vw - 24px));
+    width: min(305px, calc(100vw - 24px));
   }
   .site-header #account-area [data-action="login"] {
     width: 44px;
@@ -1367,4 +1441,10 @@ dialog.skin-detail {
 .site-header .tools-popover a,
 .site-header .tools-popover .compact-create-link {
   color: #25372a;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .tools-menu summary,
+  .site-header .tools-menu .tools-chevron {
+    transition: none;
+  }
 }

@@ -83,6 +83,7 @@ export const SERVERS = Object.freeze([
     language: "Português",
     status: "unknown",
     statusText: "Estado não consultado",
+    avatar: "./assets/servers/forca-aliada.png",
     cover: "./shared/images/hero.webp",
     theme: "ocean",
     official: true,
@@ -302,6 +303,7 @@ export function catalogFilters(params) {
     mode: ["Survival", "Criativo", "Aventura"],
     language: ["Português", "English", "Español"],
     access: ["open", "whitelist"],
+    status: ["online", "offline", "unknown"],
     sort: ["name"],
   };
   const filters = {};
@@ -311,46 +313,90 @@ export function catalogFilters(params) {
     const value = params.get(key);
     if (values.includes(value)) filters[key] = value;
   }
-  for (const key of ["favorites", "online"]) {
-    if (params.get(key) === "true" || params.get(key) === "1") filters[key] = true;
-  }
+  if (["true", "1"].includes(params.get("favorites"))) filters.favorites = true;
+  if (!filters.status && ["true", "1"].includes(params.get("online"))) filters.status = "online";
   return filters;
+}
+
+const availabilityOrder = { online: 0, unknown: 1, scheduled: 2, offline: 3 };
+
+export function serverAvailability(server, edition) {
+  if (!server.editionStatus) return server.status || "unknown";
+  if (edition && server.editions.includes(edition))
+    return server.editionStatus[edition] || "unknown";
+  const states = server.editions.map((key) => server.editionStatus[key]);
+  if (states.includes("online")) return "online";
+  return states.every((status) => status === "offline") ? "offline" : "unknown";
+}
+
+export function readProviderAvailability(data, edition, host, now = Date.now()) {
+  if (!data || data.host !== host || typeof data.online !== "boolean"
+    || !Number.isFinite(data.retrieved_at) || !Number.isFinite(data.expires_at)
+    || data.retrieved_at > now + 30_000 || data.retrieved_at < now - 120_000
+    || data.expires_at < now || data.expires_at <= data.retrieved_at
+    || data.eula_blocked === true) return "unknown";
+  if (!data.online) return "offline";
+  // The main site's monitor treats a zero-capacity Java proxy response as unreliable.
+  if (edition === "Java" && !(Number.isFinite(data.players?.max) && data.players.max > 0))
+    return "unknown";
+  return "online";
+}
+
+export function readProviderIcon(value) {
+  const prefix = "data:image/png;base64,";
+  if (typeof value !== "string" || !value.startsWith(prefix) || value.length > 65_536)
+    return undefined;
+  const encoded = value.slice(prefix.length);
+  if (encoded.length < 44 || encoded.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded))
+    return undefined;
+  const header = atob(encoded.slice(0, 44));
+  // Check the PNG signature and the length, name and dimensions of the IHDR chunk.
+  const expected = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 64, 0, 0, 0, 64];
+  return expected.every((byte, index) => header.charCodeAt(index) === byte)
+    ? value
+    : undefined;
 }
 
 export function filterServers(servers, filters = {}) {
   const query = normalize(filters.q).trim().replace(/\s+/g, " ");
   const terms = query ? query.split(" ") : [];
-  const compatible = servers.filter(
-    (server) =>
-      (!filters.edition || server.editions.includes(filters.edition)) &&
-      (!filters.mode || server.mode === filters.mode) &&
-      (!filters.language || server.language === filters.language) &&
-      (!filters.online || server.status === "online") &&
-      (!filters.access || server.access === filters.access),
-  );
+  const statusTerms = { online: "online", "on-line": "online", offline: "offline", "off-line": "offline" };
+  const queryEditions = ["Java", "Bedrock"].filter((edition) => terms.includes(edition.toLowerCase()));
+  const edition = filters.edition || (queryEditions.length === 1 ? queryEditions[0] : "");
+  const statusFilter = filters.status || (filters.online ? "online" : "");
   const ranked = [];
-  for (const server of compatible) {
-    if (!query) {
-      ranked.push({ server, relevance: 0 });
-      continue;
-    }
+
+  for (const server of servers) {
+    const availability = serverAvailability(server, edition);
+    if ((edition && !server.editions.includes(edition))
+      || (filters.mode && server.mode !== filters.mode)
+      || (filters.language && server.language !== filters.language)
+      || (statusFilter && availability !== statusFilter)
+      || (filters.access && server.access !== filters.access)) continue;
+
     const name = normalize(server.name);
     const searchable = normalize([
       server.name, server.mode, ...server.editions, server.language,
       { English: "Inglês", Español: "Espanhol" }[server.language],
-      server.version, server.summary, ...(server.features || []),
+      server.address, server.version, server.summary, ...(server.features || []),
     ].join(" "));
-    if (!terms.every((term) => searchable.includes(term))) continue;
+    if (!terms.every((term) => Object.hasOwn(statusTerms, term)
+      ? availability === statusTerms[term]
+      : searchable.includes(term))) continue;
+
     let relevance = terms.filter((term) => name.includes(term)).length;
-    if (name === query) relevance += terms.length + 2;
-    else if (name.startsWith(query)) relevance += terms.length + 1;
-    ranked.push({ server, relevance });
+    if (query && name === query) relevance += terms.length + 2;
+    else if (query && name.startsWith(query)) relevance += terms.length + 1;
+    ranked.push({ server, relevance, availability });
   }
+
   return ranked
     .sort((a, b) =>
       filters.sort === "name"
         ? a.server.name.localeCompare(b.server.name, "pt-BR")
-        : b.relevance - a.relevance,
+        : b.relevance - a.relevance
+          || Number(Boolean(a.server.example)) - Number(Boolean(b.server.example))
+          || availabilityOrder[a.availability] - availabilityOrder[b.availability],
     )
     .map(({ server }) => server);
 }
