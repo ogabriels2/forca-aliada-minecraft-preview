@@ -2104,3 +2104,78 @@ a {
     transform: none !important;
   }
 }
+
+/* Discovery controls are a quiet frame for the server photography. */
+.catalog-masthead {
+  background: #f5f1e7;
+  border-bottom: 1px solid #e4ddce;
+  margin-bottom: clamp(24px, 3vw, 42px);
+}
+.catalog-masthead .catalog-hero {
+  padding-block: clamp(26px, 4vw, 58px);
+}
+.catalog-masthead .catalog-hero p {
+  color: #554f42;
+}
+.catalog-masthead .quick-modes .chip {
+  min-height: 40px;
+  background: #ebe6da;
+  color: #393a30;
+}
+.catalog-masthead .quick-modes .chip:hover {
+  background: #dfdacd;
+}
+.catalog-masthead .quick-modes .chip[aria-pressed="true"] {
+  background: #244e36;
+  color: #fff;
+}
+.catalog-main .catalog-toolbar h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 12px;
+}
+.catalog-main .catalog-toolbar h2 small {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.catalog-main .active-filters {
+  align-items: center;
+}
+.catalog-main .active-filter {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+.catalog-main .active-filters .text-link {
+  min-height: 36px;
+  padding-inline: 6px;
+}
+.catalog-more {
+  text-align: center;
+  margin-top: 24px;
+}
+.catalog-main + .discovery:not([hidden]) {
+  margin-top: clamp(32px, 5vw, 66px);
+}
+@media (max-width: 560px) {
+  .catalog-masthead .catalog-hero { padding-block: 24px; }
+  .catalog-masthead .quick-modes .chip { min-height: 44px; }
+  .catalog-masthead .search-form input { font-size: 16px; }
+  .catalog-main .filter-row select,
+  .catalog-main .filter-more { min-height: 44px; }
+}
+.catalog-main .active-filters:empty {
+  display: none;
+}
+@media (max-width: 480px) {
+  .catalog-masthead .catalog-hero p { margin-block: 10px 16px; }
+  .catalog-masthead .quick-modes [data-action="favorites"] span { display: none; }
+  .catalog-masthead .quick-modes [data-action="favorites"] { min-width: 44px; }
+  .catalog-main .filter-row .filter-more { max-width: none; white-space: nowrap; }
+}
+@media (max-width: 480px) {
+  .catalog-masthead .quick-modes { gap: 4px; }
+  .catalog-masthead .quick-modes .chip { padding-inline: 8px; }
+  .catalog-main .filter-row .filter-more { width: 100%; min-width: 0; }
+}

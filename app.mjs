@@ -304,7 +304,12 @@ function card(d) {
 function featured() {
   return featuredServer(SERVERS[0], state.featured, { esc, icon });
 }
+const CATALOG_BATCH = 9;
+let catalogLimit = CATALOG_BATCH;
+let catalogFilterKey;
+
 function renderCatalog() {
+  catalogLimit = CATALOG_BATCH;
   activeServer = null;
   main.innerHTML = catalogMarkup(state.filters, {
     esc,
@@ -318,12 +323,17 @@ function renderCatalog() {
 function updateResults() {
   const n = document.querySelector("#results");
   if (!n) return;
+  const filterKey = JSON.stringify(Object.entries(state.filters).filter(([, value]) => value));
+  if (filterKey !== catalogFilterKey) catalogLimit = CATALOG_BATCH;
+  catalogFilterKey = filterKey;
   let found = filterServers(availableServers(), state.filters);
   if (state.filters.favorites)
     found = found.filter((s) => state.favorites.has(s.id));
   n.innerHTML = found.length
-    ? found.map(card).join("")
-    : `<div class="empty">${icon("search")}<h3>${state.filters.favorites ? "Guarde os mundos que quer conhecer." : "Não encontramos servidores com esses filtros."}</h3><p>${state.filters.favorites ? "Use o coração em um servidor para encontrá-lo depois." : "Remova um filtro ou tente outro nome."}</p><button class="button secondary" data-action="clear-filters">Explorar todos</button></div>`;
+    ? found.slice(0, catalogLimit).map(card).join("")
+    : `<div class="empty">${icon("search")}<h3>${state.filters.favorites && !state.favorites.size ? "Nenhum servidor salvo ainda." : "Não encontramos servidores com esses filtros."}</h3><p>${state.filters.favorites && !state.favorites.size ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p><button class="button secondary" data-action="clear-filters">Explorar todos</button></div>`;
+  document.querySelector(".catalog-more").hidden = found.length <= catalogLimit;
+  document.querySelector("[data-catalog-title]").textContent = state.filters.favorites ? "Seus favoritos" : state.filters.q ? "Resultados da busca" : "Servidores";
   document.querySelector("[data-result-count]").textContent =
     `${found.length} ${found.length === 1 ? "resultado" : "resultados"}`;
   const labels = {
@@ -333,7 +343,7 @@ function updateResults() {
     language: "Idioma",
     favorites: "Favoritos",
     online: "Online",
-    access: "Sem whitelist",
+    access: "Entrada livre",
   };
   document.querySelector("#active-filters").innerHTML = Object.entries(
     state.filters,
@@ -341,9 +351,12 @@ function updateResults() {
     .filter(([k, v]) => labels[k] && v)
     .map(
       ([k, v]) =>
-        `<button class="active-filter" data-action="remove-filter" data-key="${k}">${esc(["favorites", "online", "access"].includes(k) ? labels[k] : v)} ${icon("x")}</button>`,
+        `<button class="active-filter" data-action="remove-filter" data-key="${k}" aria-label="Remover filtro: ${esc(labels[k])}">${esc(["favorites", "online", "access"].includes(k) ? labels[k] : v)} ${icon("x")}</button>`,
     )
     .join("");
+  const active = document.querySelector("#active-filters");
+  if (active.childElementCount > 0)
+    active.insertAdjacentHTML("beforeend", '<button class="text-link" data-action="clear-filters">Limpar filtros</button>');
   document.querySelector("#discovery").hidden =
     !SERVERS.some((s) => s.official) ||
     Object.entries(state.filters).some(([k, v]) => k !== "sort" && v);
@@ -352,7 +365,7 @@ function updateResults() {
     .forEach((button) =>
       button.setAttribute(
         "aria-pressed",
-        String(state.filters.mode === button.dataset.value),
+        String((state.filters.mode || "") === button.dataset.value),
       ),
     );
   document
@@ -1055,7 +1068,7 @@ document.addEventListener("click", (e) => {
     });
   } else if (a === "mode" || a === "collection") {
     state.filters.mode =
-      state.filters.mode === b.dataset.value ? "" : b.dataset.value;
+      (state.filters.mode || "") === b.dataset.value ? "" : b.dataset.value;
     updateResults();
     if (a === "collection")
       document
@@ -1068,6 +1081,11 @@ document.addEventListener("click", (e) => {
   } else if (a === "favorites") {
     state.filters.favorites = state.filters.favorites ? "" : true;
     updateResults();
+  } else if (a === "more-results") {
+    const previous = catalogLimit;
+    catalogLimit += CATALOG_BATCH;
+    updateResults();
+    document.querySelectorAll("#results .card-picture-link")[previous]?.focus();
   } else if (a === "clear-filters") {
     state.filters = {};
     updateResults();
@@ -1277,6 +1295,9 @@ document.addEventListener("submit", (e) => {
     e.preventDefault();
     state.filters.q = e.target.elements.q.value.trim();
     updateResults();
+    const heading = document.querySelector("#catalog-results h2");
+    heading.tabIndex = -1;
+    heading.focus();
   } else if (e.target.id === "wizard-form") {
     e.preventDefault();
     wizardNext();
