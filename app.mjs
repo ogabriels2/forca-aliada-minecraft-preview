@@ -690,7 +690,7 @@ function updateResults() {
   const displayFilter = (key, value) =>
     key === "access"
       ? labels[key]
-      : key === "sort" ? "Nome de A a Z"
+      : key === "sort" ? ({ name: "Nome de A a Z", online: "Online primeiro", players: "Mais jogadores online" }[value] || value)
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
   const browsing = !Object.entries(state.filters).some(([key, value]) => key !== "sort" && value);

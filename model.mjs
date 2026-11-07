@@ -313,7 +313,7 @@ export function catalogFilters(params) {
     language: ["Português", "English", "Español"],
     access: ["open", "whitelist"],
     status: ["online", "offline", "unknown"],
-    sort: ["name"],
+    sort: ["name", "online", "players"],
   };
   const filters = {};
   const query = params.get("q")?.trim().slice(0, 160);
@@ -372,6 +372,17 @@ export function catalogEdition(filters = {}, terms = normalize(filters.q).trim()
   return filters.edition || (queryEditions.length === 1 ? queryEditions[0] : "");
 }
 
+export function catalogPlayerCount(server, edition) {
+  if (server.example || serverAvailability(server, edition) !== "online") return -1;
+  const editions = edition && server.editions.includes(edition) ? [edition] : server.editions;
+  for (const key of editions) {
+    const count = server.editionPlayers?.[key]?.online;
+    if ((!server.editionStatus || server.editionStatus[key] === "online")
+      && Number.isSafeInteger(count) && count >= 0) return count;
+  }
+  return -1;
+}
+
 export function filterServers(servers, filters = {}) {
   const query = normalize(filters.q).trim().replace(/\s+/g, " ");
   const terms = query ? query.split(" ") : [];
@@ -409,9 +420,14 @@ export function filterServers(servers, filters = {}) {
     .sort((a, b) =>
       filters.sort === "name"
         ? a.server.name.localeCompare(b.server.name, "pt-BR")
-        : b.relevance - a.relevance
-          || Number(Boolean(a.server.example)) - Number(Boolean(b.server.example))
-          || availabilityOrder[a.availability] - availabilityOrder[b.availability],
+        : filters.sort === "online" || filters.sort === "players"
+          ? Number(Boolean(a.server.example)) - Number(Boolean(b.server.example))
+            || availabilityOrder[a.availability] - availabilityOrder[b.availability]
+            || (filters.sort === "players" ? catalogPlayerCount(b.server, edition) - catalogPlayerCount(a.server, edition) : 0)
+            || b.relevance - a.relevance
+          : b.relevance - a.relevance
+            || Number(Boolean(a.server.example)) - Number(Boolean(b.server.example))
+            || availabilityOrder[a.availability] - availabilityOrder[b.availability],
     )
     .map(({ server }) => server);
 }

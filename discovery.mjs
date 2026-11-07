@@ -167,7 +167,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
       ${filterField("feature", "Características", categories(GAMEPLAY, "Todas"), esc)}
       ${filterField("language", "Idioma", [["", "Todos"], ["Português", "Português"], ["English", "Inglês"], ["Español", "Espanhol"]], esc)}
       ${filterField("access", "Entrada", [["", "Qualquer acesso"], ["open", "Entrada livre"], ["whitelist", "Com aprovação"]], esc)}
-      ${filterField("sort", "Ordenar por", [["", "Relevância"], ["name", "Nome de A a Z"]], esc)}
+      ${filterField("sort", "Ordenar por", [["", "Relevância"], ["online", "Online primeiro"], ["players", "Mais jogadores online"], ["name", "Nome de A a Z"]], esc)}
       <div class="filter-panel-actions">
         <button class="text-link edition-help" data-action="edition-help">Qual edição eu uso?</button>
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>
