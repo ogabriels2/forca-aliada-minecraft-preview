@@ -104,6 +104,10 @@ function paintIcons(root = document) {
       );
   });
 }
+main.addEventListener("error", (event) => {
+  if (event.target.matches?.(".card-server-icon img")) event.target.remove();
+}, true);
+
 function toast(text) {
   clearTimeout(toastTimer);
   const n = document.querySelector("#toast");

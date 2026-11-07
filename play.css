@@ -2915,3 +2915,69 @@ body.studio-open .catalog-help { display: none; }
   .catalog-main .quick-modes [data-action="favorites"] { min-width: 44px; }
   .catalog-section-heading { margin-bottom: 10px; }
 }
+
+/* Server tiles use a quiet graphite surface beneath the world preview. */
+.catalog-main .server-tile {
+  background: #19221d;
+  color: #f4f7f2;
+  border-color: #35443a;
+  border-radius: 13px;
+}
+.catalog-main .server-tile:hover { background: #1d2821; border-color: #748d78; }
+.catalog-main .server-tile .card-art { aspect-ratio: 16 / 8.4; }
+.catalog-main .server-tile .card-body { padding: 14px; min-height: 0; }
+.tile-identity { display: flex; gap: 10px; align-items: flex-start; }
+.server-tile .card-server-icon {
+  position: relative;
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  background: #314739;
+  color: #dcebdd;
+}
+.server-tile .card-server-icon img { position: absolute; inset: 0; }
+.server-tile .card-heading { display: block; flex: 1; min-width: 0; }
+.catalog-main .server-tile .card-heading h3 { color: #fff; font-size: 19px; }
+.server-tile .card-heading a { color: inherit; }
+.server-tile .card-heading a .icon { color: #a5c6ac; }
+.tile-status { display: flex; flex-wrap: wrap; gap: 3px 9px; margin-top: 4px; }
+.server-tile .availability { color: #c2cec3; font-size: 11px; }
+.server-tile .availability.online { color: #a9dfb3; }
+.server-tile .availability.offline { color: #ffc4bc; }
+.server-tile .availability.offline::before { background: #ee8e83; }
+.tile-editions {
+  margin-top: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: #e3eee2;
+  font-size: 12px;
+  font-weight: 800;
+}
+.server-tile .catalog-house {
+  background: #3d3525;
+  color: #f2d69b;
+}
+.catalog-main .server-tile .tile-description {
+  color: #d0dbd1;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 6px 0 7px;
+}
+.tile-meta { color: #c4d2c6; font-size: 11px; line-height: 1.5; }
+.catalog-main .server-tile .card-address {
+  margin: 10px 0 0;
+  padding-inline: 0;
+  border: 0;
+  border-top: 1px solid #415247;
+  border-radius: 0;
+  background: transparent;
+  color: #eef5ee;
+}
+.server-tile .card-address small { color: #b9cebd; }
+.server-tile .card-address button { color: #c1ebc9; }
+.server-tile .card-address button:hover { background: #34483a; }
+.server-tile .card-address.copy-failed [data-copy-feedback] { color: #ffc4bc; }
+.server-tile :focus-visible { outline-color: #9cdda9; }
