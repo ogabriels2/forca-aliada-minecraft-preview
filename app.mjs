@@ -661,9 +661,7 @@ function updateResults() {
       </div>`;
   if (editorial) {
     editorial.hidden = !browsing || !SERVERS.some((server) => server.official);
-    const firstShelf = results.querySelector(".catalog-shelf");
-    if (!editorial.hidden && firstShelf) firstShelf.after(editorial);
-    else results.after(editorial);
+    document.querySelector("#catalog-results").after(editorial);
   }
   restoreShelfPositions(scrollPositions);
   document.querySelector(".catalog-more").hidden = browsing || found.length <= catalogLimit;
@@ -672,7 +670,7 @@ function updateResults() {
       : state.filters.q ? "Resultados da busca"
       : state.filters.feature || state.filters.mode ? state.filters.feature || state.filters.mode
       : state.filters.edition ? `Servidores para ${state.filters.edition}`
-      : "Servidores";
+      : "Explore por categoria";
   const count = document.querySelector("[data-result-count]");
   const countText = checkingAvailability ? "Consultando…" : `${found.length} ${label}`;
   if (count.textContent !== countText) count.textContent = countText;
