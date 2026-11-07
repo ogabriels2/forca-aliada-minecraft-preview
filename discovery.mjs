@@ -19,46 +19,56 @@ export function featuredImages(server) {
   return [...new Set([openingPhoto, ...gallery, server.cover].filter(Boolean))].slice(0, 5);
 }
 
-function editionBadges(server, esc) {
-  const statusLabels = { online: "Online", offline: "Offline", unknown: "Sem confirmação" };
+const availabilityLabels = { online: "Online", offline: "Offline", unknown: "Sem confirmação" };
+const availabilityIcons = { online: "check", offline: "x", unknown: "help-circle" };
+const playerNumber = new Intl.NumberFormat("pt-BR");
+
+function editionBadges(server, esc, icon) {
+  const splitStatus = new Set(Object.values(server.editionStatus || {})).size > 1;
   return server.editions.map((edition) => {
     const status = server.editionStatus?.[edition];
-    const label = statusLabels[status];
-    return `<span class="server-edition server-edition--${edition === "Bedrock" ? "bedrock" : "java"}">
-      <strong>${esc(edition)}</strong>
-      ${label ? `<span class="availability ${status}">${label}</span>` : ""}
+    const label = availabilityLabels[status];
+    return `<span class="server-edition server-edition--${edition === "Bedrock" ? "bedrock" : "java"}"${label ? ` title="${esc(`${edition}: ${label}`)}"` : ""}>
+      ${esc(edition)}${label ? `<span class="sr-only">, ${label}</span>` : ""}
+      ${splitStatus && label ? `<span class="edition-indicator ${status}">${icon(availabilityIcons[status])}</span>` : ""}
     </span>`;
   }).join("");
 }
 
-export function serverCard(d, { esc, icon, cover, favorite, serverHref }) {
-  const href = serverHref ? serverHref(d) : `#/servidor/${d.id}`;
-  const access = d.access === "whitelist" ? "Com aprovação" : "Entrada livre";
-  const version = /^\d/.test(d.version) ? d.version.split(" · ")[0] : "";
+function cardAvailability(server, edition, esc, icon) {
+  if (server.example && server.id !== "minha-pagina")
+    return '<span class="card-presence card-presence--sample">Exemplo</span>';
+
+  const status = Object.hasOwn(availabilityLabels, server.status) ? server.status : "unknown";
+  const label = availabilityLabels[status];
+  const countedEdition = (edition && server.editions.includes(edition) ? [edition] : server.editions)
+    .find((key) => Number.isSafeInteger(server.editionPlayers?.[key]?.online));
+  const count = server.editionPlayers?.[countedEdition]?.online;
+  return `<span class="card-presence card-presence--${status}">
+    <span class="card-presence-dot" aria-hidden="true"></span>${label}
+    ${status === "online" && count >= 0 ? `<span class="card-player-count" title="${esc(`Jogadores online · ${countedEdition}`)}">${icon("users")} ${playerNumber.format(count)}<span class="sr-only"> jogadores em ${esc(countedEdition)}</span></span>` : ""}
+  </span>`;
+}
+
+export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition }) {
+  const href = serverHref ? serverHref(d) : `#/servidor/${encodeURIComponent(d.id)}`;
   const initial = [...d.name.trim()][0]?.toLocaleUpperCase("pt-BR") || "?";
-  const checkedAt = Number.isFinite(d.statusCheckedAt)
-    ? new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(d.statusCheckedAt)
-    : "";
-  return `<article class="server-card" data-id="${esc(d.id)}">
+  return `<article class="server-card server-card--cover" data-id="${esc(d.id)}">
     <div class="card-art art-${esc(d.theme)}">
       <div class="card-picture-link">${cover(d, { card: true })}</div>
-      <button class="favorite card-favorite" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${favorite}" aria-label="${favorite ? "Remover dos favoritos:" : "Favoritar"} ${esc(d.name)}">${icon("heart")}</button>
+      ${cardAvailability(d, edition, esc, icon)}
+      <button class="favorite card-favorite" type="button" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${favorite}" aria-label="${favorite ? "Remover dos favoritos:" : "Favoritar"} ${esc(d.name)}">${icon("heart")}</button>
     </div>
     <div class="card-body">
       <div class="card-heading">
-        <span class="card-server-icon" aria-hidden="true">${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="36" height="36" loading="lazy" decoding="async">` : esc(initial)}</span>
-        <h3><a href="${esc(href)}"><span>${esc(d.name)}</span>${icon("arrow-right")}</a></h3>
+        <span class="card-server-icon" aria-hidden="true"><span>${esc(initial)}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async">` : ""}</span>
+        <h3><a href="${esc(href)}" title="${esc(d.name)}"><span class="card-label"><span class="card-name">${esc(d.name)}</span>${d.official ? `<span class="card-house-mark" title="Servidor da casa">${icon("shield-check")}<span class="sr-only">Servidor da casa</span></span>` : ""}</span>${icon("arrow-right")}</a></h3>
       </div>
-      <div class="card-editions">${editionBadges(d, esc)}${d.editionStatus ? "" : `<span class="availability ${esc(d.status)}">${esc(d.statusText)}</span>`}</div>
-      <div class="card-facts"><span>${access}</span>${version ? `<span>${esc(version)}</span>` : ""}</div>
-      <p>${esc(d.summary)}</p>
-      ${d.address ? `<div class="card-address ${d.example ? "card-address-example" : ""}">
-        <div><code data-copy-source tabindex="-1">${esc(d.address)}</code>
-        ${d.editions.includes("Bedrock") && d.port ? `<small>Porta Bedrock: ${esc(d.port)}</small>` : ""}</div>
-        ${d.example ? '<small>Exemplo</small>' : `<button type="button" data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço de ${esc(d.name)}">${icon("copy")}<span data-copy-label>Copiar</span></button>`}
-        <span class="sr-only" data-copy-feedback role="status"></span>
-      </div>` : ""}
-      <div class="card-bottom"><span>${esc(d.mode)} · ${esc(d.language)}</span>${d.official ? `<span class="catalog-house" title="Mantido pela equipe da Força Aliada">${icon("shield-check")} Servidor da casa</span>` : ""}${checkedAt ? `<small class="card-checked" title="Horário local da última consulta de disponibilidade">Consulta às ${checkedAt}</small>` : ""}</div>
+      <div class="card-editions">
+        ${editionBadges(d, esc, icon)}
+        <span class="card-mode">${esc(d.mode)}</span>
+        ${d.access === "whitelist" ? `<span class="card-access" title="Entrada com aprovação">${icon("lock")}<span class="sr-only">Entrada com aprovação</span></span>` : ""}
+      </div>
     </div>
   </article>`;
 }
@@ -91,7 +101,7 @@ export function catalogShelves(servers, card, { esc, icon }) {
   }
   return groups.filter(({ matches }) => matches.length).map(({ name, key, matches }) => {
     const href = `#/?${new URLSearchParams({ [key]: name })}`;
-    return `<section class="catalog-shelf" data-shelf="${esc(name)}">
+    return `<section class="catalog-shelf" data-shelf="${esc(name)}" data-shelf-size="${Math.min(matches.length, 4)}">
       <div class="shelf-heading">
         <h3><a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a></h3>
         <div class="shelf-actions"><a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a><button type="button" data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button></div>
@@ -101,13 +111,43 @@ export function catalogShelves(servers, card, { esc, icon }) {
   }).join("");
 }
 
-export function catalogMarkup(f, { esc, icon, featured, extra }) {
+export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
   const browsing = !Object.entries(f).some(([k, v]) => k !== "sort" && v);
-  return `<section class="catalog-masthead"><div class="catalog-hero container"><div class="catalog-intro"><h1>Servidores de Minecraft</h1><p>Encontre onde jogar no Java ou no Bedrock.</p></div><div class="catalog-search-area"><form class="search-form" id="search-form" role="search">${icon("search")}<label class="sr-only" for="server-search">Buscar servidores</label><input id="server-search" name="q" type="search" placeholder="Nome, endereço ou modo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160"><button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button></form></div></div></section>
-  <section class="catalog-main container" id="catalog-results" aria-label="Catálogo de servidores"><div class="catalog-toolbar"><div class="quick-modes" role="group" aria-label="Explorar por modo de jogo"><button class="chip" data-action="mode" data-value="" aria-pressed="${!f.mode && !f.feature}">Todos</button>${["Survival", "Criativo", "Aventura"].map((m) => `<button class="chip" data-action="mode" data-value="${m}" aria-pressed="${f.mode === m}">${m}</button>`).join("")}<button class="chip" data-action="favorites" aria-label="Favoritos" title="Favoritos" aria-pressed="${Boolean(f.favorites)}">${icon("heart")} <span>Favoritos</span></button></div><div class="filter-row" id="filters">
-      <label class="select-wrap catalog-edition"><select name="edition" aria-label="Edição do Minecraft"><option value="">Todas as edições</option><option>Java</option><option>Bedrock</option></select>${icon("chevron-down")}</label>
-      <button class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button><details class="gameplay-directory" id="gameplay-directory"><summary>Estilos ${icon("chevron-down")}</summary><nav aria-label="Estilos de jogo">${GAMEPLAY.map((name) => `<a class="chip" href="#/?${esc(new URLSearchParams({ feature: name }))}">${esc(name)}</a>`).join("")}</nav></details>
-    </div></div>
+  const chip = (action, label, glyph, pressed, value = "") =>
+    `<button type="button" class="chip" data-action="${action}" data-value="${value}" aria-pressed="${Boolean(pressed)}">${glyph ? icon(glyph) : ""}<span>${label}</span></button>`;
+  return `<section class="catalog-masthead"><div class="catalog-hero container">
+    <div class="catalog-stage">
+      <div class="catalog-intro">
+        <h1>Servidores de <em>Minecraft</em></h1>
+        <p>Encontre seu próximo mundo.</p>
+        <div class="catalog-search-area"><form class="search-form" id="search-form" role="search">${icon("search")}<label class="sr-only" for="server-search">Buscar servidores</label><input id="server-search" name="q" type="search" placeholder="Nome, IP ou estilo de jogo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160"><button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button></form></div>
+      </div>
+      <div class="catalog-stage-art">
+        <img src="./shared/images/galeria14.webp" width="1200" height="675" alt="" fetchpriority="high" decoding="async">
+        <a class="catalog-stage-caption" href="#/servidor/forca-aliada" aria-label="Conhecer o servidor Força Aliada">${icon("world")} Um mundo da Força Aliada ${icon("arrow-right")}</a>
+      </div>
+    </div>
+  </div></section>
+  <section class="catalog-main container" id="catalog-results" aria-label="Catálogo de servidores">
+    <div class="catalog-toolbar">
+      <div class="catalog-compat" role="group" aria-label="Edição e disponibilidade">
+        ${chip("quick-edition", "Java", "device-desktop", f.edition === "Java", "Java")}
+        ${chip("quick-edition", "Bedrock", "device-mobile", f.edition === "Bedrock", "Bedrock")}
+        ${chip("quick-online", "Online agora", "", f.status === "online")}
+        <button class="filter-more" data-action="filters" aria-label="Filtros" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} <span class="filter-label">Filtros</span><span class="filter-count" hidden></span></button>
+      </div>
+      <div class="filter-row catalog-tools" id="filters">
+        ${chip("favorites", "Favoritos", "heart", f.favorites)}
+        ${hasRecent || f.recent ? chip("recent", "Recentes", "clock", f.recent) : ""}
+      </div>
+      <div class="catalog-modes">
+        <div class="quick-modes" role="group" aria-label="Explorar por modo de jogo">
+          ${chip("mode", "Todos", "", !f.mode && !f.feature)}
+          ${MODES.map((m) => chip("mode", esc(m), "", f.mode === m, esc(m))).join("")}
+        </div>
+        <details class="gameplay-directory" id="gameplay-directory"><summary><span>Estilos</span> ${icon("chevron-down")}</summary><nav aria-label="Estilos de jogo">${GAMEPLAY.map((name) => `<a class="chip" href="#/?${esc(new URLSearchParams({ ...f, mode: "", feature: name }))}">${esc(name)}</a>`).join("")}</nav></details>
+      </div>
+    </div>
     <div class="extra-filters catalog-filter-panel" id="extra-filters" ${extra ? "" : "hidden"}>
       ${filterGroup("edition", "Edição", [["", "Todas"], ["Java", "Java"], ["Bedrock", "Bedrock"]], icon)}
       ${filterGroup("language", "Idioma", [["", "Todos"], ["Português", "Português"], ["English", "Inglês"], ["Español", "Espanhol"]], icon)}
@@ -123,7 +163,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra }) {
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>
         <button class="button filter-done" data-action="finish-filters"><span data-filter-done>Ver servidores</span></button>
       </div>
-    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2></div><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div><p class="catalog-footnote">${icon("alert-circle")} Catálogo de demonstração. Os servidores de exemplo não aceitam conexões.</p></section>
+    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><button type="button" class="text-link" data-action="clear-recent" hidden>Limpar histórico</button></div><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div><p class="catalog-footnote">${icon("alert-circle")} Os servidores marcados como exemplo não aceitam conexões.</p></section>
   <section class="container discovery" id="discovery" ${browsing ? "" : "hidden"} aria-label="Servidor em destaque editorial"><div class="featured" id="featured">${featured}</div></section>
   <section class="container player-studio"><div class="player-studio-copy"><h2>Biblioteca de skins</h2><p>Baixe uma skin pronta ou pinte a sua no editor 3D.</p><a class="text-link" href="#/skins">Explorar skins e editor ${icon("arrow-right")}</a></div><a class="player-studio-art" href="#/skins/editor" aria-label="Abrir o editor de skins"><img src="./assets/skins/showcase-explorer.png" alt="" width="144" height="192" loading="lazy"><img src="./assets/skins/showcase-ocean.png" alt="" width="174" height="232" loading="lazy"><img src="./assets/skins/showcase-plum.png" alt="" width="144" height="192" loading="lazy"><span>${icon("brush")} Editor de skins</span></a></section>
   <section class="join-platform"><div class="container"><div><h2>Tem um servidor?</h2><p>Monte uma página com o endereço, as regras e as fotos do seu mundo.</p><a class="text-link publisher-manager" href="https://forcaaliada.com/manager">Precisa criar um servidor? Conheça o Manager ${icon("arrow-right")}</a></div><button class="button" data-action="create">Criar página grátis ${icon("arrow-right")}</button></div></section>`;

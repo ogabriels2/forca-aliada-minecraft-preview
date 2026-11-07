@@ -1,0 +1,378 @@
+/* Finder only. Warm ink and amethyst frame the worlds; gold invites action. */
+body[data-surface="discovery"] {
+  --finder-ground: #191820;
+  --finder-panel: #252332;
+  --finder-ink: #fff8ef;
+  --finder-muted: #c2b9cf;
+  --finder-line: #514960;
+  --finder-gold: #ffcf6d;
+  --finder-lime: #b8f08c;
+  --finder-violet: #dfc5ff;
+  --finder-ease: cubic-bezier(.2,.75,.24,1);
+  background: var(--finder-ground);
+  color: var(--finder-ink);
+}
+
+body[data-surface="discovery"] .site-header {
+  background: #201e2a;
+  border-color: #383143;
+}
+body[data-surface="discovery"] .main-nav > [aria-current="page"] {
+  color: var(--finder-gold);
+}
+body[data-surface="discovery"] .main-nav > [aria-current="page"]::after { background: var(--finder-gold); }
+body[data-surface="discovery"] .prototype-note {
+  background: #30253e;
+  color: #ebdcef;
+}
+body[data-surface="discovery"] .prototype-note span { color: #d0b9d9; }
+body[data-surface="discovery"] #main :focus-visible {
+  outline: 2px solid #ffdc90;
+  outline-offset: 3px;
+}
+body[data-surface="discovery"] #main ::selection {
+  background: #ffcf6d;
+  color: #241928;
+}
+
+.catalog-masthead { background: transparent; border: 0; }
+.catalog-masthead .catalog-hero.container {
+  display: block;
+  padding-block: 18px 14px;
+  text-align: left;
+}
+.catalog-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 224px;
+  border-radius: 18px;
+  background: #352753;
+}
+.catalog-stage .catalog-intro {
+  z-index: 1;
+  align-self: center;
+  min-width: 0;
+  padding: 25px clamp(20px, 3.6vw, 50px);
+}
+.catalog-masthead .catalog-stage h1 {
+  max-width: 15ch;
+  font-size: clamp(34px, 4.25vw, 65px);
+  line-height: 1;
+  letter-spacing: -.04em;
+  font-weight: 850;
+  color: var(--finder-ink);
+}
+.catalog-stage h1 em {
+  color: var(--finder-gold);
+  font-style: normal;
+}
+.catalog-masthead .catalog-stage p {
+  margin: 9px 0 15px;
+  color: #f1e7ff;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.catalog-masthead .catalog-stage .catalog-search-area { padding: 0; }
+.catalog-stage .search-form {
+  width: 100%;
+  min-height: 53px;
+  padding: 4px 5px 4px 13px;
+  gap: 8px;
+  border: 0;
+  background: #fff9f3;
+  border-radius: 10px;
+}
+.catalog-stage .search-form > .icon { color: #634a78; flex: 0 0 19px; }
+.catalog-stage .search-form:focus-within { outline: 2px solid #ffdb90; outline-offset: 3px; }
+.catalog-stage .search-form input {
+  min-width: 0;
+  color: #251b31;
+  caret-color: #624183;
+  font-size: 16px;
+}
+.catalog-stage .search-form input::placeholder { color: #60536c; opacity: 1; }
+.catalog-stage .search-form > .button {
+  background: var(--finder-gold);
+  color: #302014;
+  border: 0;
+  min-height: 44px;
+  padding-inline: 13px;
+  font-weight: 850;
+  transition: background-color 140ms, transform 240ms var(--finder-ease);
+}
+.catalog-stage .search-form > .button:hover { background: #ffdf96; transform: translateY(-1px); }
+.catalog-stage .search-form > .button:active { transform: scale(.96); }
+.catalog-stage-art {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 100%;
+  overflow: hidden;
+  background: #655084;
+}
+.catalog-stage-art > img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 51%;
+  transition: transform 680ms var(--finder-ease);
+}
+.catalog-stage-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,#352753,transparent 22%);
+}
+.catalog-stage-caption {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  bottom: 13px;
+  right: 13px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #21192e;
+  color: #fff8ef;
+  font-size: 11px;
+  font-weight: 800;
+}
+.catalog-stage-caption .icon { width: 15px; height: 15px; color: var(--finder-gold); }
+.catalog-stage-caption:hover { background: #332541; }
+.catalog-stage-caption .icon:last-child { transition: transform 240ms var(--finder-ease); }
+@media (hover:hover) {
+  .catalog-stage-art:hover img { transform: scale(1.075); }
+  .catalog-stage-art:hover .icon:last-child { transform: translateX(3px); }
+}
+
+.catalog-main .catalog-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 8px 12px;
+  padding-block: 4px 10px;
+}
+.catalog-masthead + .catalog-main.container { margin-top: 0; padding-top: 0; }
+.catalog-main .catalog-compat,
+.catalog-main .catalog-modes,
+.catalog-main .catalog-tools {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+.catalog-main .catalog-modes { grid-column: 1 / -1; justify-content: space-between; }
+.catalog-main .catalog-compat .filter-more { width: auto; position: relative; }
+.catalog-main .catalog-toolbar .catalog-tools { width: auto; justify-content: flex-end; }
+.catalog-main .quick-modes {
+  min-width: 0;
+  gap: 6px;
+  flex-wrap: nowrap;
+  padding: 4px;
+  margin: -4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #514960 transparent;
+}
+.catalog-main .catalog-toolbar .chip,
+.catalog-main .catalog-toolbar .filter-more,
+.catalog-main .gameplay-directory summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid var(--finder-line);
+  border-radius: 9px;
+  background: var(--finder-panel);
+  color: var(--finder-ink);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 800;
+  transition: background-color 160ms, border-color 160ms, transform 230ms var(--finder-ease);
+}
+.catalog-main .catalog-toolbar .chip[hidden] { display: none; }
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover,
+.catalog-main .gameplay-directory summary:hover { background: #383247; border-color: #8978a2; }
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: scale(.94); }
+.catalog-main .catalog-toolbar .icon { width: 16px; height: 16px; flex: 0 0 16px; }
+.catalog-main .catalog-toolbar .chip[aria-pressed="true"],
+.catalog-main .catalog-toolbar .filter-more[aria-expanded="true"] {
+  background: var(--finder-violet);
+  border-color: var(--finder-violet);
+  color: #302147;
+}
+.catalog-main .catalog-compat [data-value="Java"] { color: #ffdc97; }
+.catalog-main .catalog-compat [data-value="Bedrock"] { color: #ade9ff; }
+.catalog-main .catalog-compat [data-value="Java"][aria-pressed="true"] { background: #ffdc97; border-color: #ffdc97; color: #352513; }
+.catalog-main .catalog-compat [data-value="Bedrock"][aria-pressed="true"] { background: #ade9ff; border-color: #ade9ff; color: #193240; }
+.catalog-main .catalog-compat [data-action="quick-online"]::before {
+  content: "";
+  background: var(--finder-lime);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 7px;
+}
+.catalog-main .catalog-compat [data-action="quick-online"][aria-pressed="true"] { background: var(--finder-lime); border-color: var(--finder-lime); color: #203614; }
+.catalog-main .catalog-compat [data-action="quick-online"][aria-pressed="true"]::before { background: #31531e; }
+.catalog-main .gameplay-directory { flex: 0 0 auto; position: relative; }
+.catalog-main .gameplay-directory nav {
+  width: min(340px,calc(100vw - 36px));
+  background: #302940;
+  color: var(--finder-ink);
+  border-color: #655676;
+  z-index: 4;
+}
+.catalog-main .gameplay-directory nav .chip { display: inline-flex; min-height: 38px; }
+.catalog-main .catalog-filter-panel:not([hidden]) {
+  background: #2c2739;
+  border: 1px solid var(--finder-line);
+  color: var(--finder-ink);
+  animation: finder-open 240ms var(--finder-ease) both;
+}
+.catalog-main .catalog-filter-panel legend { color: #eadfff; }
+.catalog-main .catalog-filter-panel .filter-choice {
+  border-color: #645770;
+  background: #231f2d;
+  color: #f0e6fc;
+}
+.catalog-main .catalog-filter-panel .filter-choice:has(input:checked) {
+  background: var(--finder-violet);
+  color: #302147;
+  border-color: var(--finder-violet);
+}
+.catalog-main .catalog-filter-panel .filter-choice .icon { color: inherit; }
+.catalog-main .catalog-filter-panel .button,
+.catalog-main .catalog-more .button,
+.catalog-main .empty .button {
+  background: var(--finder-gold);
+  color: #342518;
+  border-color: transparent;
+}
+.catalog-main :is(.filter-panel-actions,.active-filters,.catalog-section-heading,.empty) .text-link { color: var(--finder-violet); }
+.catalog-main .filter-count { background: #ffdb92; color: #302147; }
+.catalog-main .active-filters { margin-block: 4px 11px; }
+.catalog-main .active-filter { background: #3b304d; color: #f4e8ff; border-color: #665477; }
+.catalog-main .active-filter:hover { background: #4b3b60; }
+.catalog-main .catalog-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-block: 5px 12px;
+}
+.catalog-main .catalog-section-heading:has(+ .results-shelves) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.catalog-main .catalog-section-heading:focus-within { position: static; width: auto; height: auto; clip-path: none; }
+.catalog-main .catalog-section-heading h2 { color: var(--finder-ink); font-weight: 850; }
+.catalog-main .catalog-section-heading small { color: var(--finder-muted); }
+.catalog-main .catalog-footnote { color: var(--finder-muted); }
+.catalog-main .empty { color: var(--finder-ink); background: #292535; border-color: var(--finder-line); }
+.catalog-main .empty p { color: var(--finder-muted); }
+.catalog-main .empty > .icon { color: var(--finder-gold); }
+.catalog-main .results-grid.results-shelves { gap: 24px; }
+.catalog-main .shelf-heading { margin-bottom: 6px; }
+.catalog-main .shelf-heading h3 { font-weight: 850; }
+.catalog-main .shelf-heading h3 .icon { color: var(--finder-gold); transition: transform 220ms var(--finder-ease); }
+.catalog-main .shelf-heading h3 a:hover .icon { transform: translateX(4px); }
+.catalog-main .shelf-actions > a { color: var(--finder-muted); }
+.catalog-main .shelf-actions button { background: var(--finder-panel); border-color: var(--finder-line); color: var(--finder-ink); min-width: 44px; min-height: 44px; }
+.catalog-main .shelf-actions button:hover:not(:disabled) { background: #453553; }
+.catalog-main .shelf-track { scrollbar-color: #716081 transparent; }
+.catalog-main .shelf-track.is-dragging { cursor: grabbing; }
+@media (min-width: 1080px) {
+  .catalog-main [data-shelf-size="3"] .shelf-track {
+    grid-auto-columns: calc((100% - 28px) / 3);
+  }
+}
+
+body[data-surface="discovery"] #featured {
+  background: #4d2d57;
+  border-color: transparent;
+}
+body[data-surface="discovery"] #featured .featured-copy :is(p,.feature-disclosure) { color: #f2dff3; }
+body[data-surface="discovery"] #featured .button { background: var(--finder-gold); color: #332039; }
+body[data-surface="discovery"] #featured .tag { background: #613f6a; color: #fff3ff; }
+body[data-surface="discovery"] .player-studio { background: #dac4fb; }
+body[data-surface="discovery"] .join-platform { background: #30243c; color: var(--finder-ink); }
+body[data-surface="discovery"] .join-platform p { color: #eadff3; }
+body[data-surface="discovery"] .join-platform .publisher-manager { color: #f5dbff; }
+body[data-surface="discovery"] .join-platform .button { background: var(--finder-gold); color: #342518; }
+
+@keyframes finder-open {
+  from { opacity: .55; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (min-width: 1240px) {
+  .catalog-main .catalog-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .catalog-main .catalog-modes { grid-column: 2; grid-row: 1; justify-content: flex-start; }
+  .catalog-main .catalog-tools { grid-column: 3; grid-row: 1; }
+}
+@media (max-width: 750px) {
+  .catalog-stage { grid-template-columns: minmax(0, 1fr); min-height: 172px; }
+  .catalog-stage .catalog-intro { padding: 18px 15px; }
+  .catalog-masthead .catalog-stage h1 { font-size: clamp(30px, 8.9vw, 47px); }
+  .catalog-stage-art { position: absolute; inset: 0 0 0 19%; z-index: -1; }
+  .catalog-stage-art::after { background: linear-gradient(90deg,#352753 10%,#352753a8 63%,#35275338); }
+  .catalog-stage-caption { display: none; }
+  .catalog-stage .catalog-search-area { max-width: 485px; }
+  .catalog-main .catalog-toolbar { gap: 7px 8px; }
+  .catalog-main .catalog-tools .chip { min-width: 44px; }
+  .catalog-main .catalog-tools .chip span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .catalog-main .quick-modes .chip { min-height: 44px; }
+}
+@media (max-width: 490px) {
+  .catalog-masthead .catalog-hero.container { padding-block: 12px 9px; }
+  .catalog-main .catalog-toolbar { grid-template-columns: minmax(0,1fr) auto; position: relative; }
+  .catalog-main .catalog-compat { grid-column: 1 / -1; }
+  .catalog-main .catalog-modes { grid-column: 1; grid-row: 2; }
+  .catalog-main .catalog-toolbar .catalog-tools { grid-column: 2; grid-row: 2; }
+  .catalog-main .catalog-compat .chip { padding-inline: 10px; }
+  .catalog-stage .search-form > .button { padding-inline: 10px; }
+  .catalog-stage .search-form > .button > .icon { display: inline-block; }
+  .catalog-main .catalog-compat .filter-more { margin-left: auto; min-width: 44px; }
+  .catalog-main .catalog-compat .filter-label { display: none; }
+  .catalog-main .catalog-compat .filter-count:not([hidden]) { position: absolute; right: -3px; top: -3px; }
+  .catalog-main .gameplay-directory { position: static; }
+  .catalog-main .gameplay-directory nav { inset: 100% 0 auto auto; }
+  .catalog-main .catalog-toolbar .chip,
+  .catalog-main .catalog-toolbar .filter-more,
+  .catalog-main .gameplay-directory summary { padding-inline: 8px; }
+}
+@media (max-width: 350px) {
+  .catalog-main .catalog-compat [data-action="quick-edition"] > .icon { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-stage-art > img,
+  .catalog-stage-caption .icon,
+  .catalog-stage .search-form > .button,
+  .catalog-main .catalog-toolbar :is(.chip,.filter-more),
+  .catalog-main .shelf-heading h3 .icon { transition: none; }
+  .catalog-stage-art:hover img,
+  .catalog-stage .search-form > .button:is(:hover,:active),
+  .catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: none; }
+  .catalog-main .catalog-filter-panel:not([hidden]) { animation: none; }
+}

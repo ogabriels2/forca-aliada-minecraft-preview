@@ -17,6 +17,7 @@ import {
   MODES,
   initialDraft,
   filterServers,
+  catalogEdition,
   catalogFilters,
   serverAvailability,
   readProviderAvailability,
@@ -33,6 +34,9 @@ if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const main = document.querySelector("#main"),
   dialog = document.querySelector("#dialog");
+main.addEventListener("error", (event) => {
+  if (event.target.matches?.(".card-server-icon img")) event.target.remove();
+}, true);
 const esc = (v) =>
   String(v ?? "").replace(
     /[&<>"']/g,
@@ -48,6 +52,20 @@ let stored = {};
 try {
   stored = JSON.parse(localStorage.getItem(storageKey) || "{}") || {};
 } catch {}
+const recentStorageKey = `${storageKey}.recent`;
+let recentlyViewed = [];
+try {
+  const visits = JSON.parse(localStorage.getItem(recentStorageKey) || "[]");
+  if (Array.isArray(visits))
+    recentlyViewed = [...new Set(visits.filter((id) => typeof id === "string" && id.length <= 80))].slice(0, 8);
+} catch {}
+function setRecentServers(ids) {
+  recentlyViewed = ids;
+  try {
+    if (ids.length) localStorage.setItem(recentStorageKey, JSON.stringify(ids));
+    else localStorage.removeItem(recentStorageKey);
+  } catch {}
+}
 const state = {
   draft: safeDraft(stored.draft),
   publication: stored.publication ? safeDraft(stored.publication) : null,
@@ -291,10 +309,12 @@ function themeStyle(d) {
   return `--server-accent:${t.accent};--server-ground:${t.ground};--server-ink:${t.ink}`;
 }
 function cover(d, { card = false } = {}) {
+  const sampleScene = d.example && ({ redwood: "build", "la-isla": "explore" }[d.id]);
+  const scene = sampleScene || (d.mode === "Criativo" ? "build" : d.mode === "Aventura" ? "explore" : "survival");
   return d.cover
-    ? `<img src="${esc(d.cover)}" alt="${d.example ? "Imagem escolhida para a página de demonstração" : "Construções do servidor Força Aliada"}" ${card ? 'loading="lazy"' : 'fetchpriority="high"'} width="1920" height="1080" style="object-position:50% ${d.coverPosition || 50}%">`
+    ? `<img src="${esc(d.cover)}" alt="${esc(d.official ? "Construções do servidor Força Aliada" : `Capa de ${d.name}`)}" ${card ? 'loading="lazy"' : 'fetchpriority="high"'} width="1920" height="1080" style="object-position:50% ${d.coverPosition || 50}%">`
     : card
-      ? `<span class="illustrated-server illustrated-${d.mode === "Criativo" ? "build" : d.mode === "Aventura" ? "explore" : "survival"}"><span class="illustrated-scene"><img src="./shared/images/manager/worlds-illustration.webp" alt="Cena ilustrativa de Minecraft, não é captura deste servidor" loading="lazy" width="1976" height="784"></span></span><span class="cover-edition">Ilustração · exemplo</span>`
+      ? `<span class="illustrated-server illustrated-${scene}"><span class="illustrated-scene"><img src="./shared/images/manager/worlds-illustration.webp" alt="Cena ilustrativa de Minecraft" loading="lazy" width="1976" height="784"></span></span><span class="cover-edition">Ilustração · exemplo</span>`
       : "";
 }
 const liveServerSamples = new Map();
@@ -342,7 +362,13 @@ function withServerAvailability(server, edition) {
   }));
   // A chosen custom image wins over an automatically imported server icon.
   const customAvatar = server.official ? undefined : server.avatar;
-  const current = { ...server, avatar: customAvatar || sample?.icon || server.avatar, editionStatus };
+  const editionPlayers = Object.fromEntries(server.editions.flatMap((key) => {
+    const current = sample?.editions[key];
+    return editionStatus[key] === "online" && current?.players
+      ? [[key, current.players]]
+      : [];
+  }));
+  const current = { ...server, avatar: customAvatar || sample?.icon || server.avatar, editionStatus, editionPlayers };
   const status = serverAvailability(current, edition);
   const reachableEdition = current.editions.find((key) => editionStatus[key] === "online");
   const mixed = !edition && current.editions.some((key) => editionStatus[key] !== "online");
@@ -391,7 +417,13 @@ async function queryServerStatus(address, edition) {
     if (!response.ok) return { status: "unknown" };
     const sample = await response.json();
     const status = readProviderAvailability(sample, edition, address.host);
+    const online = sample?.players?.online;
+    const max = sample?.players?.max;
+    const players = status === "online" && Number.isSafeInteger(online) && online >= 0
+      ? { online, max: Number.isSafeInteger(max) && max > 0 ? max : undefined }
+      : undefined;
     return {
+      players,
       status,
       expiresAt: status === "unknown" ? 0 : sample.expires_at,
       checkedAt: status === "unknown" ? undefined : sample.retrieved_at,
@@ -501,15 +533,17 @@ function availableServers() {
     : servers;
 }
 function serverHref(server) {
-  const edition = state.filters.edition;
+  const edition = catalogEdition(state.filters);
   const query = edition && server.editions.includes(edition) ? `?edition=${edition}` : "";
   return `#/servidor/${encodeURIComponent(server.id)}${query}`;
 }
 function card(d) {
-  return serverCard(withServerAvailability(d, state.filters.edition), {
+  const edition = catalogEdition(state.filters);
+  return serverCard(withServerAvailability(d, edition), {
     esc,
     icon,
     cover,
+    edition,
     favorite: state.favorites.has(d.id),
     serverHref,
   });
@@ -531,6 +565,7 @@ function renderCatalog(limit = CATALOG_BATCH) {
     icon,
     featured: featured(),
     extra: state.extra,
+    hasRecent: recentlyViewed.length > 0,
   });
   updateResults();
   paintIcons();
@@ -540,15 +575,26 @@ function filterKey() {
 }
 function catalogResults(filters) {
   const found = filterServers(availableServers(), filters);
-  return filters.favorites
-    ? found.filter((server) => state.favorites.has(server.id))
-    : found;
+  const matching = filters.status === "online" ? found.filter((server) => !server.example) : found;
+  if (filters.favorites) return matching.filter((server) => state.favorites.has(server.id));
+  if (filters.recent) {
+    const byId = new Map(matching.map((server) => [server.id, server]));
+    return recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
+  }
+  return matching;
 }
 function focusCatalogHeading() {
   const heading = document.querySelector("#catalog-results h2");
   if (!heading) return;
   heading.tabIndex = -1;
   heading.focus();
+}
+function animateCatalogResults() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.querySelector("#results")?.animate?.(
+    [{ opacity: .65, transform: "translateY(6px)" }, { opacity: 1, transform: "translateY(0)" }],
+    { duration: 235, easing: "cubic-bezier(.2,.75,.24,1)" },
+  );
 }
 function shelfPositions() {
   return Object.fromEntries([...document.querySelectorAll(".shelf-track")].map(
@@ -623,9 +669,10 @@ function updateResults() {
   const found = catalogResults(state.filters);
   const label = found.length === 1 ? "resultado" : "resultados";
   const savedEmpty = state.filters.favorites && !state.favorites.size;
+  const recentEmpty = state.filters.recent && !recentlyViewed.length;
   const checkingAvailability = !found.length && state.filters.status && pendingServerSamples.size > 0;
-  const relaxedFilter = !found.length && !savedEmpty
-    ? ["language", "mode", "feature", "access", "status"].find((key) => {
+  const relaxedFilter = !found.length && !savedEmpty && !recentEmpty
+    ? ["edition", "language", "mode", "feature", "access", "status"].find((key) => {
         if (!state.filters[key]) return false;
         return catalogResults({ ...state.filters, [key]: "" }).length > 0;
       })
@@ -637,11 +684,12 @@ function updateResults() {
     edition: "Edição",
     language: "Idioma",
     favorites: "Favoritos",
+    recent: "Recentes",
     status: "Disponibilidade",
     access: state.filters.access === "whitelist" ? "Entrada com aprovação" : "Entrada livre",
   };
   const displayFilter = (key, value) =>
-    ["favorites", "online", "access"].includes(key)
+    ["favorites", "recent", "access"].includes(key)
       ? labels[key]
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
@@ -654,8 +702,8 @@ function updateResults() {
     ? browsing ? catalogShelves(found, card, { esc, icon }) : found.slice(0, catalogLimit).map(card).join("")
     : `<div class="empty">
         ${icon("search")}
-        <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : "Nenhum servidor encontrado."}</h3>
-        <p>${checkingAvailability ? "Os resultados aparecerão quando a consulta terminar." : savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : "Remova um filtro ou tente outro nome."}</p>
+        <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : recentEmpty ? "Nenhum servidor visitado ainda." : state.filters.status === "online" && !state.filters.q ? "Nenhum servidor confirmado online." : "Nenhum servidor encontrado."}</h3>
+        <p>${checkingAvailability ? "Os resultados aparecerão quando a consulta terminar." : savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : recentEmpty ? "Os servidores que você abrir aparecem aqui." : "Remova um filtro ou tente outro nome."}</p>
         <button class="button secondary" data-action="clear-filters">Explorar todos</button>
         ${relaxedFilter ? `<button class="text-link" data-action="remove-filter" data-key="${relaxedFilter}">Remover filtro de ${labels[relaxedFilter].toLocaleLowerCase("pt-BR")}</button>` : ""}
       </div>`;
@@ -667,6 +715,7 @@ function updateResults() {
   document.querySelector(".catalog-more").hidden = browsing || found.length <= catalogLimit;
   document.querySelector("[data-catalog-title]").textContent =
     state.filters.favorites ? "Seus favoritos"
+      : state.filters.recent ? "Vistos recentemente"
       : state.filters.q ? "Resultados da busca"
       : state.filters.feature || state.filters.mode ? state.filters.feature || state.filters.mode
       : state.filters.edition ? `Servidores para ${state.filters.edition}`
@@ -700,6 +749,17 @@ function updateResults() {
   document
     .querySelector('[data-action="favorites"]')
     ?.setAttribute("aria-pressed", String(Boolean(state.filters.favorites)));
+  const recent = document.querySelector('[data-action="recent"]');
+  if (recent) {
+    recent.hidden = !recentlyViewed.length && !state.filters.recent;
+    recent.setAttribute("aria-pressed", String(Boolean(state.filters.recent)));
+  }
+  document.querySelector('[data-action="clear-recent"]').hidden = !state.filters.recent || !recentlyViewed.length;
+  document.querySelectorAll('[data-action="quick-edition"]').forEach((button) => {
+    button.setAttribute("aria-pressed", String(state.filters.edition === button.dataset.value));
+  });
+  document.querySelector('[data-action="quick-online"]')
+    ?.setAttribute("aria-pressed", String(state.filters.status === "online"));
   const advancedCount = panelFilters.filter(
     (key) => state.filters[key],
   ).length;
@@ -980,21 +1040,97 @@ function serverSection(id, d) {
     return `<section class="server-section"><h3>Dúvidas antes de começar?</h3><details><summary>Preciso usar o Manager para jogar?</summary><p>Não. Você só precisa do Minecraft compatível e seguir as regras de entrada do servidor.</p></details><details><summary>Java e Bedrock entram do mesmo jeito?</summary><p>Escolha a edição no bloco de conexão. No Bedrock, confira também a porta. A compatibilidade é definida pela equipe de cada servidor.</p></details></section>`;
   return "";
 }
-function connection(d) {
-  const edition = d.editions.includes(state.selectedEdition)
-    ? state.selectedEdition
-    : d.editions[0];
-  const availability = withServerAvailability(d, edition);
-  return `<aside class="connect-panel" id="section-connect" data-connection><h2>${d.access === "whitelist" ? "Como participar" : "Entre no servidor"}</h2><span class="availability ${esc(availability.status)}" data-connection-availability>${esc(availability.statusText || "Status não confirmado")}</span><div class="edition-tabs" role="tablist" aria-label="Edição do Minecraft">${d.editions.map((v) => `<button role="tab" data-action="edition" data-edition="${v}" aria-selected="${edition === v}" tabindex="${edition === v ? 0 : -1}">${v}</button>`).join("")}</div><div class="address-field"><code>${esc(d.address)}</code><button data-action="copy-address" data-value="${esc(d.address)}" aria-label="Copiar endereço">${icon("copy")}</button>${canEdit() ? `<button data-action="inline-edit" data-key="address" aria-label="Editar endereço do servidor">${icon("pencil")}</button>` : ""}</div><p data-port class="port-note" ${edition === "Bedrock" ? "" : "hidden"}>Porta Bedrock: <strong>${esc(d.port || "19132")}</strong></p><button class="button full" data-action="join">${d.access === "whitelist" ? "Como pedir acesso" : "Como entrar"} ${icon("arrow-right")}</button><button class="follow-server" data-action="favorite" data-id="${esc(d.id)}" aria-pressed="${state.favorites.has(d.id)}">${icon("heart")} ${state.favorites.has(d.id) ? "Salvo nos favoritos" : "Guardar nos favoritos"}</button><div class="connection-details"><div><span>Modalidade</span><strong>${esc(d.mode)}</strong></div><div><span>Idioma</span><strong>${esc(d.language)}</strong></div><div><span>Versão</span><strong>${esc(d.version)}</strong></div></div><p class="connection-note">${d.example ? "Endereço de exemplo: não aceita conexões." : "Confirme a versão compatível com a equipe."}</p></aside>`;
+function connectionStatus(server, edition) {
+  const status = serverAvailability(server, edition);
+  const text = {
+    online: "Online",
+    offline: "Offline",
+    scheduled: "Em breve",
+    unknown: "Sem confirmação",
+  }[status];
+  const players = server.editionPlayers?.[edition];
+  const count = players ? (players.max ? `${players.online}/${players.max}` : String(players.online)) : "";
+  return { status, text, count };
 }
+
+function connectionAddress(server, edition) {
+  const bedrock = edition === "Bedrock";
+  return {
+    address: bedrock ? server.address.split(":")[0] : server.address,
+    port: bedrock ? server.port || "19132" : undefined,
+  };
+}
+
+function hasExampleAddress(server) {
+  return server.example
+    && (server.id !== "minha-pagina" || /\.example(?::\d+)?$/i.test(server.address));
+}
+
+function connectionField(label, value, { example, editable = false }) {
+  return `<div class="connection-field" data-connection-field>
+    <div class="connection-field-text">
+      <span>${label}</span>
+      <code data-copy-source tabindex="-1">${esc(value)}</code>
+    </div>
+    ${editable ? `<button type="button" class="connection-icon-button" data-action="inline-edit" data-key="address" aria-label="Editar endereço">${icon("pencil")}</button>` : ""}
+    ${example || !value ? "" : `<button type="button" class="connection-copy" data-action="copy-address" data-value="${esc(value)}" aria-label="Copiar ${label.toLowerCase()}">${icon("copy")}<span aria-hidden="true" data-copy-label>Copiar</span></button>`}
+    <span class="connection-copy-feedback" data-copy-feedback role="status"></span>
+  </div>`;
+}
+
+function connection(d) {
+  const edition = d.editions.includes(state.selectedEdition) ? state.selectedEdition : d.editions[0];
+  const multiple = d.editions.length > 1;
+  const editable = canEdit();
+  const example = hasExampleAddress(d);
+  const saved = state.favorites.has(d.id);
+  const favoriteLabel = saved ? "Remover dos favoritos" : "Guardar nos favoritos";
+  return `<aside class="connect-panel play-panel" id="section-connect" data-connection aria-labelledby="connect-heading">
+    <div class="connection-heading">
+      <div>
+        <h2 id="connect-heading">${d.access === "whitelist" ? "Como participar" : "Entre no servidor"}</h2>
+        <span class="connection-access">${icon(d.access === "whitelist" ? "lock" : "world")}${d.access === "whitelist" ? "Lista de acesso" : "Entrada livre"}</span>
+      </div>
+      <button type="button" class="follow-server connection-icon-button" data-action="favorite" data-id="${esc(d.id)}" aria-label="${favoriteLabel}" title="${favoriteLabel}" aria-pressed="${saved}">${icon("heart")}</button>
+    </div>
+    <div class="connection-content">
+      <div class="connection-editions">
+      ${multiple ? `<div class="edition-tabs" role="tablist" aria-label="Edição do Minecraft">${d.editions.map((v) => `<button type="button" id="connect-tab-${v}" role="tab" data-action="edition" data-edition="${v}" aria-controls="connect-${v}" aria-selected="${edition === v}" tabindex="${edition === v ? 0 : -1}">${icon(v === "Java" ? "device-desktop" : "device-mobile")}${v}</button>`).join("")}</div>` : ""}
+      ${d.editions.map((v) => {
+        const { address, port } = connectionAddress(d, v);
+        const { status, text, count } = connectionStatus(d, v);
+        return `<div class="connection-edition" id="connect-${v}" data-connect-edition="${v}" ${multiple ? `role="tabpanel" aria-labelledby="connect-tab-${v}"` : ""} ${edition === v ? "" : "hidden"}>
+          <div class="connection-status-line">
+            ${multiple ? "" : `<span class="connection-single-edition">${icon(v === "Java" ? "device-desktop" : "device-mobile")}${v}</span>`}
+            <span class="availability ${status}" data-connection-availability>${text}</span>
+            <span class="connection-players" data-connection-players ${count ? "" : "hidden"}>${icon("users")}<span class="sr-only">Jogadores conectados: </span><span data-connection-count>${count}</span></span>
+            ${d.version && !/^(a informar|consulte a equipe)$/i.test(d.version) ? `<span class="connection-version">${esc(d.version)}</span>` : ""}
+          </div>
+          <div class="connection-fields ${port ? "with-port" : ""}">
+            ${connectionField("Endereço", address, { example, editable })}
+            ${port ? connectionField("Porta", port, { example }) : ""}
+          </div>
+        </div>`;
+      }).join("")}
+      </div>
+      <button type="button" class="button connection-help" data-action="join">${d.access === "whitelist" ? "Pedir acesso" : "Como entrar"} ${icon("arrow-right")}</button>
+      ${example ? `<p class="connection-demo-note">${icon("alert-circle")} Exemplo de servidor. O endereço não aceita conexões.</p>` : ""}
+    </div>
+  </aside>`;
+}
+
 function updateConnectionAvailability() {
-  if (!activeServer?.official) return;
-  const badge = document.querySelector("[data-connection-availability]");
-  if (!badge) return;
-  const edition = state.selectedEdition || activeServer.editions[0];
-  const availability = withServerAvailability(activeServer, edition);
-  badge.className = `availability ${availability.status}`;
-  badge.textContent = availability.statusText;
+  if (!activeServer) return;
+  const server = withServerAvailability(activeServer);
+  document.querySelectorAll("[data-connect-edition]").forEach((panel) => {
+    const { status, text, count } = connectionStatus(server, panel.dataset.connectEdition);
+    const badge = panel.querySelector("[data-connection-availability]");
+    const players = panel.querySelector("[data-connection-players]");
+    badge.className = `availability ${status}`;
+    badge.textContent = text;
+    players.hidden = !count;
+    players.querySelector("[data-connection-count]").textContent = count;
+  });
 }
 function ownerBar() {
   return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">Publicar alterações ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
@@ -1002,7 +1138,7 @@ function ownerBar() {
 function serverDocument(d) {
   const ordered = d.modules;
   const editable = canEdit();
-  return `<article class="server-page ${d.font === "system" ? "font-system" : ""} ${d.layout === "compact" ? "compact-layout" : d.layout === "spotlight" && d.plan === "pro" ? "spotlight-layout" : ""}" style="${themeStyle(d)}"><div class="server-hero ${d.cover ? "" : "typographic"}" data-name="${esc(d.name)}">${cover(d)}<div class="hero-shade"></div>${editable ? `<button class="hero-edit button secondary small" data-action="media" data-target="cover">${icon("camera")} Alterar capa</button>` : ""}<div class="server-hero-copy">${d.official ? `<span class="official-label">${icon("shield-check")} Oficial da Força Aliada</span>` : ""}<div class="server-identity">${d.avatar ? `<div class="server-avatar">${`<img src="${esc(d.avatar)}" alt="Foto de ${esc(d.name)}">`}${editable ? `<button data-action="media" data-target="avatar" aria-label="Alterar foto do servidor">${icon("camera")}</button>` : ""}</div>` : editable ? `<button class="server-avatar avatar-empty" data-action="media" data-target="avatar" aria-label="Adicionar foto do servidor">${icon("camera")}</button>` : ""}<div>${editText(d, "name", d.name, "h1")}${editText(d, "summary", d.summary, "p", "Adicione uma apresentação curta.")}</div></div></div></div><div class="server-subnav"><div>${d.modules.includes("about") ? '<button data-action="page-section" data-id="section-about">Visão geral</button>' : ""}${d.modules.includes("gallery") && d.gallery?.length ? '<button data-action="page-section" data-id="section-gallery">Imagens</button>' : ""}${d.modules.includes("news") && d.newsTitle ? '<button data-action="page-section" data-id="section-news">Novidades</button>' : ""}${d.modules.includes("event") && d.eventTitle ? '<button data-action="page-section" data-id="section-event">Encontros</button>' : ""}<button data-action="page-section" data-id="section-connect">Como entrar</button></div>${d.example ? "<span>Servidor de demonstração</span>" : ""}</div><div class="server-layout"><div class="server-main"><div class="server-meta">${[...d.editions, d.mode, d.language].map((v) => `<span class="tag">${esc(v)}</span>`).join("")}</div>${ordered.map((id) => serverSection(id, d)).join("")}${editable ? `<button class="add-section" data-action="settings" data-tab="sections">${icon("plus")} Adicionar ou organizar seções</button>` : ""}</div>${connection(d)}</div><div class="server-bottom"><span>Uma página <a href="#/">Força Aliada Servidores</a></span><button class="text-link" data-action="create">Crie a sua, grátis ${icon("arrow-right")}</button></div></article>`;
+  return `<article class="server-page ${d.font === "system" ? "font-system" : ""} ${d.layout === "compact" ? "compact-layout" : d.layout === "spotlight" && d.plan === "pro" ? "spotlight-layout" : ""}" style="${themeStyle(d)}"><div class="server-hero ${d.cover ? "" : "typographic"}" data-name="${esc(d.name)}">${cover(d)}<div class="hero-shade"></div>${editable ? `<button class="hero-edit button secondary small" data-action="media" data-target="cover">${icon("camera")} Alterar capa</button>` : ""}<div class="server-hero-copy">${d.official ? `<span class="official-label">${icon("shield-check")} Oficial da Força Aliada</span>` : ""}<div class="server-identity">${d.avatar ? `<div class="server-avatar">${`<img src="${esc(d.avatar)}" alt="Foto de ${esc(d.name)}">`}${editable ? `<button data-action="media" data-target="avatar" aria-label="Alterar foto do servidor">${icon("camera")}</button>` : ""}</div>` : editable ? `<button class="server-avatar avatar-empty" data-action="media" data-target="avatar" aria-label="Adicionar foto do servidor">${icon("camera")}</button>` : ""}<div>${editText(d, "name", d.name, "h1")}${editText(d, "summary", d.summary, "p", "Adicione uma apresentação curta.")}</div></div></div></div><div class="container server-play-band">${connection(d)}</div><div class="server-subnav"><div>${d.modules.includes("about") ? '<button data-action="page-section" data-id="section-about">Visão geral</button>' : ""}${d.modules.includes("gallery") && d.gallery?.length ? '<button data-action="page-section" data-id="section-gallery">Imagens</button>' : ""}${d.modules.includes("news") && d.newsTitle ? '<button data-action="page-section" data-id="section-news">Novidades</button>' : ""}${d.modules.includes("event") && d.eventTitle ? '<button data-action="page-section" data-id="section-event">Encontros</button>' : ""}<button data-action="page-section" data-id="section-connect">Como entrar</button></div>${d.example ? "<span>Servidor de demonstração</span>" : ""}</div><div class="server-layout"><div class="server-main"><div class="server-meta">${[...d.editions, d.mode, d.language].map((v) => `<span class="tag">${esc(v)}</span>`).join("")}</div>${ordered.map((id) => serverSection(id, d)).join("")}${editable ? `<button class="add-section" data-action="settings" data-tab="sections">${icon("plus")} Adicionar ou organizar seções</button>` : ""}</div></div><div class="server-bottom"><span>Uma página <a href="#/">Força Aliada Servidores</a></span><button class="text-link" data-action="create">Crie a sua, grátis ${icon("arrow-right")}</button></div></article>`;
 }
 function renderPage(id) {
   activeServer =
@@ -1248,12 +1384,13 @@ function showJoin() {
   const edition = d.editions.includes(state.selectedEdition)
     ? state.selectedEdition
     : d.editions[0];
-  const notice = d.example
+  const example = hasExampleAddress(d);
+  const notice = example
     ? '<div class="notice">Este endereço é demonstrativo e não aceita conexões.</div>'
     : "";
   if (d.access === "whitelist") {
     const contact = safeLink(d.discord) || safeLink(d.website);
-    const action = contact && !d.example
+    const action = contact && !example
       ? `<a class="button full" href="${esc(contact)}" target="_blank" rel="noopener noreferrer ugc">Falar com a equipe ${icon("external-link")}</a>`
       : '<button class="button secondary full" data-action="close-dialog">Voltar à página</button>';
     openDialog(`<h2 id="dialog-title">Como pedir acesso</h2>
@@ -1264,6 +1401,7 @@ function showJoin() {
   }
 
   const bedrock = edition === "Bedrock";
+  const { address, port } = connectionAddress(d, edition);
   const instructions = bedrock
     ? "No celular ou PC, abra Jogar → Servidores → Adicionar servidor."
     : "Acesse Multijogador → Adicionar servidor.";
@@ -1277,34 +1415,48 @@ function showJoin() {
       <li>${instructions}</li>
       <li>Informe o endereço${bedrock ? " e a porta" : ""} abaixo.</li>
     </ol>
-    <div class="address-field"><code data-copy-source tabindex="-1">${esc(d.address)}</code></div>
-    ${bedrock ? `<p>Porta Bedrock: <strong>${esc(d.port || "19132")}</strong>.</p>
+    <div class="address-field"><code data-copy-source tabindex="-1">${esc(address)}</code></div>
+    ${bedrock ? `<p>Porta Bedrock: <strong>${esc(port)}</strong>.</p>
       <p class="field-help">Em alguns consoles, a opção de adicionar servidores personalizados pode não aparecer.</p>` : ""}
     <p class="field-help" data-copy-feedback role="status"></p>
-    ${d.example
+    ${example
       ? '<button class="button secondary full" data-action="close-dialog">Voltar à página</button>'
-      : `<button class="button full" data-action="copy-address" data-value="${esc(d.address)}">${icon("copy")} <span data-copy-label>Copiar endereço</span></button>`}`);
+      : `<button class="button full" data-action="copy-address" data-value="${esc(address)}">${icon("copy")} <span data-copy-label>Copiar endereço</span></button>`}`);
 }
 async function copyText(text, trigger) {
-  const scope = trigger?.closest(".card-address, dialog");
+  const scope = trigger?.closest(".card-address, [data-connection-field], dialog");
   const feedback = scope?.querySelector("[data-copy-feedback]");
   const isCard = scope?.classList.contains("card-address");
+  const isConnection = scope?.hasAttribute("data-connection-field");
+  const fieldLabel = scope?.querySelector(".connection-field-text > span")?.textContent;
   try {
     await navigator.clipboard.writeText(text);
     if (feedback?.isConnected) {
-      feedback.textContent = "Endereço copiado.";
+      feedback.textContent = fieldLabel === "Porta" ? "Porta copiada." : "Endereço copiado.";
       scope.classList.remove("copy-failed");
       const label = trigger.querySelector("[data-copy-label]");
-      if (label) label.textContent = isCard ? "Copiado" : "Copiar novamente";
+      if (label) label.textContent = isCard || isConnection ? "Copiado" : "Copiar novamente";
+      if (isConnection) {
+        trigger.querySelector(".icon").dataset.icon = "check";
+        trigger.classList.add("copied");
+        paintIcons(trigger);
+      }
     } else {
       toast("Endereço copiado.");
     }
   } catch {
     if (feedback?.isConnected) {
-      feedback.textContent = "A cópia automática não está disponível. Copie o endereço selecionado.";
+      feedback.textContent = isConnection
+        ? "A cópia automática falhou. Copie o valor selecionado."
+        : "A cópia automática não está disponível. Copie o endereço selecionado.";
       scope.classList.add("copy-failed");
       const label = trigger.querySelector("[data-copy-label]");
-      if (label) label.textContent = isCard ? "Copiar" : "Copiar endereço";
+      if (label) label.textContent = isCard || isConnection ? "Copiar" : "Copiar endereço";
+      if (isConnection) {
+        trigger.querySelector(".icon").dataset.icon = "copy";
+        trigger.classList.remove("copied");
+        paintIcons(trigger);
+      }
       const source = scope.querySelector("[data-copy-source]");
       if (source) {
         source.focus();
@@ -1414,6 +1566,8 @@ function route({ focus = true } = {}) {
     const edition = params.get("edition");
     state.selectedEdition = ["Java", "Bedrock"].includes(edition) ? edition : undefined;
     renderPage(id);
+    if (SERVERS.some((server) => server.id === id) || (id === "minha-pagina" && state.publication?.visibility === "listed"))
+      setRecentServers([id, ...recentlyViewed.filter((entry) => entry !== id)].slice(0, 8));
     document.title = `${activeServer?.name || "Servidor"} · Servidores de Minecraft · Prévia`;
   } else if (path === "/editor") {
     if (state.created) {
@@ -1451,10 +1605,14 @@ function route({ focus = true } = {}) {
           (card) => card.dataset.id === catalogReturn.id
             && (!catalogReturn.shelf || card.closest("[data-shelf]")?.dataset.shelf === catalogReturn.shelf),
         )?.querySelector(".card-heading a")
-      : catalogReturn?.featured ? document.querySelector("#featured a.button")
+      : catalogReturn?.featured ? document.querySelector(catalogReturn.stage ? ".catalog-stage-caption" : "#featured a.button")
       : [...document.querySelectorAll(".catalog-shelf")].find(
           (shelf) => shelf.dataset.shelf === catalogReturn?.shelf,
         )?.querySelector(".shelf-heading h3 a");
+    if (!returnLink && path === "/" && params.size && !catalogReturn) {
+      focusCatalogHeading();
+      return;
+    }
     (returnLink || main).focus({ preventScroll: true });
     window.scrollTo({ top: catalogReturn?.scroll || 0, behavior: "instant" });
   }
@@ -1500,12 +1658,13 @@ document.addEventListener("click", (e) => {
   const tools = document.querySelector(".tools-menu");
   if (tools?.open && (!e.target.closest(".tools-menu") || e.target.closest(".tools-popover a, .compact-create-link")))
     tools.open = false;
-  const catalogLink = e.target.closest('#results .card-heading a, #results .shelf-heading a, #featured a.button');
+  const catalogLink = e.target.closest('#results .card-heading a, #results a.card-picture-link, #results .shelf-heading a, #featured a.button, .catalog-stage-caption');
   if (catalogLink && !e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
     history.replaceState({
       catalogReturn: {
         id: catalogLink.closest(".server-card")?.dataset.id,
-        featured: Boolean(catalogLink.closest("#featured")),
+        featured: Boolean(catalogLink.closest("#featured, .catalog-stage-art")),
+        stage: catalogLink.classList.contains("catalog-stage-caption"),
         scroll: window.scrollY,
         shelves: shelfPositions(),
         shelf: catalogLink.closest("[data-shelf]")?.dataset.shelf,
@@ -1547,10 +1706,11 @@ document.addEventListener("click", (e) => {
       }
     });
   } else if (a === "mode" || a === "collection") {
-    if (a === "mode" && !b.dataset.value) delete state.filters.feature;
+    delete state.filters.feature;
     state.filters.mode =
       (state.filters.mode || "") === b.dataset.value ? "" : b.dataset.value;
     updateResults();
+    animateCatalogResults();
     if (a === "collection")
       document
         .querySelector("#catalog-results")
@@ -1574,9 +1734,28 @@ document.addEventListener("click", (e) => {
   } else if (a === "clear-panel-filters") {
     for (const key of panelFilters) delete state.filters[key];
     updateResults();
+  } else if (a === "quick-edition") {
+    state.filters.edition = state.filters.edition === b.dataset.value ? "" : b.dataset.value;
+    updateResults();
+    animateCatalogResults();
+  } else if (a === "quick-online") {
+    state.filters.status = state.filters.status === "online" ? "" : "online";
+    updateResults();
+    animateCatalogResults();
   } else if (a === "favorites") {
+    delete state.filters.recent;
     state.filters.favorites = state.filters.favorites ? "" : true;
     updateResults();
+    animateCatalogResults();
+  } else if (a === "recent") {
+    delete state.filters.favorites;
+    state.filters.recent = state.filters.recent ? "" : true;
+    updateResults();
+    animateCatalogResults();
+  } else if (a === "clear-recent") {
+    setRecentServers([]);
+    updateResults();
+    focusCatalogHeading();
   } else if (a === "more-results") {
     const previous = catalogLimit;
     catalogLimit += CATALOG_BATCH;
@@ -1629,8 +1808,9 @@ document.addEventListener("click", (e) => {
     persist();
     if (activeServer) {
       b.setAttribute("aria-pressed", String(saved));
-      b.innerHTML = `${icon("heart")} ${saved ? "Salvo nos favoritos" : "Guardar nos favoritos"}`;
-      paintIcons(b);
+      const label = saved ? "Remover dos favoritos" : "Guardar nos favoritos";
+      b.setAttribute("aria-label", label);
+      b.title = label;
     } else if (state.filters.favorites) {
       const hearts = [...document.querySelectorAll('#results [data-action="favorite"]')];
       const position = hearts.indexOf(b);
@@ -1641,10 +1821,20 @@ document.addEventListener("click", (e) => {
       else focusCatalogHeading();
     } else {
       const server = availableServers().find((entry) => entry.id === id);
-      b.setAttribute("aria-pressed", String(saved));
-      if (server) b.setAttribute("aria-label", saved
-        ? `Remover dos favoritos: ${server.name}`
-        : `Favoritar ${server.name}`);
+      for (const button of main.querySelectorAll(".card-favorite")) {
+        if (button.dataset.id !== id) continue;
+        button.setAttribute("aria-pressed", String(saved));
+        if (server) button.setAttribute("aria-label", saved
+          ? `Remover dos favoritos: ${server.name}`
+          : `Favoritar ${server.name}`);
+      }
+      if (saved && e.detail && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        b.querySelector(".icon")?.animate?.([
+          { transform: "scale(.84)" },
+          { transform: "scale(1.22)", offset: .55 },
+          { transform: "scale(1)" },
+        ], { duration: 260, easing: "cubic-bezier(.23, 1, .32, 1)" });
+      }
     }
     toast(saved ? "Servidor guardado nos favoritos." : "Servidor removido dos favoritos.");
   } else if (a === "copy-address") copyText(b.dataset.value, b);
@@ -1655,15 +1845,18 @@ document.addEventListener("click", (e) => {
       n.setAttribute("aria-selected", String(n === b));
       n.tabIndex = n === b ? 0 : -1;
     });
-    panel.querySelector("[data-port]").hidden =
-      state.selectedEdition !== "Bedrock";
-    updateConnectionAvailability();
+    panel.querySelectorAll("[data-connect-edition]").forEach((n) => {
+      n.hidden = n.dataset.connectEdition !== state.selectedEdition;
+    });
   } else if (a === "join") showJoin();
   else if (a === "community") showCommunity();
   else if (a === "page-section") {
     const target = document.getElementById(b.dataset.id);
     if (target) {
-      target.scrollIntoView({ block: "start", behavior: "smooth" });
+      target.scrollIntoView({
+        block: "start",
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      });
       target.setAttribute("tabindex", "-1");
       target.focus({ preventScroll: true });
     }

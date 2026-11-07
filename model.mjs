@@ -323,6 +323,7 @@ export function catalogFilters(params) {
     if (values.includes(value)) filters[key] = value;
   }
   if (["true", "1"].includes(params.get("favorites"))) filters.favorites = true;
+  else if (["true", "1"].includes(params.get("recent"))) filters.recent = true;
   if (!filters.status && ["true", "1"].includes(params.get("online"))) filters.status = "online";
   return filters;
 }
@@ -366,12 +367,16 @@ export function readProviderIcon(value) {
     : undefined;
 }
 
+export function catalogEdition(filters = {}, terms = normalize(filters.q).trim().split(/\s+/)) {
+  const queryEditions = ["Java", "Bedrock"].filter((edition) => terms.includes(edition.toLowerCase()));
+  return filters.edition || (queryEditions.length === 1 ? queryEditions[0] : "");
+}
+
 export function filterServers(servers, filters = {}) {
   const query = normalize(filters.q).trim().replace(/\s+/g, " ");
   const terms = query ? query.split(" ") : [];
   const statusTerms = { online: "online", "on-line": "online", offline: "offline", "off-line": "offline" };
-  const queryEditions = ["Java", "Bedrock"].filter((edition) => terms.includes(edition.toLowerCase()));
-  const edition = filters.edition || (queryEditions.length === 1 ? queryEditions[0] : "");
+  const edition = catalogEdition(filters, terms);
   const statusFilter = filters.status || (filters.online ? "online" : "");
   const ranked = [];
 
