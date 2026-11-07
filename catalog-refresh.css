@@ -1,34 +1,36 @@
-/* A field atlas of Minecraft worlds: paper, spruce, sky, and clay. */
+/* One action family, neutral browsing surfaces, and a restrained warm editorial accent. */
 body:is([data-surface="discovery"], [data-surface="server"]) {
-  --finder-ground: #f3f1e9;
-  --finder-panel: #fffdf7;
-  --finder-ink: #222a24;
-  --finder-muted: #4f5b50;
-  --finder-line: #cecfc2;
-  --finder-spruce: #202e27;
-  --finder-dark-panel: #2b3a31;
-  --finder-chalk: #f8f6e9;
-  --finder-dark-muted: #d3ddca;
-  --finder-leaf: #b9df86;
-  --finder-leaf-hover: #cceaa3;
-  --finder-action: #345c32;
-  --finder-action-hover: #284b26;
-  --finder-selected: #dfe9d5;
-  --finder-focus: #467a42;
-  --finder-seal: #77592e;
-  --finder-seal-bg: #f4e1b7;
-  --finder-java: #eee6d5;
-  --finder-java-ink: #514127;
-  --finder-bedrock: #d5e8ef;
-  --finder-bedrock-ink: #254e5c;
-  --finder-sky: #d6e7ed;
-  --finder-sky-action: #245c72;
-  --finder-clay: #eddbc3;
-  --finder-clay-action: #754823;
-  --finder-online: #c4eaa1;
-  --finder-offline: #f5beb0;
-  --finder-favorite: #873d2d;
-  --finder-favorite-bg: #f3c5b2;
+  --finder-ground: #f7f8f6;
+  --finder-panel: #fff;
+  --finder-ink: #202524;
+  --finder-muted: #505a57;
+  --finder-line: #d9dfdc;
+  --finder-night: #1c2221;
+  --finder-dark-panel: #303a36;
+  --finder-chalk: #fffdfa;
+  --finder-dark-muted: #dce4df;
+  --finder-leaf: #40d679;
+  --finder-leaf-hover: #70e69a;
+  --finder-brand-bright: #40d679;
+  --finder-brand-bright-hover: #70e69a;
+  --finder-action: #167542;
+  --finder-action-hover: #105b32;
+  --finder-selected: #e5eae7;
+  --finder-focus: #167542;
+  --finder-seal: #68430e;
+  --finder-seal-bg: #f5d88d;
+  --finder-java: #edf0ee;
+  --finder-java-ink: #323d37;
+  --finder-bedrock: #edf0ee;
+  --finder-bedrock-ink: #323d37;
+  --finder-editorial: #f3e7c9;
+  --finder-sky-art: #d6e5ec;
+  --finder-art-ground: #d6e5ec;
+  --finder-online: #40d679;
+  --finder-offline: #ffb4ab;
+  --finder-error-ink: #ab2c3d;
+  --finder-favorite: #bf2945;
+  --finder-favorite-bg: #fff5f6;
   --finder-ease: cubic-bezier(.2,.75,.24,1);
 }
 
@@ -38,15 +40,15 @@ body[data-surface="discovery"] {
 }
 
 body:is([data-surface="discovery"], [data-surface="server"]) :is(.site-header, .site-footer) {
-  background: var(--finder-spruce);
-  border-color: #36453b;
+  background: var(--finder-night);
+  border-color: #404a45;
 }
 body:is([data-surface="discovery"], [data-surface="server"]) .main-nav > [aria-current="page"] {
-  color: var(--finder-leaf);
+  color: var(--finder-chalk);
 }
-body:is([data-surface="discovery"], [data-surface="server"]) .main-nav > [aria-current="page"]::after { background: var(--finder-leaf); }
+body:is([data-surface="discovery"], [data-surface="server"]) .main-nav > [aria-current="page"]::after { background: var(--finder-brand-bright); }
 body:is([data-surface="discovery"], [data-surface="server"]) .prototype-note {
-  background: #e9e4d7;
+  background: #f1f0eb;
   color: var(--finder-ink);
 }
 body:is([data-surface="discovery"], [data-surface="server"]) .prototype-note span { color: var(--finder-muted); }
@@ -73,7 +75,7 @@ body[data-surface="discovery"] #main ::selection {
   grid-template-columns: 1fr 1fr;
   min-height: 224px;
   border-radius: 18px;
-  background: var(--finder-spruce);
+  background: var(--finder-night);
 }
 .catalog-stage .catalog-intro {
   z-index: 1;
@@ -103,15 +105,27 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-masthead .catalog-stage .catalog-search-area { padding: 0; }
 .catalog-stage .search-form {
   width: 100%;
-  min-height: 53px;
-  padding: 4px 5px 4px 13px;
+  min-height: 48px;
+  padding: 0;
   gap: 8px;
   border: 0;
-  background: var(--finder-panel);
-  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
 }
-.catalog-stage .search-form > .icon { color: var(--finder-muted); flex: 0 0 19px; }
-.catalog-stage .search-form:focus-within { outline: 2px solid var(--finder-leaf); outline-offset: 3px; }
+.catalog-search-field {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--finder-panel);
+  border-radius: 9px;
+}
+.catalog-search-field > .icon { color: var(--finder-muted); flex: 0 0 19px; }
+.catalog-stage .search-form:focus-within { outline: none; }
+.catalog-search-field:focus-within { outline: 2px solid var(--finder-brand-bright); outline-offset: 3px; }
 .catalog-stage .search-form input {
   min-width: 0;
   color: var(--finder-ink);
@@ -120,15 +134,16 @@ body[data-surface="discovery"] #main ::selection {
 }
 .catalog-stage .search-form input::placeholder { color: var(--finder-muted); opacity: 1; }
 .catalog-stage .search-form > .button {
-  background: var(--finder-leaf);
-  color: var(--finder-spruce);
+  background: var(--finder-brand-bright);
+  color: var(--finder-night);
   border: 0;
-  min-height: 44px;
+  min-height: 48px;
+  flex: 0 0 auto;
   padding-inline: 13px;
   font-weight: 850;
   transition: background-color 140ms, transform 240ms var(--finder-ease);
 }
-.catalog-stage .search-form > .button:hover { background: var(--finder-leaf-hover); transform: translateY(-1px); }
+.catalog-stage .search-form > .button:hover { background: var(--finder-brand-bright-hover); transform: translateY(-1px); }
 .catalog-stage .search-form > .button:active { transform: scale(.96); }
 .catalog-stage-art {
   position: relative;
@@ -156,12 +171,12 @@ body[data-surface="discovery"] #main ::selection {
   right: 13px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--finder-spruce);
+  background: var(--finder-night);
   color: var(--finder-chalk);
   font-size: 11px;
   font-weight: 800;
 }
-.catalog-stage-caption .icon { width: 15px; height: 15px; color: var(--finder-leaf); }
+.catalog-stage-caption .icon { width: 15px; height: 15px; color: var(--finder-brand-bright); }
 .catalog-stage-caption:hover { background: var(--finder-dark-panel); }
 .catalog-stage-caption .icon:last-child { transition: transform 240ms var(--finder-ease); }
 @media (hover:hover) {
@@ -205,11 +220,11 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main .catalog-toolbar .chip[hidden] { display: none; }
 .catalog-main .catalog-toolbar .filter-more {
   background: var(--finder-panel);
-  border-color: #858c80;
+  border-color: #7d8982;
   color: var(--finder-ink);
   margin-inline-start: auto;
 }
-.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover { background: #e8e9df; color: var(--finder-ink); }
+.catalog-main .catalog-toolbar :is(.chip,.filter-more):hover { background: #e5eae7; color: var(--finder-ink); }
 .catalog-main .catalog-toolbar :is(.chip,.filter-more):active { transform: scale(.96); }
 .catalog-main .catalog-toolbar .icon { width: 16px; height: 16px; }
 .catalog-main .catalog-toolbar .chip[aria-pressed="true"],
@@ -238,7 +253,7 @@ body[data-surface="discovery"] #main ::selection {
   min-width: 0;
   padding: 0 7px;
   color-scheme: light;
-  border: 1px solid #858c80;
+  border: 1px solid #7d8982;
   border-radius: 8px;
   background: var(--finder-panel);
   color: var(--finder-ink);
@@ -258,8 +273,8 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main :is(.filter-panel-actions,.active-filters,.catalog-section-heading,.empty) .text-link { color: var(--finder-action); }
 .catalog-main .filter-count { background: var(--finder-selected); color: var(--finder-ink); }
 .catalog-main .active-filters { margin-block: 4px 11px; }
-.catalog-main .active-filter { background: var(--finder-selected); color: var(--finder-ink); border-color: #9da995; }
-.catalog-main .active-filter:hover { background: #d4e4c9; }
+.catalog-main .active-filter { background: var(--finder-selected); color: var(--finder-ink); border-color: #95a39b; }
+.catalog-main .active-filter:hover { background: #d5dfd8; }
 .catalog-main .catalog-section-heading {
   display: flex;
   align-items: center;
@@ -284,12 +299,12 @@ body[data-surface="discovery"] #main ::selection {
 .catalog-main .results-grid.results-shelves { gap: 24px; }
 .catalog-main .shelf-heading { margin-bottom: 6px; }
 .catalog-main .shelf-heading h3 { font-weight: 850; }
-.catalog-main .shelf-heading h3 .icon { color: var(--finder-action); transition: transform 220ms var(--finder-ease); }
+.catalog-main .shelf-heading h3 .icon { color: var(--finder-muted); transition: transform 220ms var(--finder-ease); }
 .catalog-main .shelf-heading h3 a:hover .icon { transform: translateX(4px); }
 .catalog-main .shelf-actions > a { color: var(--finder-muted); }
 .catalog-main .shelf-actions button { background: var(--finder-panel); border-color: var(--finder-line); color: var(--finder-ink); min-width: 44px; min-height: 44px; }
 .catalog-main .shelf-actions button:hover:not(:disabled) { background: var(--finder-selected); }
-.catalog-main .shelf-track { scrollbar-color: #7b8676 transparent; }
+.catalog-main .shelf-track { scrollbar-color: #7d8982 transparent; }
 .catalog-main .shelf-track.is-dragging { cursor: grabbing; }
 @media (min-width: 1080px) {
   .catalog-main [data-shelf-size="3"] .shelf-track {
@@ -298,22 +313,23 @@ body[data-surface="discovery"] #main ::selection {
 }
 
 body[data-surface="discovery"] #featured {
-  background: var(--finder-spruce);
+  background: var(--finder-night);
   border-color: transparent;
 }
 body[data-surface="discovery"] #featured .featured-copy :is(p,.feature-disclosure) { color: var(--finder-dark-muted); }
-body[data-surface="discovery"] #featured .button { background: var(--finder-leaf); color: var(--finder-spruce); }
+body[data-surface="discovery"] #featured .button { background: var(--finder-brand-bright); color: var(--finder-night); }
 body[data-surface="discovery"] #featured .tag { background: var(--finder-dark-panel); color: var(--finder-chalk); }
-body[data-surface="discovery"] .player-studio { background: var(--finder-sky); }
+body[data-surface="discovery"] #featured .featured-copy { background: var(--finder-night); }
+body[data-surface="discovery"] .player-studio { background: var(--finder-editorial); }
 body[data-surface="discovery"] .player-studio-copy h2 { color: var(--finder-ink); }
-body[data-surface="discovery"] .player-studio-copy p { color: var(--finder-muted); }
-body[data-surface="discovery"] .player-studio-copy a { color: var(--finder-sky-action); }
-body[data-surface="discovery"] .player-studio-art > span { background: var(--finder-sky-action); color: var(--finder-chalk); }
-body[data-surface="discovery"] .join-platform { background: var(--finder-clay); color: var(--finder-ink); }
+body[data-surface="discovery"] .player-studio-copy p { color: #5f5137; }
+body[data-surface="discovery"] .player-studio-copy a { color: var(--finder-ink); }
+body[data-surface="discovery"] .player-studio-art > span { background: var(--finder-night); color: var(--finder-chalk); }
+body[data-surface="discovery"] .join-platform { background: var(--finder-panel); color: var(--finder-ink); border-top: 1px solid var(--finder-line); }
 body[data-surface="discovery"] .join-platform h2 { color: var(--finder-ink); }
 body[data-surface="discovery"] .join-platform p { color: var(--finder-muted); }
-body[data-surface="discovery"] .join-platform .publisher-manager { color: var(--finder-clay-action); }
-body[data-surface="discovery"] .join-platform .button { background: var(--finder-clay-action); color: var(--finder-chalk); }
+body[data-surface="discovery"] .join-platform .publisher-manager { color: var(--finder-action); }
+body[data-surface="discovery"] .join-platform .button { background: var(--finder-action); color: var(--finder-chalk); }
 
 @keyframes finder-open {
   from { opacity: .55; transform: translateY(-6px); }
@@ -329,7 +345,7 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(90deg,var(--finder-spruce) 10%,#202e27c4 63%,#202e2760);
+    background: linear-gradient(90deg,var(--finder-night) 10%,#1c2221d8 63%,#1c222157);
   }
   .catalog-stage-caption { display: none; }
   .catalog-stage .catalog-search-area { max-width: 485px; }
@@ -353,12 +369,32 @@ body[data-surface="discovery"] .join-platform .button { background: var(--finder
 }
 
 body[data-surface="discovery"] :is(.catalog-stage, #featured) :focus-visible {
-  outline-color: var(--finder-leaf);
+  outline-color: var(--finder-brand-bright);
 }
 body[data-surface="discovery"] #featured .featured-copy h2 { color: var(--finder-chalk); }
-body[data-surface="discovery"] #featured .feature-reel button[aria-pressed="true"] { border-color: var(--finder-leaf); }
-body[data-surface="discovery"] .join-platform .button:hover { background: #5e371a; }
+body[data-surface="discovery"] #featured .feature-reel button[aria-pressed="true"] { outline-color: var(--finder-brand-bright); }
+body[data-surface="discovery"] .join-platform .button:hover { background: var(--finder-action-hover); }
 .catalog-main :is(.catalog-filter-panel,.catalog-more,.empty) .button:hover {
   background: var(--finder-action-hover);
   color: var(--finder-chalk);
 }
+
+body[data-surface="discovery"] #featured .button:hover {
+  background: var(--finder-brand-bright-hover);
+  color: var(--finder-night);
+}
+body[data-surface="discovery"] .player-studio :focus-visible { outline-color: var(--finder-ink); }
+
+/* Utility controls remain subordinate to search, even on dark surfaces. */
+body:is([data-surface="discovery"], [data-surface="server"]) .header-create {
+  background: var(--finder-dark-panel);
+  color: var(--finder-chalk);
+}
+body:is([data-surface="discovery"], [data-surface="server"]) .header-create:hover { background: #46524b; }
+body:is([data-surface="discovery"], [data-surface="server"]) .catalog-help summary {
+  background: var(--finder-night);
+  color: var(--finder-chalk);
+}
+body[data-surface="discovery"] .player-studio-art:hover > span { background: #46524b; color: var(--finder-chalk); }
+body:is([data-surface="discovery"], [data-surface="server"]) .site-footer :is(p, a, small) { color: var(--finder-dark-muted); }
+body:is([data-surface="discovery"], [data-surface="server"]) .site-footer a:hover { color: var(--finder-chalk); }

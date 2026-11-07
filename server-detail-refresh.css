@@ -38,7 +38,7 @@
 
 .official-server .official-hero-actions .button:not(.secondary) {
   background: var(--finder-leaf);
-  color: var(--finder-spruce);
+  color: var(--finder-night);
 }
 
 .official-server .official-entry {
@@ -49,8 +49,8 @@
   --play-ink: var(--finder-chalk);
   --play-muted: var(--finder-dark-muted);
   --play-surface: var(--finder-dark-panel);
-  --play-lime: var(--finder-leaf);
-  --play-dark: var(--finder-spruce);
+  --play-copy: var(--finder-brand-bright);
+  --play-dark: var(--finder-night);
   position: static;
   display: grid;
   grid-template-columns: minmax(13rem, 0.25fr) minmax(0, 1fr);
@@ -61,13 +61,13 @@
   padding: clamp(16px, 2.25vw, 28px);
   border: 0;
   border-radius: 14px;
-  background: var(--finder-spruce);
+  background: var(--finder-night);
   color: var(--play-ink);
   scroll-margin-top: 100px;
 }
 
 .play-panel :focus-visible {
-  outline: 2px solid var(--play-lime);
+  outline: 2px solid var(--finder-brand-bright);
   outline-offset: 3px;
 }
 
@@ -113,7 +113,7 @@
   height: 40px;
   min-height: 40px;
   padding: 0;
-  border: 1px solid #536758;
+  border: 1px solid #77889c;
   border-radius: 9px;
   margin: 0;
   background: transparent;
@@ -128,9 +128,9 @@
 }
 
 .play-panel .follow-server[aria-pressed="true"] {
-  color: var(--finder-favorite-bg);
-  background: #55382e;
-  border-color: #a67461;
+  color: var(--finder-favorite);
+  background: var(--finder-favorite-bg);
+  border-color: var(--finder-favorite-bg);
 }
 
 .play-panel .edition-tabs {
@@ -165,7 +165,7 @@
 
 .play-panel .edition-tabs button[aria-selected="true"] {
   color: var(--play-dark);
-  background: var(--play-lime);
+  background: var(--finder-panel);
   box-shadow: none;
 }
 
@@ -269,7 +269,7 @@
   padding: 0 9px;
   border: 0;
   border-radius: 6px;
-  background: var(--play-lime);
+  background: var(--play-copy);
   color: var(--play-dark);
   font-size: 12px;
   font-weight: 850;
@@ -300,7 +300,7 @@
 .play-panel .button.connection-help {
   min-height: 50px;
   background: transparent;
-  border: 1px solid #536758;
+  border: 1px solid #77889c;
   color: var(--play-ink);
   border-radius: 9px;
   padding-inline: 11px;
@@ -345,7 +345,7 @@
 @media (hover: hover) and (pointer: fine) {
   .play-panel .connection-icon-button:hover,
   .play-panel .connection-help:hover {
-    background: #354a3c;
+    background: #3b4b5f;
     color: var(--play-ink);
   }
 
@@ -354,7 +354,7 @@
   }
 
   .play-panel .edition-tabs button:not([aria-selected="true"]):hover {
-    background: #354a3c;
+    background: #3b4b5f;
     color: var(--play-ink);
   }
 }

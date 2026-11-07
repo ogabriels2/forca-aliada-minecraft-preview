@@ -118,7 +118,16 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
       <div class="catalog-intro">
         <h1>Servidores de <em>Minecraft</em></h1>
         <p>Encontre seu próximo mundo.</p>
-        <div class="catalog-search-area"><form class="search-form" id="search-form" role="search">${icon("search")}<label class="sr-only" for="server-search">Buscar servidores</label><input id="server-search" name="q" type="search" placeholder="Nome, IP ou estilo de jogo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160"><button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button></form></div>
+        <div class="catalog-search-area">
+          <form class="search-form" id="search-form" role="search">
+            <div class="catalog-search-field">
+              ${icon("search")}
+              <label class="sr-only" for="server-search">Buscar servidores</label>
+              <input id="server-search" name="q" type="search" placeholder="Nome, IP ou estilo de jogo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160">
+            </div>
+            <button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button>
+          </form>
+        </div>
       </div>
       <div class="catalog-stage-art">
         <img src="./shared/images/galeria14.webp" width="1200" height="675" alt="" fetchpriority="high" decoding="async">
