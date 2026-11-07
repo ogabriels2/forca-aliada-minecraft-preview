@@ -371,7 +371,7 @@ function updateResults() {
   document
     .querySelector('[data-action="favorites"]')
     ?.setAttribute("aria-pressed", String(Boolean(state.filters.favorites)));
-  const advancedCount = ["language", "online", "access"].filter(
+  const advancedCount = ["edition", "language", "online", "access", "sort"].filter(
     (key) => state.filters[key],
   ).length;
   const filterCount = document.querySelector(".filter-count");
@@ -380,9 +380,8 @@ function updateResults() {
   const search = document.querySelector("#server-search");
   if (search && search.value !== (state.filters.q || ""))
     search.value = state.filters.q || "";
-  document.querySelectorAll("#filters select, #extra-filters select").forEach((select) => {
-    select.value =
-      state.filters[select.name] || (select.name === "sort" ? "relevance" : "");
+  document.querySelectorAll('#extra-filters input[type="radio"]').forEach((input) => {
+    input.checked = input.value === (state.filters[input.name] || "");
   });
   document
     .querySelectorAll('#extra-filters input[type="checkbox"]')
