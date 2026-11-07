@@ -371,10 +371,16 @@ function updateResults() {
   document
     .querySelector('[data-action="favorites"]')
     ?.setAttribute("aria-pressed", String(Boolean(state.filters.favorites)));
+  const advancedCount = ["language", "online", "access"].filter(
+    (key) => state.filters[key],
+  ).length;
+  const filterCount = document.querySelector(".filter-count");
+  filterCount.hidden = advancedCount === 0;
+  filterCount.textContent = advancedCount ? String(advancedCount) : "";
   const search = document.querySelector("#server-search");
   if (search && search.value !== (state.filters.q || ""))
     search.value = state.filters.q || "";
-  document.querySelectorAll("#filters select").forEach((select) => {
+  document.querySelectorAll("#filters select, #extra-filters select").forEach((select) => {
     select.value =
       state.filters[select.name] || (select.name === "sort" ? "relevance" : "");
   });
