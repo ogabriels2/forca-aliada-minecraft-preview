@@ -133,9 +133,12 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
     return `<section class="catalog-shelf" data-shelf="${esc(name)}" data-shelf-size="${Math.min(matches.length, 4)}">
       <div class="shelf-heading">
         <div><h3>${title}</h3>${note ? `<small class="shelf-note">${esc(note)}</small>` : ""}</div>
-        <div class="shelf-actions">${all}<button type="button" data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button></div>
+        <div class="shelf-actions">${all}</div>
       </div>
-      <div class="shelf-track">${matches.slice(0, 9).map(card).join("")}</div>
+      <div class="shelf-viewport">
+        <div class="shelf-track">${matches.slice(0, 9).map(card).join("")}</div>
+        <button type="button" disabled data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" disabled data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button>
+      </div>
     </section>`;
   }).join("");
 }

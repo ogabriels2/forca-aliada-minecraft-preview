@@ -6,7 +6,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=discovery-shelves";
+} from "./discovery.mjs?v=shelf-edges";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
