@@ -467,7 +467,7 @@ body:is([data-surface="discovery"], [data-surface="server"]) .site-footer a:hove
 .shelf-viewport::before { left: 0; background: linear-gradient(to right, var(--finder-ground), color-mix(in srgb, var(--finder-ground) 56%, transparent) 48%, transparent); }
 .shelf-viewport::after { right: 0; background: linear-gradient(to left, var(--finder-ground), color-mix(in srgb, var(--finder-ground) 56%, transparent) 48%, transparent); }
 .shelf-viewport:has([data-direction="-1"]:enabled)::before,
-.shelf-viewport:has([data-direction="1"]:enabled)::after { opacity: 1; }
+.shelf-viewport:has([data-direction="1"]:enabled)::after { opacity: .92; }
 .shelf-viewport > button {
   position: absolute;
   z-index: 2;
