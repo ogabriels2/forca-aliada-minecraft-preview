@@ -6,7 +6,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=shelf-boundaries";
+} from "./discovery.mjs?v=ecosystem-1";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -842,7 +842,7 @@ function wizardBody(d, step) {
   if (step === 0)
     return `<h2 id="dialog-title">Crie a página do seu servidor.</h2><p>Divulgue um servidor que já existe. Comece com nome e endereço; fotos e detalhes vêm nas próximas etapas.</p><div class="source-tabs"><button type="button" data-action="source" data-value="manual" aria-pressed="${d.source === "manual"}">${icon("world")}<span>Já tenho um servidor<small>Informe o endereço de jogo</small></span></button><button type="button" data-action="source" data-value="manager" aria-pressed="${d.source === "manager"}">${icon("device-desktop")}<span>Usar o Manager<small>Experimentar importação</small></span></button></div>${d.source === "manager" ? '<div class="notice">Importação de exemplo. Confira o que ficará público; nenhuma conta do Manager é consultada.</div>' : ""}${field("name", d.name, { required: true, max: 64 })}${field("address", d.address, { required: true, hint: "Sem https://. Para testar, use meu-servidor.example." })}<div class="field"><span>Quem pode jogar? Selecione uma ou as duas edições.</span><div class="appearance-choice wizard-editions">${["Java", "Bedrock"].map((v) => `<button type="button" data-action="toggle-edition" data-value="${v}" aria-pressed="${d.editions.includes(v)}">${icon(v === "Java" ? "device-desktop" : "device-mobile")}<span><strong>${v}</strong><small>${v === "Java" ? "Minecraft Java no computador" : "Minecraft Bedrock em dispositivos compatíveis"}</small></span><span class="edition-check" aria-hidden="true">${d.editions.includes(v) ? icon("check") : ""}</span></button>`).join("")}</div></div>${d.editions.includes("Bedrock") ? field("port", d.port, { label: "Porta Bedrock", max: 5 }) : ""}`;
   if (step === 1)
-    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
+    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p><details class="subscriber-detail"><summary title="Recurso para assinantes: ícone em maior resolução"><span class="subscriber-badge">${icon("sparkles")} Pro</span> Ícone em alta resolução</summary><p>Até 384 px na prévia para preservar mais detalhes da sua imagem. O ícone automático e a personalização básica já fazem parte da página gratuita.</p></details></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
   if (step === 2)
     return `<h2 id="dialog-title">Como é jogar aqui?</h2><p>Uma boa apresentação ajuda a pessoa a entender se este é o mundo que procura.</p>${field("summary", d.summary, { area: true, max: 180, hint: "Uma frase sobre a experiência, sem precisar de um slogan." })}<details class="optional-setup"><summary>Adicionar uma descrição completa</summary>${field("description", d.description, { area: true, max: 4000, label: "Conte um pouco mais (opcional)" })}</details><div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${field("version", d.version, { label: "Versão compatível (opcional)" })}<h3>O que as pessoas encontram?</h3>${featureChoices(d)}`;
   if (step === 3)
@@ -957,11 +957,11 @@ function layoutChoices(d) {
   return `<div class="appearance-choice">${[
     ["landscape", "Panorâmica"],
     ["compact", "Compacta"],
-    ["spotlight", "Destaque · Pro"],
+    ["spotlight", "Destaque"],
   ]
     .map(
       ([v, label]) =>
-        `<button type="button" data-action="layout" data-value="${v}" aria-pressed="${d.layout === v}"><span class="layout-sample layout-sample--${v}" aria-hidden="true"><i></i><i></i><i></i></span><span>${label}</span></button>`,
+        `<button type="button" data-action="layout" data-value="${v}" ${v === "spotlight" ? 'title="Recurso para assinantes Força Aliada. Clique para conhecer e experimentar."' : ""} aria-pressed="${d.layout === v}"><span class="layout-sample layout-sample--${v}" aria-hidden="true"><i></i><i></i><i></i></span><span>${label}${v === "spotlight" ? ' <span class="subscriber-badge">' + icon("sparkles") + ' Pro</span>' : ""}</span></button>`,
     )
     .join("")}</div>`;
 }
@@ -1499,8 +1499,9 @@ function showCommunity() {
   );
 }
 function showPro() {
+  const draft = workingDraft();
   openDialog(
-    `<h2 id="dialog-title">Experimente a composição Destaque.</h2><p>Ela amplia a capa e centraliza a apresentação. É um exemplo de personalização avançada incluída na assinatura Força Aliada.</p><div class="notice">Este modo não contrata, cobra ou altera uma assinatura. A página básica permanece completa.</div><div class="dialog-actions"><button class="button secondary" data-action="pro-return">Continuar no básico</button><button class="button gold" data-action="try-pro">Experimentar modo Pro ${icon("sparkles")}</button></div>`,
+    `<h2 id="dialog-title">Experimente a composição Destaque.</h2><p>Ela amplia a capa e centraliza a apresentação. É um exemplo de personalização avançada incluída na assinatura Força Aliada.</p><div class="subscriber-preview"><span class="subscriber-badge">${icon("sparkles")} Força Aliada Pro</span><div class="subscriber-page-sample"><img src="${esc(draft.cover || "./shared/images/galeria14.webp")}" alt="Exemplo da capa ampliada"><strong>${esc(draft.name || "Seu servidor")}</strong><span>Sua comunidade começa aqui.</span></div><strong>Mais espaço para mostrar seu mundo.</strong><span>Capa ampla · apresentação centralizada · ícone em maior resolução</span></div><p class="field-help">Você pode experimentar estes recursos nesta prévia, sem cobrança. A disponibilidade comercial será definida antes do lançamento.</p><a class="text-link" href="https://forcaaliada.com/assinatura" target="_blank" rel="noopener">Conhecer a assinatura Força Aliada ${icon("external-link")}</a><div class="dialog-actions"><button class="button secondary" data-action="pro-return">Continuar no básico</button><button class="button gold" data-action="try-pro">Experimentar modo Pro ${icon("sparkles")}</button></div>`,
     "premium",
   );
 }

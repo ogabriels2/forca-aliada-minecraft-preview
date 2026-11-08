@@ -104,6 +104,30 @@ function filterField(name, label, choices, esc) {
   </label>`;
 }
 
+function communityDiscovery(icon) {
+  const posts = [
+    { image: "galeria14.webp", title: "Como você ligaria duas cidades?", text: "Estradas, trilhos ou caminhos pelo Nether? Uma conversa sobre transporte entre as construções do mundo.", topic: "Construções e ideias" },
+    { image: "galeria19.webp", title: "Uma casa no meio do seu Survival.", text: "Espaço para guardar recursos, cultivar e continuar construindo. Compartilhe as soluções que funcionam no seu mundo.", topic: "Vida no Survival" },
+    { image: "galeria26.webp", title: "Qual vai ser a próxima construção?", text: "Uma praça, uma ponte ou um caminho novo? Combine projetos com quem joga junto.", topic: "Projetos em equipe" },
+  ];
+  return `<section class="community-discovery" aria-label="Conversas do Community">
+    <header><div><h3>O que acontece entre uma partida e outra.</h3><p>Construções, ideias e conversas no Community.</p></div><a href="https://forcaaliada.com/community">Abrir Community ${icon("arrow-right")}</a></header>
+    <div class="community-posts">${posts.map(post => `<article class="community-post">
+      <div class="community-post-author"><img src="./assets/servers/forca-aliada.png" alt="" width="34" height="34"><span><strong>Força Aliada</strong><small>${post.topic}</small></span></div>
+      <img class="community-post-image" src="./shared/images/${post.image}" alt="${photoCaptions[post.image]}" loading="lazy" width="640" height="360">
+      <details><summary>${post.title}${icon("chevron-down")}</summary><p>${post.text}</p><a href="https://forcaaliada.com/community">Participar no Community ${icon("external-link")}</a></details>
+      <a class="community-server-link" href="#/servidor/forca-aliada">${icon("world")} Conhecer este servidor ${icon("arrow-right")}</a>
+    </article>`).join("")}</div>
+    <small class="integration-preview-note">Prévia da integração · textos ilustrativos com imagens do servidor Força Aliada.</small>
+  </section>`;
+}
+function managerDiscovery(icon) {
+  return `<section class="manager-discovery" aria-label="Crie seu servidor com o Manager">
+    <div><h3>E se o próximo servidor fosse seu?</h3><p>Crie seu servidor Minecraft no PC com o Manager. Compartilhe um endereço protegido e cuide do mundo com seus amigos.</p><a class="button" href="https://forcaaliada.com/manager">Conhecer o Manager ${icon("arrow-right")}</a><small>Aplicativo incluído na assinatura Força Aliada.</small></div>
+    <div class="manager-discovery-path"><div>${icon("device-desktop")}<span><strong>Crie no seu PC</strong><small>Uma interface para preparar o servidor.</small></span></div><div>${icon("world")}<span><strong>Convide seus amigos</strong><small>Um endereço próprio, sem abrir portas.</small></span></div><div>${icon("calendar-event")}<span><strong>Cuide da rotina</strong><small>Backups e reinícios programados.</small></span></div></div>
+  </section>`;
+}
+
 export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }) {
   const byId = new Map(servers.map((server) => [server.id, server]));
   const history = recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
@@ -127,7 +151,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
     if (matches.length >= 2) groups.push({ name, query: { feature: name }, matches });
   }
   const shelfLimit = 9;
-  return groups.filter(({ matches }) => matches.length).map(({ name, query, note, matches }) => {
+  return groups.filter(({ matches }) => matches.length).map(({ name, query, note, matches }, index) => {
     const href = query ? `#/?${new URLSearchParams(query)}` : "";
     const title = href ? `<a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a>` : esc(name);
     const all = href && matches.length > shelfLimit ? `<a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a>` : "";
@@ -140,7 +164,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
         <div class="shelf-track">${matches.slice(0, shelfLimit).map(card).join("")}</div>
         <button type="button" disabled data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" disabled data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button>
       </div>
-    </section>`;
+    </section>${index === 2 ? communityDiscovery(icon) : ""}${index === 6 ? managerDiscovery(icon) : ""}`;
   }).join("");
 }
 
