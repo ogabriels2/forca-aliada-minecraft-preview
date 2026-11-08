@@ -186,6 +186,8 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
               <input id="server-search" name="q" type="search" placeholder="Nome, IP ou estilo de jogo" value="${esc(f.q || "")}" autocomplete="off" maxlength="160">
             </div>
             <button class="button" aria-label="Buscar" type="submit"><span>Buscar</span>${icon("arrow-right")}</button>
+            <div id="server-search-preview" class="search-preview" role="region" aria-label="Prévia da busca" hidden></div>
+            <span class="sr-only" id="server-search-status" role="status"></span>
           </form>
         </div>
       </div>

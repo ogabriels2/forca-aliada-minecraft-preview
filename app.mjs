@@ -6,7 +6,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=ecosystem-1";
+} from "./discovery.mjs?v=search-preview";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -535,8 +535,8 @@ function availableServers() {
     ? [withServerAvailability(state.publication), ...servers]
     : servers;
 }
-function serverHref(server) {
-  const edition = catalogEdition(state.filters);
+function serverHref(server, filters = state.filters) {
+  const edition = catalogEdition(filters);
   const query = edition && server.editions.includes(edition) ? `?edition=${edition}` : "";
   return `#/servidor/${encodeURIComponent(server.id)}${query}`;
 }
@@ -585,6 +585,40 @@ function catalogResults(filters) {
     return recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
   }
   return matching;
+}
+function closeSearchPreview() {
+  const preview = document.querySelector("#server-search-preview");
+  if (!preview) return;
+  preview.hidden = true;
+  document.querySelector("#server-search-status").textContent = "";
+}
+function updateSearchPreview(input) {
+  const query = input.value.trim();
+  if (!query) {
+    closeSearchPreview();
+    return;
+  }
+
+  const filters = { ...state.filters, q: query };
+  const matches = catalogResults(filters);
+  const preview = document.querySelector("#server-search-preview");
+  const visible = matches.slice(0, 5);
+  preview.innerHTML = visible.length
+    ? `<strong class="search-preview-heading">Servidores encontrados</strong>
+       <ul class="search-preview-results">${visible.map((server) => `
+         <li><a href="${esc(serverHref(server, filters))}">
+           <span class="search-preview-icon">${icon("world")}</span>
+           <span class="search-preview-copy"><strong>${esc(server.name)}</strong>
+             <small>${esc([server.mode, ...server.editions, server.example ? "Exemplo" : server.address].filter(Boolean).join(" · "))}</small>
+           </span>
+           ${icon("arrow-right")}
+         </a></li>`).join("")}</ul>
+       <button type="submit" class="search-preview-submit">Ver ${matches.length === 1 ? "1 resultado" : `todos os ${matches.length} resultados`} ${icon("arrow-right")}</button>`
+    : '<div class="search-preview-empty"><strong>Nenhum servidor encontrado</strong><small>Tente outro nome ou endereço, ou ajuste os filtros.</small></div>';
+  preview.hidden = false;
+  paintIcons(preview);
+  document.querySelector("#server-search-status").textContent =
+    matches.length === 1 ? "1 servidor encontrado." : `${matches.length} servidores encontrados.`;
 }
 function focusCatalogHeading() {
   const heading = document.querySelector("#catalog-results h2");
@@ -2018,7 +2052,8 @@ document.addEventListener("submit", (e) => {
   }
   if (e.target.id === "search-form") {
     e.preventDefault();
-    state.filters.q = e.target.elements.q.value.trim();
+    closeSearchPreview();
+    state.filters.q = e.target.querySelector("#server-search").value.trim();
     updateResults();
     focusCatalogHeading();
   } else if (e.target.id === "wizard-form") {
@@ -2029,10 +2064,40 @@ document.addEventListener("submit", (e) => {
     commitInline();
   } else if (e.target.id === "settings-form") e.preventDefault();
 });
+document.addEventListener("compositionend", (e) => {
+  if (e.target.id === "server-search") updateSearchPreview(e.target);
+});
+document.addEventListener("focusin", (e) => {
+  if (e.target.id === "server-search" && !e.target.closest("#search-form").contains(e.relatedTarget)) updateSearchPreview(e.target);
+});
+document.addEventListener("focusout", (e) => {
+  const form = e.target.closest("#search-form");
+  if (form && e.relatedTarget && !form.contains(e.relatedTarget)) closeSearchPreview();
+});
+document.addEventListener("pointerdown", (e) => {
+  if (!e.target.closest("#search-form")) closeSearchPreview();
+});
+document.addEventListener("keydown", (e) => {
+  const form = e.target.closest("#search-form");
+  const preview = form?.querySelector("#server-search-preview:not([hidden])");
+  if (!preview || e.isComposing) return;
+  const input = form.querySelector("#server-search");
+  if (e.key === "Escape") {
+    e.preventDefault();
+    input.focus();
+    closeSearchPreview();
+  } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    const items = [input, ...preview.querySelectorAll("a, button")];
+    const current = items.indexOf(e.target);
+    if (current < 0 || items.length < 2) return;
+    e.preventDefault();
+    const step = e.key === "ArrowDown" ? 1 : -1;
+    items[Math.max(0, Math.min(items.length - 1, current + step))].focus();
+  }
+});
 document.addEventListener("input", (e) => {
   if (e.target.id === "server-search") {
-    state.filters.q = e.target.value;
-    updateResults();
+    if (!e.isComposing) updateSearchPreview(e.target);
     return;
   }
   const form = e.target.closest("#wizard-form,#settings-form");
