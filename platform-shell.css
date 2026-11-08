@@ -174,3 +174,5 @@ dialog.ps-drawer[data-panel=social][open] { animation-name:ps-social-in; }
  .ps-drawer-products a[aria-current] { color:var(--ps-green); text-decoration:underline; text-underline-offset:4px; }
 }
 .platform-shell #fa-chat-root .fa-chat-launcher, .platform-shell .community-chat-fallback { display:none; }
+
+.platform-shell > .ps-social { overscroll-behavior-y:auto; }
