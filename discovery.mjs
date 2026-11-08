@@ -126,17 +126,18 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
     const matches = servers.filter((server) => server.features?.includes(name));
     if (matches.length >= 2) groups.push({ name, query: { feature: name }, matches });
   }
+  const shelfLimit = 9;
   return groups.filter(({ matches }) => matches.length).map(({ name, query, note, matches }) => {
     const href = query ? `#/?${new URLSearchParams(query)}` : "";
     const title = href ? `<a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a>` : esc(name);
-    const all = href ? `<a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a>` : "";
+    const all = href && matches.length > shelfLimit ? `<a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a>` : "";
     return `<section class="catalog-shelf" data-shelf="${esc(name)}" data-shelf-size="${Math.min(matches.length, 4)}">
       <div class="shelf-heading">
         <div><h3>${title}</h3>${note ? `<small class="shelf-note">${esc(note)}</small>` : ""}</div>
         <div class="shelf-actions">${all}</div>
       </div>
       <div class="shelf-viewport">
-        <div class="shelf-track">${matches.slice(0, 9).map(card).join("")}</div>
+        <div class="shelf-track">${matches.slice(0, shelfLimit).map(card).join("")}</div>
         <button type="button" disabled data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" disabled data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button>
       </div>
     </section>`;

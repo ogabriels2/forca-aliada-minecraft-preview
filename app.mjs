@@ -6,7 +6,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=shelf-edges";
+} from "./discovery.mjs?v=shelf-boundaries";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -608,10 +608,11 @@ function syncShelfControls(track) {
   const shelf = track.closest(".catalog-shelf");
   const previous = shelf.querySelector('[data-direction="-1"]');
   const next = shelf.querySelector('[data-direction="1"]');
-  const limit = track.scrollWidth - track.clientWidth;
-  previous.hidden = next.hidden = limit <= 1;
-  previous.disabled = track.scrollLeft <= 1;
-  next.disabled = track.scrollLeft >= limit - 1;
+  const bounds = track.getBoundingClientRect();
+  const first = track.firstElementChild?.getBoundingClientRect();
+  const last = track.lastElementChild?.getBoundingClientRect();
+  previous.disabled = !first || first.left >= bounds.left - 1;
+  next.disabled = !last || last.right <= bounds.right + 1;
 }
 function restoreShelfPositions(positions = {}) {
   document.querySelectorAll(".shelf-track").forEach((track) => {

@@ -453,21 +453,21 @@ body:is([data-surface="discovery"], [data-surface="server"]) .site-footer a:hove
 
 /* Keep the controls beside the content they move. */
 .catalog-main .shelf-viewport { position: relative; }
-.catalog-main .shelf-track { scrollbar-width: none; }
+.catalog-main .shelf-track { scrollbar-width: none; margin-inline: 0; padding-inline: 0; }
 .catalog-main .shelf-track::-webkit-scrollbar { display: none; }
 .shelf-viewport::before, .shelf-viewport::after {
   content: "";
   position: absolute;
   inset-block: 0;
-  width: 52px;
+  width: 36px;
   z-index: 1;
   pointer-events: none;
   opacity: 0;
 }
-.shelf-viewport::before { left: 0; background: linear-gradient(to right, var(--finder-ground), transparent); }
-.shelf-viewport::after { right: 0; background: linear-gradient(to left, var(--finder-ground), transparent); }
+.shelf-viewport::before { left: 0; background: linear-gradient(to right, var(--finder-ground), color-mix(in srgb, var(--finder-ground) 25%, transparent) 55%, transparent); }
+.shelf-viewport::after { right: 0; background: linear-gradient(to left, var(--finder-ground), color-mix(in srgb, var(--finder-ground) 25%, transparent) 55%, transparent); }
 .shelf-viewport:has([data-direction="-1"]:enabled)::before,
-.shelf-viewport:has([data-direction="1"]:enabled)::after { opacity: .68; }
+.shelf-viewport:has([data-direction="1"]:enabled)::after { opacity: .52; }
 .shelf-viewport > button {
   position: absolute;
   z-index: 2;
