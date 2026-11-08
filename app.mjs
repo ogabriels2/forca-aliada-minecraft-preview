@@ -1,4 +1,4 @@
-import { previewCatalog } from "./catalog-preview.mjs";
+import { previewCatalog } from "./catalog-preview.mjs?v=15c8f53";
 import {
   serverCard,
   featuredServer,
