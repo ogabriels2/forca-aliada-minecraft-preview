@@ -1,3 +1,4 @@
+import { previewCatalog } from "./catalog-preview.mjs";
 import {
   serverCard,
   featuredServer,
@@ -10,7 +11,7 @@ import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
-  SERVERS,
+  SERVERS as BASE_SERVERS,
   THEMES,
   MODULES,
   FEATURES,
@@ -308,11 +309,13 @@ function themeStyle(d) {
   const t = THEMES[d.theme] || THEMES.forest;
   return `--server-accent:${t.accent};--server-ground:${t.ground};--server-ink:${t.ink}`;
 }
+const SERVERS = previewCatalog(BASE_SERVERS);
+
 function cover(d, { card = false } = {}) {
   const sampleScene = d.example && ({ redwood: "build", "la-isla": "explore" }[d.id]);
   const scene = sampleScene || (d.mode === "Criativo" ? "build" : d.mode === "Aventura" ? "explore" : "survival");
   return d.cover
-    ? `<img src="${esc(d.cover)}" alt="${esc(d.official ? "Construções do servidor Força Aliada" : `Capa de ${d.name}`)}" ${card ? 'loading="lazy"' : 'fetchpriority="high"'} width="1920" height="1080" style="object-position:50% ${d.coverPosition || 50}%">`
+    ? `<img src="${esc(d.cover)}" alt="${esc(d.official ? "Construções do servidor Força Aliada" : d.example ? "Captura de Minecraft usada como capa de demonstração" : `Capa de ${d.name}`)}" ${card ? 'loading="lazy"' : 'fetchpriority="high"'} width="1920" height="1080" style="object-position:50% ${d.coverPosition || 50}%">`
     : card
       ? `<span class="illustrated-server illustrated-${scene}"><span class="illustrated-scene"><img src="./shared/images/manager/worlds-illustration.webp" alt="Cena ilustrativa de Minecraft" loading="lazy" width="1976" height="784"></span></span><span class="cover-edition">Ilustração · exemplo</span>`
       : "";
@@ -529,7 +532,7 @@ async function refreshServerStatuses() {
 function availableServers() {
   const servers = SERVERS.map((server) => withServerAvailability(server));
   return state.publication?.visibility === "listed"
-    ? [...servers, withServerAvailability(state.publication)]
+    ? [withServerAvailability(state.publication), ...servers]
     : servers;
 }
 function serverHref(server) {
