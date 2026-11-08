@@ -445,3 +445,8 @@ body:is([data-surface="discovery"], [data-surface="server"]) .site-footer a:hove
 .preview-review form { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
 .preview-review select { border:1px solid #859389; border-radius:8px; padding:10px; font:inherit; background:#fff; color:#202524; }
 .preview-review small { flex-basis:100%; color:#526258; }
+@media(max-width:480px) {
+ .catalog-shelf .shelf-heading { flex-wrap:wrap; gap:10px; }
+ .catalog-shelf .shelf-heading > div:first-child { min-width:0; max-width:100%; }
+ .catalog-shelf .shelf-actions { margin-left:auto; }
+}

@@ -48,21 +48,21 @@ function renderNav() {
   const own = loggedIn() && Boolean(saved.created || saved.publication);
   nav.innerHTML=`<div class="ps-panel-heading"><strong>Seu Minecraft</strong><button class="ps-icon-button" data-shell="close-nav" aria-label="Recolher menu">${icon('x')}</button></div>
     <nav aria-label="Explorar e criar">
-      ${navLink('#/','Explorar servidores','world',hash.split('?')[0]==='#/'&&!query.has('favorites')&&!query.has('recent'))}
+      ${navLink('#/','Servidores','world',hash.split('?')[0]==='#/'&&!query.has('favorites')&&!query.has('recent'))}
       ${navLink('#/skins','Skins','shirt',hash==='#/skins')}
-      <div class="ps-nav-group"><span>Sua atividade</span>
+      <div class="ps-nav-group"><span>Sua biblioteca</span>
       ${navLink('#/?favorites=true','Favoritos','heart',query.has('favorites'))}
       ${navLink('#/?recent=true','Histórico','clock',query.has('recent'))}</div>
-      <div class="ps-nav-group"><span>Suas criações</span>
-      ${own ? navLink('#/servidor/minha-pagina','Minha página','layout',hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página">${icon('plus')}<span>Criar página</span></button>`}
+      <div class="ps-nav-group"><span>Criar e publicar</span>
+      ${own ? navLink('#/servidor/minha-pagina','Minha página','layout',hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página" aria-label="Criar página">${icon('plus')}<span>Criar página</span></button>`}
       ${navLink('#/perfil/demonstracao/skins','Minhas skins','folder',hash.includes('/perfil/'))}
       ${navLink('#/skins/editor','Editor de skins','brush',hash==='#/skins/editor')}</div>
       <div class="ps-nav-group"><span>Ferramentas</span>
       ${navLink('https://iamcal.github.io/enchant-order/','Encantamentos','book')}
       ${navLink('https://forcaaliada.com/ajuda','Ajuda','help-circle')}</div>
     </nav>
-    <div class="ps-products">
-      <a class="ps-manager" href="https://forcaaliada.com/manager" title="Força Aliada Manager">${icon('device-desktop')}<span><strong>Manager</strong><small>Crie e cuide do servidor</small></span>${icon('arrow-right')}</a>
+    <div class="ps-products"><span class="ps-products-label">Na Força Aliada</span>
+      <a class="ps-manager" href="https://forcaaliada.com/manager" title="Força Aliada Manager">${icon('device-desktop')}<span><strong>Manager</strong><small>Crie e gerencie</small></span>${icon('arrow-right')}</a>
       ${navLink('https://forcaaliada.com/community','Community','users')}
       ${navLink('https://forcaaliada.com/assinatura','Assinatura','sparkles')}
     </div>`;
@@ -77,7 +77,7 @@ function personRow(p) {
 }
 function renderSocial() {
   const back = view !== 'list';
-  social.innerHTML=`<div class="ps-panel-heading">${back?`<button class="ps-icon-button" data-shell="social-back" aria-label="Voltar aos amigos">${icon('arrow-left')}</button>`:''}<strong>${view==='chat'?'Conversa':view==='profile'?'Perfil':'Amigos'}</strong><button class="ps-icon-button" data-shell="close-social" aria-label="Fechar Amigos">${icon('x')}</button></div><div class="ps-demo-label">${icon('eye')} Demonstração visual</div><div class="ps-social-content"></div>`;
+  social.innerHTML=`<div class="ps-panel-heading">${back?`<button class="ps-icon-button" data-shell="social-back" aria-label="Voltar aos amigos">${icon('arrow-left')}</button>`:''}<strong>${view==='chat'?'Conversa':view==='profile'?'Perfil':'Amigos'}</strong>${!back && loggedIn() && demoState==='friends' ? `<button class="ps-icon-button" data-shell="search-friends" aria-label="Buscar pessoas" aria-expanded="false">${icon('search')}</button>` : ''}<button class="ps-icon-button" data-shell="close-social" aria-label="Fechar Amigos">${icon('x')}</button></div><div class="ps-demo-label">${icon('eye')} Perfis de demonstração</div><div class="ps-social-content"></div>`;
   const content=social.querySelector('.ps-social-content');
   if (!loggedIn() || demoState==='guest') {
     content.innerHTML=`<div class="ps-empty">${icon('users')}<h3>Jogar fica melhor junto.</h3><p>Seus amigos, conversas e servidores em um só lugar.</p><button class="ps-primary" data-shell="demo-login">Experimentar com amigos</button><small>Abre uma demonstração, sem login real.</small></div>${demoControls()}`;return;
@@ -97,9 +97,9 @@ function renderSocial() {
     content.innerHTML=`<div class="ps-chat-person">${avatar(p)}<strong>${p.name}</strong></div><p class="ps-chat-notice">Conversa de demonstração. Nada será enviado.</p><div class="ps-messages" role="log" aria-label="Conversa de demonstração"><p class="ps-message">Oi! Vamos combinar de jogar?</p>${(messages.get(p.id)||[]).map(m=>`<p class="ps-message ps-message--own">${esc(m)}</p>`).join('')}</div><form class="ps-compose"><label class="sr-only" for="ps-message-input">Mensagem de demonstração</label><input id="ps-message-input" placeholder="Escreva uma mensagem…" maxlength="1000" autocomplete="off" required><button class="ps-icon-button" aria-label="Adicionar mensagem à demonstração">${icon('arrow-up')}</button></form><a class="ps-community-link" href="https://forcaaliada.com/community">Abrir Community ${icon('external-link')}</a>`;
     content.querySelector('.ps-messages').scrollTop=100000;return;
   }
-  content.innerHTML=`<div class="ps-friends-list">${people.map(personRow).join('')}</div>
+  content.innerHTML=`<label class="ps-friend-search" hidden><span class="sr-only">Buscar pessoas</span>${icon('search')}<input type="search" placeholder="Buscar pessoas" autocomplete="off"></label><p class="ps-search-empty" hidden role="status">Nenhuma pessoa encontrada.</p><div class="ps-friends-list">${people.map(personRow).join('')}</div>
     <div class="ps-list-caption">Sugestões para você</div>
-    ${suggestions.map(p=>`<div class="ps-suggestion">${personRow(p)}<button data-request="${p.id}" class="ps-request" aria-label="${requested.has(p.id)?'Solicitação demonstrativa enviada a':'Adicionar'} ${p.name}" ${requested.has(p.id)?'disabled':''}>${icon(requested.has(p.id)?'check':'plus')}</button></div>`).join('')}
+    ${suggestions.map(p=>`<div class="ps-suggestion">${personRow(p)}<button data-request="${p.id}" class="ps-request" title="${requested.has(p.id)?'Solicitação enviada':'Adicionar amigo'}" aria-label="${requested.has(p.id)?'Solicitação demonstrativa enviada a':'Adicionar'} ${p.name}" ${requested.has(p.id)?'disabled':''}>${icon(requested.has(p.id)?'check':'plus')}</button></div>`).join('')}
     <a class="ps-community-link" href="https://forcaaliada.com/community">Ver no Community ${icon('external-link')}</a>${demoControls()}`;
 }
 let panel=null;
@@ -120,6 +120,7 @@ function showDrawer(node) {
 function syncLayout() {
   document.body.classList.toggle('ps-nav-expanded',expanded);
   document.body.classList.toggle('ps-social-pinned',socialPinned);
+  menuButton.setAttribute('aria-label', innerWidth >= 1200 && expanded ? 'Recolher menu da plataforma' : 'Abrir menu da plataforma');
   menuButton.setAttribute('aria-expanded',String(drawer.open&&panel===nav || innerWidth>=1200&&expanded));
   socialButton.setAttribute('aria-expanded',String(drawer.open&&panel===social || innerWidth>=1680&&socialPinned&&!document.body.classList.contains('studio-open')));
 }
@@ -133,6 +134,16 @@ socialButton.addEventListener('click',()=>{
 });
 function handleClick(e) {
   const action=e.target.closest('[data-shell]')?.dataset.shell;
+  if (action === 'search-friends') {
+    const field = social.querySelector('.ps-friend-search');
+    field.hidden = !field.hidden;
+    e.target.closest('button').setAttribute('aria-expanded', String(!field.hidden));
+    if (!field.hidden) field.querySelector('input').focus();
+    else {
+      field.querySelector('input').value = '';
+      filterPeople('');
+    }
+  }
   if(action==='close-nav'){expanded=false;save();closeDrawer();syncLayout();menuButton.focus();}
   if(action==='close-social'){socialPinned=false;save();closeDrawer();syncLayout();socialButton.focus();}
   if(action==='social-back'){view='list';selected=null;renderSocial();social.querySelector('[data-person]')?.focus();}
@@ -148,6 +159,22 @@ function handleClick(e) {
     if(e.target.closest('[data-action="create"]'))menuButton.focus();
   }
 }
+function filterPeople(query) {
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+  const term = normalize(query.trim());
+  let matches = 0;
+  for (const row of social.querySelectorAll('.ps-person')) {
+    const item = row.closest('.ps-suggestion') || row;
+    item.hidden = !normalize(row.textContent).includes(term);
+    if (!item.hidden) matches++;
+  }
+  social.querySelector('.ps-search-empty').hidden = matches > 0;
+  const hasSuggestions = [...social.querySelectorAll('.ps-suggestion')].some(row => !row.hidden);
+  social.querySelector('.ps-list-caption').hidden = !hasSuggestions;
+}
+social.addEventListener('input', event => {
+  if (event.target.matches('.ps-friend-search input')) filterPeople(event.target.value);
+});
 nav.addEventListener('click',handleClick); social.addEventListener('click',handleClick);
 social.addEventListener('change',e=>{if(e.target.matches('[data-demo-state]')){demoState=e.target.value;view='list';renderSocial();}});
 social.addEventListener('submit',e=>{
