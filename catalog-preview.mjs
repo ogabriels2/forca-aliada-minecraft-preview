@@ -37,6 +37,8 @@ export function previewCatalog(baseServers) {
         editions: index % 4 === 0 ? ["Java", "Bedrock"] : index % 4 === 1 ? ["Bedrock"] : ["Java"],
         language: index % 11 === 0 ? "Español" : index % 7 === 0 ? "English" : "Português",
         example: true,
+        demoRating: { score: (36 + ((index * 7 + category * 3) % 15)) / 10, count: 8 + ((index * 31 + category * 19) % 180) },
+        demoTrend: (index * 37 + category * 61) % 307,
         status: "unknown",
         address: `${id}.example`,
         port: "19132",

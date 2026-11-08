@@ -52,7 +52,7 @@ function renderNav() {
       ${navLink('#/skins','Skins','shirt',hash==='#/skins')}
       <div class="ps-nav-group"><span>Sua atividade</span>
       ${navLink('#/?favorites=true','Favoritos','heart',query.has('favorites'))}
-      ${navLink('#/?recent=true','Recentes','clock',query.has('recent'))}</div>
+      ${navLink('#/?recent=true','Histórico','clock',query.has('recent'))}</div>
       <div class="ps-nav-group"><span>Suas criações</span>
       ${own ? navLink('#/servidor/minha-pagina','Minha página','layout',hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página">${icon('plus')}<span>Criar página</span></button>`}
       ${navLink('#/perfil/demonstracao/skins','Minhas skins','folder',hash.includes('/perfil/'))}

@@ -437,3 +437,11 @@ body:is([data-surface="discovery"], [data-surface="server"]) .site-footer a:hove
  dialog[data-wizard-step="5"] .wizard-preview { display: block; width: 100%; }
  dialog[data-wizard-step="5"] .wizard-grid { grid-template-columns: minmax(0,1fr); }
 }
+.shelf-note { display:block; margin-top:4px; color:var(--finder-muted,#526258); font-size:12px; }
+.card-demo-rating { display:inline-flex; align-items:center; gap:4px; margin-inline-start:auto; font-size:12px; font-weight:750; color:#59451d; white-space:nowrap; }
+.card-demo-rating > span { color:#865d0d; }
+.preview-review { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; padding-block:24px 40px; }
+.preview-review h2 { margin:0 0 6px; font-size:24px; }
+.preview-review form { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.preview-review select { border:1px solid #859389; border-radius:8px; padding:10px; font:inherit; background:#fff; color:#202524; }
+.preview-review small { flex-basis:100%; color:#526258; }

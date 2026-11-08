@@ -1,4 +1,4 @@
-import { previewCatalog } from "./catalog-preview.mjs?v=15c8f53";
+import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
   serverCard,
   featuredServer,
@@ -6,7 +6,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs";
+} from "./discovery.mjs?v=discovery-shelves";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -706,7 +706,7 @@ function updateResults() {
   editorial?.remove();
   results.classList.toggle("results-shelves", browsing && found.length > 0);
   results.innerHTML = found.length
-    ? browsing ? catalogShelves(found, card, { esc, icon }) : found.slice(0, catalogLimit).map(card).join("")
+    ? browsing ? catalogShelves(found, card, { esc, icon, recentlyViewed }) : found.slice(0, catalogLimit).map(card).join("")
     : `<div class="empty">
         ${icon("search")}
         <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : recentEmpty ? "Nenhum servidor visitado ainda." : state.filters.status === "online" && !state.filters.q ? "Nenhum servidor confirmado online." : "Nenhum servidor encontrado."}</h3>
@@ -1133,6 +1133,24 @@ function serverDocument(d) {
   const editable = canEdit();
   return `<article class="server-page ${d.font === "system" ? "font-system" : ""} ${d.layout === "compact" ? "compact-layout" : d.layout === "spotlight" && d.plan === "pro" ? "spotlight-layout" : ""}" style="${themeStyle(d)}"><div class="server-hero ${d.cover ? "" : "typographic"}" data-name="${esc(d.name)}">${cover(d)}<div class="hero-shade"></div>${editable ? `<button class="hero-edit button secondary small" data-action="media" data-target="cover">${icon("camera")} Alterar capa</button>` : ""}<div class="server-hero-copy">${d.official ? `<span class="official-label">${icon("shield-check")} Oficial da Força Aliada</span>` : ""}<div class="server-identity">${d.avatar ? `<div class="server-avatar">${`<img src="${esc(d.avatar)}" alt="Foto de ${esc(d.name)}">`}${editable ? `<button data-action="media" data-target="avatar" aria-label="Alterar foto do servidor">${icon("camera")}</button>` : ""}</div>` : editable ? `<button class="server-avatar avatar-empty" data-action="media" data-target="avatar" aria-label="Adicionar foto do servidor">${icon("camera")}</button>` : ""}<div>${editText(d, "name", d.name, "h1")}${editText(d, "summary", d.summary, "p", "Adicione uma apresentação curta.")}</div></div></div></div><div class="container server-play-band">${connection(d)}</div><div class="server-subnav"><div>${d.modules.includes("about") ? '<button data-action="page-section" data-id="section-about">Visão geral</button>' : ""}${d.modules.includes("gallery") && d.gallery?.length ? '<button data-action="page-section" data-id="section-gallery">Imagens</button>' : ""}${d.modules.includes("news") && d.newsTitle ? '<button data-action="page-section" data-id="section-news">Novidades</button>' : ""}${d.modules.includes("event") && d.eventTitle ? '<button data-action="page-section" data-id="section-event">Encontros</button>' : ""}<button data-action="page-section" data-id="section-connect">Como entrar</button></div>${d.example ? "<span>Servidor de demonstração</span>" : ""}</div><div class="server-layout"><div class="server-main"><div class="server-meta">${[...d.editions, d.mode, d.language].map((v) => `<span class="tag">${esc(v)}</span>`).join("")}</div>${ordered.map((id) => serverSection(id, d)).join("")}${editable ? `<button class="add-section" data-action="settings" data-tab="sections">${icon("plus")} Adicionar ou organizar seções</button>` : ""}</div></div><div class="server-bottom"><span>Uma página <a href="#/">Força Aliada Servidores</a></span><button class="text-link" data-action="create">Crie a sua, grátis ${icon("arrow-right")}</button></div></article>`;
 }
+function previewReview(server) {
+  const key = `fa-minecraft-demo-review:${server.id}`;
+  let saved;
+  try { saved = localStorage.getItem(key); } catch {}
+  const { score, count } = server.demoRating;
+  return `<section class="container preview-review" aria-labelledby="preview-review-title">
+    <div><h2 id="preview-review-title">Avaliações</h2><p><strong>★ ${score.toFixed(1).replace(".", ",")}</strong> · ${count} avaliações simuladas</p></div>
+    <form data-preview-review>
+      <label for="preview-score">Sua nota de teste</label>
+      <select id="preview-score" name="score" required><option value="">Escolher nota</option>
+        ${[5, 4, 3, 2, 1].map((value) => `<option value="${value}" ${Number(saved) === value ? "selected" : ""}>${value} de 5</option>`).join("")}
+      </select>
+      <button class="button secondary" type="submit">Salvar nota</button>
+      <small role="status">${saved ? "Nota salva neste navegador." : "A nota fica neste navegador."}</small>
+    </form>
+  </section>`;
+}
+
 function renderPage(id) {
   activeServer =
     id === "minha-pagina"
@@ -1150,6 +1168,7 @@ function renderPage(id) {
     activeServer.id === "forca-aliada"
       ? officialPage(displayServer, { icon, connection, gallery: mediaGallery })
       : `<div class="container page-controls"><nav class="page-breadcrumb" aria-label="Caminho"><a href="#/">Servidores</a>${icon("chevron-right")}<span>${esc(activeServer.name)}</span></nav>${!ownPage() ? '<button class="text-link" data-action="create">Criar uma página como esta</button>' : ""}</div>${ownPage() ? ownerBar() : ""}${serverDocument(displayServer)}`;
+  if (displayServer.demoRating) main.insertAdjacentHTML("beforeend", previewReview(displayServer));
   if (activeServer.id === "forca-aliada") bindOfficialStories(main);
   paintIcons();
   updateSaveStatus();
@@ -1981,6 +2000,20 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("submit", (e) => {
+  if (e.target.matches("[data-preview-review]")) {
+    e.preventDefault();
+    if (!activeServer?.demoRating) return;
+    const score = Number(e.target.elements.score.value);
+    if (!Number.isInteger(score) || score < 1 || score > 5) return;
+    const status = e.target.querySelector('[role="status"]');
+    try {
+      localStorage.setItem(`fa-minecraft-demo-review:${activeServer.id}`, String(score));
+      status.textContent = "Nota salva neste navegador.";
+    } catch {
+      status.textContent = "Não foi possível salvar a nota neste navegador.";
+    }
+    return;
+  }
   if (e.target.id === "search-form") {
     e.preventDefault();
     state.filters.q = e.target.elements.q.value.trim();

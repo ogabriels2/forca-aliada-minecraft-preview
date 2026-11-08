@@ -83,6 +83,7 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition 
           ${d.access === "whitelist" ? `<span class="card-access" title="Entrada com aprovação">${icon("lock")}<span class="sr-only">Entrada com aprovação</span></span>` : ""}
         </span>
         ${cardAvailability(d, edition, esc, icon)}
+        ${d.demoRating ? `<span class="card-demo-rating" aria-label="Nota simulada: ${d.demoRating.score.toFixed(1)} de 5"><span aria-hidden="true">★</span> ${d.demoRating.score.toFixed(1).replace(".", ",")}</span>` : ""}
         <span class="card-mode">${esc(d.mode)}</span>
       </div>
     </div>
@@ -103,21 +104,36 @@ function filterField(name, label, choices, esc) {
   </label>`;
 }
 
-export function catalogShelves(servers, card, { esc, icon }) {
-  const groups = MODES.map((name) => ({ name, key: "mode", matches: servers.filter((s) => s.mode === name) }));
+export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }) {
+  const byId = new Map(servers.map((server) => [server.id, server]));
+  const history = recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
+  const rated = servers.filter((server) => server.demoRating);
+  const trending = [...rated].sort((a, b) => b.demoTrend - a.demoTrend);
+  const topRated = [...rated].sort((a, b) =>
+    b.demoRating.score - a.demoRating.score || b.demoRating.count - a.demoRating.count);
+  const recommendations = MODES.flatMap((mode) =>
+    servers.filter((server) => server.mode === mode).slice(0, 2));
+
+  const groups = [
+    { name: "Seu histórico", query: { recent: true }, matches: history },
+    { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
+    { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
+    ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),
+    { name: "Mais bem avaliados", note: "Notas simuladas nesta prévia", matches: topRated },
+  ];
   for (const name of GAMEPLAY) {
-    const matches = servers.filter((s) => s.features?.includes(name));
-    // An overlapping topic earns a shelf once it has a meaningful selection.
-    if (matches.length >= 2 && matches.filter((s) => !s.example).length >= 2 && !groups.some((group) =>
-      group.matches.length === matches.length && group.matches.every((s, i) => s.id === matches[i].id)
-    )) groups.push({ name, key: "feature", matches });
+    if (MODES.includes(name)) continue;
+    const matches = servers.filter((server) => server.features?.includes(name));
+    if (matches.length >= 2) groups.push({ name, query: { feature: name }, matches });
   }
-  return groups.filter(({ matches }) => matches.length).map(({ name, key, matches }) => {
-    const href = `#/?${new URLSearchParams({ [key]: name })}`;
+  return groups.filter(({ matches }) => matches.length).map(({ name, query, note, matches }) => {
+    const href = query ? `#/?${new URLSearchParams(query)}` : "";
+    const title = href ? `<a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a>` : esc(name);
+    const all = href ? `<a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a>` : "";
     return `<section class="catalog-shelf" data-shelf="${esc(name)}" data-shelf-size="${Math.min(matches.length, 4)}">
       <div class="shelf-heading">
-        <h3><a href="${esc(href)}">${esc(name)} ${icon("arrow-right")}</a></h3>
-        <div class="shelf-actions"><a href="${esc(href)}" aria-label="Ver todos em ${esc(name)}">Ver todos</a><button type="button" data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button></div>
+        <div><h3>${title}</h3>${note ? `<small class="shelf-note">${esc(note)}</small>` : ""}</div>
+        <div class="shelf-actions">${all}<button type="button" data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button></div>
       </div>
       <div class="shelf-track">${matches.slice(0, 9).map(card).join("")}</div>
     </section>`;
@@ -156,7 +172,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
       <div class="catalog-views" role="group" aria-label="Listas de servidores">
         ${view("explore", "Explorar", !f.favorites && !f.recent)}
         ${view("favorites", "Favoritos", f.favorites)}
-        ${hasRecent || f.recent ? view("recent", "Recentes", f.recent) : ""}
+        ${hasRecent || f.recent ? view("recent", "Histórico", f.recent) : ""}
       </div>
       <button type="button" class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button>
     </div>
