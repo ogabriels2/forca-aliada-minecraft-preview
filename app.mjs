@@ -1525,10 +1525,10 @@ function updateHeader() {
         <summary aria-label="Minha conta"><span class="account-initial" aria-hidden="true">D</span><span>Minha conta</span>${icon("chevron-down")}</summary>
         <div class="account-popover">
           <div class="account-profile"><span class="account-initial" aria-hidden="true">D</span><div><strong>Perfil de demonstração</strong><small>Dados salvos neste navegador</small></div></div>
-          ${state.created ? '<a href="#/servidor/minha-pagina">Minha página</a>' : '<button data-action="create">Criar página grátis</button>'}
-          <a href="#/perfil/demonstracao/skins">Minhas skins</a>
-          <a href="https://forcaaliada.com/assinatura">Planos da Força Aliada</a>
-          <button data-action="logout">${icon("logout")} Sair da demonstração</button>
+          <a href="#/perfil/demonstracao/skins">Perfil</a>
+          <a href="https://forcaaliada.com/conta">Configurações</a>
+          <a href="https://forcaaliada.com/assinatura">Assinatura</a>
+          <button data-action="logout">${icon("logout")} Sair</button>
         </div>
       </details>`
     : `<button class="button secondary small" data-action="login">${icon("users")} Entrar na prévia</button>`;

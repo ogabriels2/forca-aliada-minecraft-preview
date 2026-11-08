@@ -41,7 +41,7 @@ const socialButton = document.createElement('button');
 socialButton.type='button'; socialButton.className='ps-social-toggle';
 socialButton.setAttribute('aria-controls',social.id); socialButton.setAttribute('aria-label','Abrir Amigos — demonstração');
 socialButton.innerHTML = `${icon('users')}<span>Amigos</span>`;
-document.querySelector('.header-actions').prepend(socialButton);
+document.querySelector('.header-create').after(socialButton);
 function save() { try { localStorage.setItem(storageKey, JSON.stringify({expanded,socialPinned})); } catch {} }
 function loggedIn() { return Boolean(document.querySelector('.prototype-account')); }
 function navLink(href,label,glyph,active=false) {
@@ -52,6 +52,7 @@ function renderNav() {
   let saved={}; try { saved=JSON.parse(localStorage.getItem('fa-minecraft-prototype-v1') || '{}'); } catch {}
   const own = loggedIn() && Boolean(saved.created || saved.publication);
   nav.innerHTML=`<div class="ps-panel-heading"><strong>Seu Minecraft</strong><button class="ps-icon-button" data-shell="close-nav" aria-label="Recolher menu">${icon('x')}</button></div>
+    <nav class="ps-drawer-products" aria-label="Produtos da Força Aliada">${document.querySelector('.ecosystem-nav').innerHTML}</nav>
     <nav aria-label="Explorar e criar">
       ${navLink('#/','Servidores','world',hash.split('?')[0]==='#/'&&!query.has('favorites')&&!query.has('recent'))}
       ${navLink('#/skins','Skins','shirt',hash==='#/skins')}
@@ -60,17 +61,13 @@ function renderNav() {
       ${navLink('#/?recent=true','Histórico','clock',query.has('recent'))}</div>
       <div class="ps-nav-group"><span>Criar e publicar</span>
       ${own ? navLink('#/servidor/minha-pagina','Minha página','layout',hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página" aria-label="Criar página">${icon('plus')}<span>Criar página</span></button>`}
-      ${navLink('#/perfil/demonstracao/skins','Minhas skins','folder',hash.includes('/perfil/'))}
-      ${navLink('#/skins/editor','Editor de skins','brush',hash==='#/skins/editor')}</div>
+      ${navLink('#/perfil/demonstracao/skins','Minhas skins','folder',hash.includes('/perfil/'))}</div>
       <div class="ps-nav-group"><span>Ferramentas</span>
+      ${navLink('#/skins/editor','Editor de skins','brush',hash==='#/skins/editor')}
       ${navLink('https://iamcal.github.io/enchant-order/','Encantamentos','book')}
       ${navLink('https://forcaaliada.com/ajuda','Ajuda','help-circle')}</div>
     </nav>
-    <div class="ps-products"><span class="ps-products-label">Na Força Aliada</span>
-      <a class="ps-manager" href="https://forcaaliada.com/manager" title="Força Aliada Manager">${icon('device-desktop')}<span><strong>Manager</strong><small>Crie e gerencie</small></span>${icon('arrow-right')}</a>
-      ${navLink('https://forcaaliada.com/community','Community','users')}
-      ${navLink('https://forcaaliada.com/assinatura','Assinatura','sparkles')}
-    </div>`;
+`;
 }
 function demoControls() {
   return `<details class="ps-demo-controls"><summary>Estados do protótipo</summary><label>Visualizar<select data-demo-state>
