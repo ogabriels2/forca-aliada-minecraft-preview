@@ -1,3 +1,4 @@
+import { openCommunityChat } from "./community-preview.mjs?v=community-shell-1";
 // Visual prototype only. No Community, Microsoft, or messaging requests are made here.
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon = name => `<i class="icon" aria-hidden="true" style="--icon:url('./vendor/tabler/${name}.svg')"></i>`;
@@ -5,20 +6,24 @@ const people = [
   {id:'lara',name:'Lara',skin:'ocean',status:'Online · Força Aliada',kind:'playing',bio:'Survival, construções e projetos em equipe.',edition:'Java'},
   {id:'davi',name:'Davi',skin:'explorer',status:'Online no Community',kind:'online',bio:'Sempre procurando uma ideia para a próxima farm.',edition:'Java e Bedrock'},
   {id:'bia',name:'Bia',skin:'plum',status:'Online · Mundo individual',kind:'solo',bio:'Construindo um mundo, uma casa de cada vez.',edition:'Bedrock'},
-  {id:'leo',name:'Léo',skin:'explorer',status:'Atividade privada',kind:'private',bio:'Exploração e aventura.',edition:'Java'},
+  {id:'leo',profile_photo_url:'./shared/images/fundacao/gabriel.webp',name:'Gabriel',skin:'explorer',status:'Atividade privada',kind:'private',bio:'Exploração e aventura.',edition:'Java'},
 ];
 const suggestions = [
-  {id:'nina',name:'Nina',skin:'plum',status:'Também gosta de construção',kind:'suggested',bio:'Cidades, jardins e construções em grupo.',edition:'Java'},
+  {id:'nina',profile_photo_url:'./assets/catalog/mundo-29.webp',name:'Nina',skin:'plum',status:'Também gosta de construção',kind:'suggested',bio:'Cidades, jardins e construções em grupo.',edition:'Java'},
   {id:'caio',name:'Caio',skin:'ocean',status:'Também gosta de Survival',kind:'suggested',bio:'Survival para jogar com calma.',edition:'Java e Bedrock'},
 ];
-const avatar = p => `<span class="ps-avatar ps-avatar--${p.skin}"><img src="./assets/skins/showcase-${p.skin}.png" alt="" width="144" height="192"></span>`;
+const avatar = person => {
+  const photo = person.profile_photo_url || person.photo_url;
+  const source = photo || `./assets/skins/showcase-${person.skin}.png`;
+  return `<span class="ps-avatar ps-avatar--${person.skin} ${photo ? 'ps-avatar--photo' : ''}"><img src="${esc(source)}" data-skin-fallback="./assets/skins/showcase-${person.skin}.png" alt="" width="144" height="192"></span>`;
+};
 const storageKey = 'fa-minecraft-shell-v1';
 let prefs = {};
 try { prefs = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch {}
 let expanded = typeof prefs.expanded === 'boolean' ? prefs.expanded : innerWidth >= 1680;
 let socialPinned = prefs.socialPinned !== false;
 let demoState = 'friends', selected = null, view = 'list';
-const messages = new Map(), requested = new Set();
+const requested = new Set();
 const nav = document.createElement('aside');
 nav.id = 'platform-navigation'; nav.className = 'ps-nav'; nav.setAttribute('aria-label','Navegação da plataforma');
 const social = document.createElement('aside');
@@ -92,11 +97,6 @@ function renderSocial() {
     <button class="ps-primary" data-shell="chat">${icon('users')} Conversar</button>
     <a class="ps-community-link" href="https://forcaaliada.com/community">Abrir Community ${icon('external-link')}</a>`;return;
   }
-  if(view==='chat' && selected) {
-    const p=selected;
-    content.innerHTML=`<div class="ps-chat-person">${avatar(p)}<strong>${p.name}</strong></div><p class="ps-chat-notice">Conversa de demonstração. Nada será enviado.</p><div class="ps-messages" role="log" aria-label="Conversa de demonstração"><p class="ps-message">Oi! Vamos combinar de jogar?</p>${(messages.get(p.id)||[]).map(m=>`<p class="ps-message ps-message--own">${esc(m)}</p>`).join('')}</div><form class="ps-compose"><label class="sr-only" for="ps-message-input">Mensagem de demonstração</label><input id="ps-message-input" placeholder="Escreva uma mensagem…" maxlength="1000" autocomplete="off" required><button class="ps-icon-button" aria-label="Adicionar mensagem à demonstração">${icon('arrow-up')}</button></form><a class="ps-community-link" href="https://forcaaliada.com/community">Abrir Community ${icon('external-link')}</a>`;
-    content.querySelector('.ps-messages').scrollTop=100000;return;
-  }
   content.innerHTML=`<label class="ps-friend-search" hidden><span class="sr-only">Buscar pessoas</span>${icon('search')}<input type="search" placeholder="Buscar pessoas" autocomplete="off"></label><p class="ps-search-empty" hidden role="status">Nenhuma pessoa encontrada.</p><div class="ps-friends-list">${people.map(personRow).join('')}</div>
     <div class="ps-list-caption">Sugestões para você</div>
     ${suggestions.map(p=>`<div class="ps-suggestion">${personRow(p)}<button data-request="${p.id}" class="ps-request" title="${requested.has(p.id)?'Solicitação enviada':'Adicionar amigo'}" aria-label="${requested.has(p.id)?'Solicitação demonstrativa enviada a':'Adicionar'} ${p.name}" ${requested.has(p.id)?'disabled':''}>${icon(requested.has(p.id)?'check':'plus')}</button></div>`).join('')}
@@ -147,7 +147,7 @@ function handleClick(e) {
   if(action==='close-nav'){expanded=false;save();closeDrawer();syncLayout();menuButton.focus();}
   if(action==='close-social'){socialPinned=false;save();closeDrawer();syncLayout();socialButton.focus();}
   if(action==='social-back'){view='list';selected=null;renderSocial();social.querySelector('[data-person]')?.focus();}
-  if(action==='chat'){view='chat';renderSocial();social.querySelector('[data-shell="social-back"]')?.focus();}
+  if(action==='chat'){const person=selected;closeDrawer();openCommunityChat(person);}
   if(action==='demo-login'){document.querySelector('#account-area [data-action="login"]')?.click();demoState='friends';view='list';renderSocial();}
   if(action==='demo-retry'){demoState='friends';view='list';renderSocial();}
   const person=e.target.closest('[data-person]')?.dataset.person;
@@ -177,15 +177,22 @@ social.addEventListener('input', event => {
 });
 nav.addEventListener('click',handleClick); social.addEventListener('click',handleClick);
 social.addEventListener('change',e=>{if(e.target.matches('[data-demo-state]')){demoState=e.target.value;view='list';renderSocial();}});
-social.addEventListener('submit',e=>{
-  if(!e.target.matches('.ps-compose'))return;e.preventDefault();
-  const input=e.target.querySelector('input'),message=input.value.trim();if(!message)return;
-  messages.set(selected.id,[...(messages.get(selected.id)||[]),message].slice(-40));
-  renderSocial();social.querySelector('input')?.focus();
-});
 window.addEventListener('hashchange',()=>{closeDrawer();renderNav();syncLayout();});
 let previousWidth=innerWidth;
-function alignPanels() { document.body.style.setProperty('--ps-top',`${Math.max(0,document.querySelector('.site-header').getBoundingClientRect().bottom)}px`); }
+function alignPanels() {
+  const top = Math.max(0, document.querySelector('.site-header').getBoundingClientRect().bottom);
+  const footer = document.querySelector('#footer').getBoundingClientRect().top;
+  document.body.style.setProperty('--ps-top', `${top}px`);
+  document.body.style.setProperty('--ps-bottom', `${Math.max(0, innerHeight - footer)}px`);
+}
+new ResizeObserver(alignPanels).observe(document.querySelector('#main'));
+social.addEventListener('error', event => {
+  const image = event.target;
+  if (!image.matches('img[data-skin-fallback]')) return;
+  image.closest('.ps-avatar').classList.remove('ps-avatar--photo');
+  image.src = image.dataset.skinFallback;
+  delete image.dataset.skinFallback;
+}, true);
 window.addEventListener('resize',()=>{if(innerWidth!==previousWidth&&drawer.open)closeDrawer();previousWidth=innerWidth;syncLayout();alignPanels();});
 window.addEventListener('scroll',alignPanels,{passive:true});
 new MutationObserver(()=>{renderNav();renderSocial();syncLayout();}).observe(document.querySelector('#account-area'),{childList:true});
