@@ -24,13 +24,15 @@ export function previewCatalog(baseServers) {
     const { features, summary } = categories[category];
     return Array.from({ length: 60 }, (_, index) => {
       const id = `demo-${category + 1}-${index + 1}`;
-      const photo = ((index * 5 + category * 7 + 4) % 27) + 1;
+      const photo = index % 3 === 0
+        ? 28 + ((Math.floor(index / 3) + category) % 4)
+        : ((index * 5 + category * 7 + 4) % 27) + 1;
       return {
         id,
         name: `${places[index % places.length]} ${regions[Math.floor(index / places.length)]} · ${mode}`,
         mode,
         summary,
-        description: "Página de teste do catálogo. As capturas são da galeria da Força Aliada.",
+        description: "Página de teste do catálogo. As capturas ilustrativas são da Força Aliada e do Xbox México.",
         features: [features[index % features.length]],
         editions: index % 4 === 0 ? ["Java", "Bedrock"] : index % 4 === 1 ? ["Bedrock"] : ["Java"],
         language: index % 11 === 0 ? "Español" : index % 7 === 0 ? "English" : "Português",
