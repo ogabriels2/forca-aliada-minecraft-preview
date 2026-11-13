@@ -91,7 +91,7 @@ export const SERVERS = Object.freeze([
     theme: "ocean",
     official: true,
     example: false,
-    address: "fa.ogabriels.com",
+    address: "forca-aliada.play.forcaaliada.com",
     port: "19132",
     version: "Consulte a equipe",
     gallery: [

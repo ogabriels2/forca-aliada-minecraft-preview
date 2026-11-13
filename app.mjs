@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs";
+import {connectDirectory} from "./directory-integration.mjs?v=publication-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -8,7 +8,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=search-preview";
+} from "./discovery.mjs?v=publication-20261113";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -33,7 +33,7 @@ import {
   safeMedia,
   mediaSource,
   eventUTC,
-} from "./model.mjs";
+} from "./model.mjs?v=publication-20261113";
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const main = document.querySelector("#main"),
@@ -408,7 +408,13 @@ async function decodedServerIcon(value) {
   }
 }
 
+let nextStatusLookup=0;
 async function queryServerStatus(address, edition) {
+  // mcstatus.io allows five requests/second per IP. Space both editions together.
+  const wait=Math.max(0,nextStatusLookup-Date.now());
+  nextStatusLookup=Math.max(Date.now(),nextStatusLookup)+260;
+  if(wait)await new Promise(resolve=>setTimeout(resolve,wait));
+  if(document.hidden)return {status:'unknown'};
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
   try {
@@ -532,7 +538,12 @@ async function refreshServerStatuses() {
 
 function availableServers() {
   const servers = SERVERS.map((server) => withServerAvailability(server));
-  if(directory)return servers;
+  if(directory){
+    const allowed=directory.catalog.ids,saved=state.filters.favorites||state.filters.recent;
+    const live=servers.filter(server=>server.directory&&(saved||allowed.has(server.id)));
+    const house=live.some(server=>server.address==='forca-aliada.play.forcaaliada.com');
+    return [...live,...servers.filter(server=>!server.directory&&!(house&&server.id==='forca-aliada'))];
+  }
   return state.publication?.visibility === "listed"
     ? [withServerAvailability(state.publication), ...servers]
     : servers;
@@ -554,7 +565,7 @@ function card(d) {
   });
 }
 function featured() {
-  return featuredServer(SERVERS[0], state.featured, { esc, icon });
+  return featuredServer(SERVERS.find(server=>server.official)||BASE_SERVERS[0], state.featured, { esc, icon });
 }
 const CATALOG_BATCH = 9;
 const panelFilters = ["edition", "status", "mode", "feature", "language", "access", "sort"];
@@ -706,6 +717,7 @@ function updateResults() {
   const currentKey = filterKey();
   if (currentKey !== catalogFilterKey) catalogLimit = CATALOG_BATCH;
   catalogFilterKey = currentKey;
+  directory?.syncCatalog(state.filters);
   const found = catalogResults(state.filters);
   const label = found.length === 1 ? "resultado" : "resultados";
   const savedEmpty = state.filters.favorites && !state.favorites.size;
@@ -756,7 +768,14 @@ function updateResults() {
     document.querySelector("#catalog-results").after(editorial);
   }
   restoreShelfPositions(scrollPositions);
-  document.querySelector(".catalog-more").hidden = browsing || found.length <= catalogLimit;
+  const remoteMore=!state.filters.favorites&&!state.filters.recent&&directory?.catalog.nextOffset!==null&&directory?.catalog.nextOffset!==undefined;
+  const more=document.querySelector('.catalog-more');more.hidden=!(remoteMore||(!browsing&&found.length>catalogLimit));
+  more.querySelector('button').disabled=Boolean(directory?.catalog.loading);
+  more.querySelector('button').textContent=directory?.catalog.loading?'Carregando…':remoteMore?'Carregar mais servidores publicados':'Mostrar mais servidores';
+  const remoteStatus=document.querySelector('[data-directory-catalog-status]');
+  if(remoteStatus){
+    remoteStatus.innerHTML=directory?.catalog.error?'Não foi possível atualizar os servidores publicados. <button class="text-link" data-directory="retry-catalog">Tentar novamente</button>':directory?.catalog.loading?'Consultando servidores publicados…':'';
+  }
   document.querySelector("[data-catalog-title]").textContent =
     state.filters.favorites ? "Seus favoritos"
       : state.filters.recent ? "Vistos recentemente"
@@ -1166,7 +1185,7 @@ function updateConnectionAvailability() {
   });
 }
 function ownerBar() {
-  return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">Enviar para revisão ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
+  return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">${directory?.publicationAction()||"Enviar para revisão"} ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
 }
 function serverDocument(d) {
   const ordered = d.modules;
@@ -1192,7 +1211,12 @@ function previewReview(server) {
 }
 
 function renderPage(id) {
-  if(directory&&/^[a-f0-9-]{36}$/i.test(id)&&!SERVERS.some(s=>s.id===id)&&!directory.publicFailed(id)){void directory.loadPublic(id);return;}
+  if(directory&&/^[a-f0-9-]{36}$/i.test(id)){
+    const status=directory.publicState(id);
+    if(!status||Date.now()-status.checkedAt>=60_000){void directory.loadPublic(id);main.innerHTML='<section class="container empty" role="status"><p>Carregando página do servidor…</p></section>';return;}
+    if(status.status==='loading'){main.innerHTML='<section class="container empty" role="status"><p>Carregando página do servidor…</p></section>';return;}
+    if(status.status==='error'){main.innerHTML=`<section class="container empty"><h1>Não foi possível carregar a página.</h1><p>Confira sua conexão e tente novamente.</p><button class="button" data-directory="retry-page" data-id="${id}">Tentar novamente</button><a class="text-link" href="#/">Voltar aos servidores</a></section>`;return;}
+  }
   activeServer =
     id === "minha-pagina"
       ? state.account && state.created
@@ -1200,10 +1224,12 @@ function renderPage(id) {
         : state.publication
       : SERVERS.find((s) => s.id === id);
   if (!activeServer) {
-    main.innerHTML = `<section class="container empty"><h1>${id === "minha-pagina" ? "Sua página começa aqui." : "Página não encontrada."}</h1><p>${id === "minha-pagina" ? "Crie sua página em etapas, com nome, imagens e apresentação do seu mundo." : "Esse servidor não está nesta prévia."}</p><button class="button" data-action="create">Criar página grátis ${icon("arrow-right")}</button></section>`;
+    main.innerHTML = `<section class="container empty"><h1>${id === "minha-pagina" ? "Sua página começa aqui." : "Página não encontrada."}</h1><p>${id === "minha-pagina" ? "Crie sua página em etapas, com nome, imagens e apresentação do seu mundo." : "O link pode estar incorreto ou a página não está mais publicada."}</p><button class="button" data-action="create">Criar página grátis ${icon("arrow-right")}</button></section>`;
     paintIcons();
     return;
   }
+  if(/^[a-f0-9-]{36}$/i.test(id))setRecentServers([id,...recentlyViewed.filter(entry=>entry!==id)].slice(0,8));
+  document.title=`${activeServer.name} · Servidores de Minecraft · Força Aliada`;
   const displayServer = withServerAvailability(activeServer);
   main.innerHTML =
     activeServer.id === "forca-aliada"
@@ -1295,7 +1321,7 @@ function renderSettings() {
   else if (state.settings === "content")
     content = `<h3>Conexão e compatibilidade</h3>${field("address", d.address, { required: true })}<div class="field-row">${field("port", d.port, { label: "Porta Bedrock", max: 5 })}${field("version", d.version)}</div><div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${select("access", "Entrada", ["Aberta", "Com whitelist"], d.access === "whitelist" ? "Com whitelist" : "Aberta")}<h3>Características</h3>${featureChoices(d)}<h3>Links da comunidade</h3>${field("discord", d.discord, { label: "Discord" })}${field("website", d.website, { label: "Site ou outro canal" })}<label class="switch"><input type="checkbox" name="community" ${d.community ? "checked" : ""}><span>Perfil do servidor no Community (demonstração)</span></label><h3>Próximo encontro</h3>${field("eventTitle", d.eventTitle)}${field("eventDate", d.eventDate, { label: "Data e hora do encontro", type: "datetime-local" })}${select("eventZone", "Fuso horário", ["America/Sao_Paulo", "UTC", "Europe/Lisbon"], d.eventZone)}<p class="field-help">O horário aparece com o fuso escolhido. Não é ajustado silenciosamente ao horário do visitante.</p>`;
   else
-    content = `${visibilityChoices(d)}<div class="notice">Seu rascunho é separado da última publicação. Enviar para revisão permite publicar a versão salva na sua conta.</div><button class="button" type="button" data-action="publish">Enviar para revisão ${icon("arrow-right")}</button><div class="form-divider"></div><button class="text-link" type="button" data-action="reset">Minhas páginas</button>`;
+    content = `${visibilityChoices(d)}<div class="notice">Seu rascunho é separado da última publicação. Enviar para revisão permite publicar a versão salva na sua conta.</div><button class="button" type="button" data-action="publish">${directory?.publicationAction()||"Enviar para revisão"} ${icon("arrow-right")}</button><div class="form-divider"></div><button class="text-link" type="button" data-action="reset">Minhas páginas</button>`;
   openDialog(
     `<h2 id="dialog-title">Configurações da página</h2><p>Os ajustes rápidos ficam no próprio texto. Aqui você encontra as opções de estrutura e apresentação.</p><div class="settings-tabs" role="tablist" aria-label="Configurações">${[
       ["appearance", "Aparência"],
@@ -1412,6 +1438,7 @@ async function uploadImages(input) {
   }
 }
 function publish() {
+  if(inline){commitInline();if(inline)return;}
   if(directory)return void directory.publish();
   if (!canEdit()) return;
   const errors = validateDraft(state.draft);
@@ -1602,6 +1629,9 @@ function route({ focus = true } = {}) {
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
+  } else if (path === "/revisoes" || path.startsWith("/revisoes/")) {
+    void directory?.reviewRoute(path.startsWith("/revisoes/")?path.slice(10):'');
+    document.title="Revisão de páginas · Força Aliada";
   } else if (path === "/skins/editor") {
     activeServer = null;
     skinStudio.render(editorSeed, new URLSearchParams(query).get("part"));
@@ -1800,6 +1830,7 @@ document.addEventListener("click", (e) => {
   } else if (a === "more-results") {
     const previous = catalogLimit;
     catalogLimit += CATALOG_BATCH;
+    if(!state.filters.favorites&&!state.filters.recent&&directory?.catalog.nextOffset!==null)void directory?.morePublic();
     updateResults();
     document.querySelectorAll("#results .card-heading a")[previous]?.focus();
   } else if (a === "clear-filters") {
@@ -2310,7 +2341,13 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.push(d);else SERVERS[index]=d;},
+  savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
+  refreshOwner:()=>{if(ownPage())refreshPage();},
+  catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},
+  renderSurface:html=>{activeServer=null;main.innerHTML=html;paintIcons();},
+  renderReview:(page,id,top,bottom)=>{activeServer={...safeDraft(page),id,example:false,official:false};main.innerHTML=top+serverDocument(withServerAvailability(activeServer))+bottom;paintIcons();void refreshServerStatuses();},
+  removePublic:id=>{const index=SERVERS.findIndex(s=>s.id===id&&s.directory);if(index>=0)SERVERS.splice(index,1);},
+  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
 });
 void directory.init();
 route({ focus: false });

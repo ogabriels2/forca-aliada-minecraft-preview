@@ -34,6 +34,7 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     submit:(id,revision)=>request(`${BASE}/drafts/${id}/submit`,{method:'POST',headers:{'If-Match':String(revision)}}),
     upload:(file,purpose)=>{const form=new FormData();form.append('purpose',purpose);form.append('file',file);return request(`${BASE}/media`,{method:'POST',body:form});},
     moderation:()=>request(`${BASE}/moderation`),
+    reviewPage:id=>request(`${BASE}/moderation/${id}`),
     review:(id,action,note,revision)=>request(`${BASE}/moderation/${id}`,{method:'POST',headers:{'If-Match':String(revision)},body:{action,note}}),
   };
 }

@@ -1,4 +1,4 @@
-import { GAMEPLAY, MODES, serverAvailability, mediaSource } from "./model.mjs";
+import { GAMEPLAY, MODES, serverAvailability, mediaSource } from "./model.mjs?v=publication-20261113";
 
 // Presentation only. Real server data and illustrative records stay distinct.
 const photoCaptions = {
@@ -140,6 +140,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
 
   const groups = [
     { name: "Seu histórico", query: { recent: true }, matches: history },
+    { name: "Publicados na Força Aliada", note: "Páginas criadas e revisadas na plataforma", matches: servers.filter(server=>server.directory) },
     { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
     { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
     ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),
@@ -219,7 +220,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>
         <button class="button filter-done" data-action="finish-filters"><span data-filter-done>Ver servidores</span></button>
       </div>
-    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><button type="button" class="text-link" data-action="clear-recent" hidden>Limpar histórico</button></div><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div><p class="catalog-footnote">${icon("alert-circle")} Os servidores marcados como exemplo não aceitam conexões.</p></section>
+    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><button type="button" class="text-link" data-action="clear-recent" hidden>Limpar histórico</button></div><p data-directory-catalog-status role="status" aria-live="polite"></p><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div><p class="catalog-footnote">${icon("alert-circle")} Os servidores marcados como exemplo não aceitam conexões.</p></section>
   <section class="container discovery" id="discovery" ${browsing ? "" : "hidden"} aria-label="Servidor em destaque editorial"><div class="featured" id="featured">${featured}</div></section>
   <section class="container player-studio"><div class="player-studio-copy"><h2>Biblioteca de skins</h2><p>Baixe uma skin pronta ou pinte a sua no editor 3D.</p><a class="text-link" href="#/skins">Explorar skins e editor ${icon("arrow-right")}</a></div><a class="player-studio-art" href="#/skins/editor" aria-label="Abrir o editor de skins"><img src="./assets/skins/showcase-explorer.png" alt="" width="144" height="192" loading="lazy"><img src="./assets/skins/showcase-ocean.png" alt="" width="174" height="232" loading="lazy"><img src="./assets/skins/showcase-plum.png" alt="" width="144" height="192" loading="lazy"><span>${icon("brush")} Editor de skins</span></a></section>
   <section class="join-platform"><div class="container"><div><h2>Tem um servidor?</h2><p>Monte uma página com o endereço, as regras e as fotos do seu mundo.</p><a class="text-link publisher-manager" href="https://forcaaliada.com/manager">Precisa criar um servidor? Conheça o Manager ${icon("arrow-right")}</a></div><button class="button" data-action="create">Criar página grátis ${icon("arrow-right")}</button></div></section>`;

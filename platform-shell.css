@@ -176,3 +176,11 @@ dialog.ps-drawer[data-panel=social][open] { animation-name:ps-social-in; }
 .platform-shell #fa-chat-root .fa-chat-launcher, .platform-shell .community-chat-fallback { display:none; }
 
 .platform-shell > .ps-social { overscroll-behavior-y:auto; }
+
+/* The staff view reuses the page renderer without touching the approved catalog. */
+.directory-review-queue { padding-block: 24px 36px; min-height: 60vh; }
+.directory-review-queue .page-controls { padding: 0 0 20px; margin: 0; }
+.directory-review-queue .module-list small { display: block; margin-top: 4px; font-weight: 400; }
+.directory-review-decision { padding-block: 24px 36px; }
+[data-directory-catalog-status]:empty { display: none; }
+img[data-directory-media], img[data-directory-loading] { opacity: 0; }
