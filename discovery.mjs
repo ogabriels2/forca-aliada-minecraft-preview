@@ -1,4 +1,4 @@
-import { GAMEPLAY, MODES, serverAvailability, mediaSource } from "./model.mjs?v=publication-20261113";
+import { GAMEPLAY, MODES, serverAvailability, mediaSource } from "./model.mjs?v=publication-20261113b";
 
 // Presentation only. Real server data and illustrative records stay distinct.
 const photoCaptions = {
@@ -131,6 +131,7 @@ function managerDiscovery(icon) {
 export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }) {
   const byId = new Map(servers.map((server) => [server.id, server]));
   const history = recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
+  const published = servers.filter(server=>server.directory);
   const rated = servers.filter((server) => server.demoRating);
   const trending = [...rated].sort((a, b) => b.demoTrend - a.demoTrend);
   const topRated = [...rated].sort((a, b) =>
@@ -140,7 +141,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
 
   const groups = [
     { name: "Seu histórico", query: { recent: true }, matches: history },
-    { name: "Publicados na Força Aliada", note: "Páginas criadas e revisadas na plataforma", matches: servers.filter(server=>server.directory) },
+    { name: "Publicados na Força Aliada", note: "Páginas criadas e revisadas na plataforma", matches: published.length>=3?published:[] },
     { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
     { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
     ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),

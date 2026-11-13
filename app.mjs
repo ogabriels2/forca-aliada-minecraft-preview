@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=publication-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=publication-20261113b";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -8,7 +8,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=publication-20261113";
+} from "./discovery.mjs?v=publication-20261113b";
 import { createSkinLibrary } from "./skins.mjs";
 import { createSkinStudio } from "./skin-studio.mjs";
 import { officialPage, bindOfficialStories } from "./official.mjs";
@@ -33,7 +33,7 @@ import {
   safeMedia,
   mediaSource,
   eventUTC,
-} from "./model.mjs?v=publication-20261113";
+} from "./model.mjs?v=publication-20261113b";
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const main = document.querySelector("#main"),

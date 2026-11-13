@@ -1,4 +1,4 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=publication-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=publication-20261113b';
 import {createPublicCatalog} from './directory-catalog.mjs';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
