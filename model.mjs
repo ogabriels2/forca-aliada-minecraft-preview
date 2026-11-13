@@ -289,6 +289,13 @@ export function safeLink(value) {
     return "";
   }
 }
+// Directory media is resolved by the authenticated adapter before the browser
+// requests it. Ordinary demo/public images retain their existing source.
+export function mediaSource(value, escape) {
+  const attribute = /^\/api\/minecraft\/directory\/media\/[a-f0-9-]{36}$/i.test(value) ? 'data-directory-media' : 'src';
+  return `${attribute}="${escape(value)}"`;
+}
+
 export function safeMedia(value) {
   return typeof value === "string" &&
     (/^\/api\/minecraft\/directory\/media\/[a-f0-9-]{36}$/.test(value) || /^\/shared\/images\/(?:hero\.webp|galeria(?:10|19|27)\.webp|fa-icon-dark\.png)$/.test(
@@ -525,7 +532,7 @@ export function safeDraft(value) {
     base.eventZone = value.eventZone;
   base.coverPosition = Math.max(
     0,
-    Math.min(100, Number(value.coverPosition) || 50),
+    Math.min(100, Number.isFinite(Number(value.coverPosition)) ? Number(value.coverPosition) : 50),
   );
   if (["open", "whitelist"].includes(value.access)) base.access = value.access;
   if (base.layout === "spotlight" && base.plan !== "pro")

@@ -1,4 +1,4 @@
-import { GAMEPLAY, MODES, serverAvailability } from "./model.mjs";
+import { GAMEPLAY, MODES, serverAvailability, mediaSource } from "./model.mjs";
 
 // Presentation only. Real server data and illustrative records stay distinct.
 const photoCaptions = {
@@ -74,7 +74,7 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition 
     </div>
     <div class="card-body">
       <div class="card-heading">
-        <span class="card-server-icon" aria-hidden="true"><span>${esc(initial)}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async">` : ""}</span>
+        <span class="card-server-icon" aria-hidden="true"><span>${esc(initial)}</span>${d.avatar ? `<img ${mediaSource(d.avatar, esc)} alt="" width="32" height="32" loading="lazy" decoding="async">` : ""}</span>
         <h3><a href="${esc(href)}" title="${esc(d.name)}"><span class="card-label"><span class="card-name">${esc(d.name)}</span>${d.official ? officialMark() : ""}</span>${icon("arrow-right")}</a></h3>
       </div>
       <div class="card-editions">
