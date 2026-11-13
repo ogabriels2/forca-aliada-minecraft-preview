@@ -291,7 +291,7 @@ export function safeLink(value) {
 }
 export function safeMedia(value) {
   return typeof value === "string" &&
-    (/^\/shared\/images\/(?:hero\.webp|galeria(?:10|19|27)\.webp|fa-icon-dark\.png)$/.test(
+    (/^\/api\/minecraft\/directory\/media\/[a-f0-9-]{36}$/.test(value) || /^\/shared\/images\/(?:hero\.webp|galeria(?:10|19|27)\.webp|fa-icon-dark\.png)$/.test(
       value,
     ) ||
       (/^data:image\/(?:webp|jpeg|png);base64,[a-zA-Z0-9+/=]+$/.test(value) &&

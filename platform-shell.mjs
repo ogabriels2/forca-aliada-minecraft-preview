@@ -43,13 +43,13 @@ socialButton.setAttribute('aria-controls',social.id); socialButton.setAttribute(
 socialButton.innerHTML = `${icon('users')}<span>Amigos</span>`;
 document.querySelector('.header-create').after(socialButton);
 function save() { try { localStorage.setItem(storageKey, JSON.stringify({expanded,socialPinned})); } catch {} }
-function loggedIn() { return Boolean(document.querySelector('.prototype-account')); }
+function loggedIn() { return Boolean(document.querySelector('.fa-account-menu')); }
 function navLink(href,label,glyph,active=false) {
   return `<a href="${href}" class="ps-nav-link" title="${label}" aria-label="${label}" ${active?'aria-current="page"':''}>${icon(glyph)}<span>${label}</span></a>`;
 }
 function renderNav() {
   const hash=location.hash || '#/', query=new URLSearchParams(hash.split('?')[1] || '');
-  let saved={}; try { saved=JSON.parse(localStorage.getItem('fa-minecraft-prototype-v1') || '{}'); } catch {}
+  let saved={}; try { saved=JSON.parse(localStorage.getItem('fa-minecraft-product-v1') || '{}'); } catch {}
   const own = loggedIn() && Boolean(saved.created || saved.publication);
   nav.innerHTML=`<div class="ps-panel-heading"><strong>Seu Minecraft</strong><button class="ps-icon-button" data-shell="close-nav" aria-label="Recolher menu">${icon('x')}</button></div>
     <nav class="ps-drawer-products" aria-label="Produtos da Força Aliada">${document.querySelector('.ecosystem-nav').innerHTML}</nav>
@@ -79,9 +79,9 @@ function personRow(p) {
 }
 function renderSocial() {
   const back = view !== 'list';
-  social.innerHTML=`<div class="ps-panel-heading">${back?`<button class="ps-icon-button" data-shell="social-back" aria-label="Voltar aos amigos">${icon('arrow-left')}</button>`:''}<strong>${view==='chat'?'Conversa':view==='profile'?'Perfil':'Amigos'}</strong>${!back && loggedIn() && demoState==='friends' ? `<button class="ps-icon-button" data-shell="search-friends" aria-label="Buscar pessoas" aria-expanded="false">${icon('search')}</button>` : ''}<button class="ps-icon-button" data-shell="close-social" aria-label="Fechar Amigos">${icon('x')}</button></div><div class="ps-demo-label">${icon('eye')} Perfis de demonstração</div><div class="ps-social-content"></div>`;
+  social.innerHTML=`<div class="ps-panel-heading">${back?`<button class="ps-icon-button" data-shell="social-back" aria-label="Voltar aos amigos">${icon('arrow-left')}</button>`:''}<strong>${view==='chat'?'Conversa':view==='profile'?'Perfil':'Amigos'}</strong>${!back && demoState==='friends' ? `<button class="ps-icon-button" data-shell="search-friends" aria-label="Buscar pessoas" aria-expanded="false">${icon('search')}</button>` : ''}<button class="ps-icon-button" data-shell="close-social" aria-label="Fechar Amigos">${icon('x')}</button></div><div class="ps-demo-label">${icon('eye')} Perfis de demonstração</div><div class="ps-social-content"></div>`;
   const content=social.querySelector('.ps-social-content');
-  if (!loggedIn() || demoState==='guest') {
+  if (demoState==='guest') {
     content.innerHTML=`<div class="ps-empty">${icon('users')}<h3>Jogar fica melhor junto.</h3><p>Seus amigos, conversas e servidores em um só lugar.</p><button class="ps-primary" data-shell="demo-login">Experimentar com amigos</button><small>Abre uma demonstração, sem login real.</small></div>${demoControls()}`;return;
   }
   if (demoState==='empty' || demoState==='error') {
@@ -145,7 +145,7 @@ function handleClick(e) {
   if(action==='close-social'){socialPinned=false;save();closeDrawer();syncLayout();socialButton.focus();}
   if(action==='social-back'){view='list';selected=null;renderSocial();social.querySelector('[data-person]')?.focus();}
   if(action==='chat'){const person=selected;closeDrawer();openCommunityChat(person);}
-  if(action==='demo-login'){document.querySelector('#account-area [data-action="login"]')?.click();demoState='friends';view='list';renderSocial();}
+  if(action==='demo-login'){demoState='friends';view='list';renderSocial();}
   if(action==='demo-retry'){demoState='friends';view='list';renderSocial();}
   const person=e.target.closest('[data-person]')?.dataset.person;
   if(person){selected=[...people,...suggestions].find(p=>p.id===person);view='profile';renderSocial();social.querySelector('[data-shell="social-back"]')?.focus();}

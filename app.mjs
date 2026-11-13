@@ -1,3 +1,5 @@
+import {connectDirectory} from "./directory-integration.mjs";
+let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
   serverCard,
@@ -48,15 +50,15 @@ const esc = (v) =>
   );
 const icon = (name) =>
   `<i class="icon" data-icon="${name}" aria-hidden="true"></i>`;
-const storageKey = "fa-minecraft-prototype-v1";
+const storageKey = "fa-minecraft-product-v1";
 let stored = {};
 try {
-  stored = JSON.parse(localStorage.getItem(storageKey) || "{}") || {};
+  stored = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem("fa-minecraft-prototype-v1") || "{}") || {};
 } catch {}
 const recentStorageKey = `${storageKey}.recent`;
 let recentlyViewed = [];
 try {
-  const visits = JSON.parse(localStorage.getItem(recentStorageKey) || "[]");
+  const visits = JSON.parse(localStorage.getItem(recentStorageKey) || localStorage.getItem("fa-minecraft-prototype-v1.recent") || "[]");
   if (Array.isArray(visits))
     recentlyViewed = [...new Set(visits.filter((id) => typeof id === "string" && id.length <= 80))].slice(0, 8);
 } catch {}
@@ -68,21 +70,12 @@ function setRecentServers(ids) {
   } catch {}
 }
 const state = {
-  draft: safeDraft(stored.draft),
-  publication: stored.publication ? safeDraft(stored.publication) : null,
-  created: Boolean(stored.created || stored.publication),
-  wizard: stored.wizard
-    ? {
-        draft: safeDraft(stored.wizard.draft),
-        step: Math.max(0, Math.min(5, Number(stored.wizard.step) || 0)),
-        maxStep: Math.max(
-          0,
-          Math.min(5, Number(stored.wizard.maxStep ?? stored.wizard.step) || 0),
-        ),
-      }
-    : null,
+  draft: initialDraft(),
+  publication: null,
+  created: false,
+  wizard: null,
   favorites: new Set(Array.isArray(stored.favorites) ? stored.favorites : []),
-  account: true,
+  account: false,
   editing: false,
   guestPreview: false,
   filters: {},
@@ -130,7 +123,7 @@ function toast(text) {
   n.hidden = false;
   toastTimer = setTimeout(() => (n.hidden = true), 3200);
 }
-function persist() {
+function persist({remote=true}={}) {
   clearTimeout(saveTimer);
   try {
     localStorage.setItem(
@@ -149,6 +142,7 @@ function persist() {
   }
   state.saving = false;
   updateSaveStatus();
+  if(remote)directory?.schedule();
   return !state.storageError;
 }
 function scheduleSave() {
@@ -168,6 +162,11 @@ function updateSaveStatus() {
             ? "Salvando…"
             : "Rascunho salvo neste navegador"),
     );
+  if(directory?.record){
+    document.querySelectorAll('[data-save-state]').forEach(n=>n.textContent=directory.saveLabel());
+    document.querySelectorAll('.directory-save-recovery').forEach(n=>n.remove());
+    if(directory.hasError)document.querySelector('[data-save-state]')?.insertAdjacentHTML('afterend','<button class="text-link directory-save-recovery" data-directory="reload">Reabrir versão da conta</button>');
+  }
 }
 function ownPage() {
   return state.account && state.created && activeServer?.id === "minha-pagina";
@@ -179,6 +178,7 @@ function dirty() {
   );
 }
 function openDialog(content, mode = "plain") {
+  window.FAAccountMenu?.closeAll();
   if (!dialog.open) dialogOpener = document.activeElement;
   dialogMode = mode;
   dialog.className =
@@ -531,6 +531,7 @@ async function refreshServerStatuses() {
 
 function availableServers() {
   const servers = SERVERS.map((server) => withServerAvailability(server));
+  if(directory)return servers;
   return state.publication?.visibility === "listed"
     ? [withServerAvailability(state.publication), ...servers]
     : servers;
@@ -824,6 +825,7 @@ const stepNames = [
   "Revisão",
 ];
 function startWizard() {
+  if(directory)return void directory.start();
   if (!state.account) {
     state.account = true;
     updateHeader();
@@ -844,6 +846,7 @@ function startWizard() {
   newWizard();
 }
 function newWizard() {
+  if(directory)return void directory.newDraft();
   const d = initialDraft();
   d.name = "";
   d.address = "";
@@ -874,9 +877,9 @@ function featureChoices(d) {
 }
 function wizardBody(d, step) {
   if (step === 0)
-    return `<h2 id="dialog-title">Crie a página do seu servidor.</h2><p>Divulgue um servidor que já existe. Comece com nome e endereço; fotos e detalhes vêm nas próximas etapas.</p><div class="source-tabs"><button type="button" data-action="source" data-value="manual" aria-pressed="${d.source === "manual"}">${icon("world")}<span>Já tenho um servidor<small>Informe o endereço de jogo</small></span></button><button type="button" data-action="source" data-value="manager" aria-pressed="${d.source === "manager"}">${icon("device-desktop")}<span>Usar o Manager<small>Experimentar importação</small></span></button></div>${d.source === "manager" ? '<div class="notice">Importação de exemplo. Confira o que ficará público; nenhuma conta do Manager é consultada.</div>' : ""}${field("name", d.name, { required: true, max: 64 })}${field("address", d.address, { required: true, hint: "Sem https://. Para testar, use meu-servidor.example." })}<div class="field"><span>Quem pode jogar? Selecione uma ou as duas edições.</span><div class="appearance-choice wizard-editions">${["Java", "Bedrock"].map((v) => `<button type="button" data-action="toggle-edition" data-value="${v}" aria-pressed="${d.editions.includes(v)}">${icon(v === "Java" ? "device-desktop" : "device-mobile")}<span><strong>${v}</strong><small>${v === "Java" ? "Minecraft Java no computador" : "Minecraft Bedrock em dispositivos compatíveis"}</small></span><span class="edition-check" aria-hidden="true">${d.editions.includes(v) ? icon("check") : ""}</span></button>`).join("")}</div></div>${d.editions.includes("Bedrock") ? field("port", d.port, { label: "Porta Bedrock", max: 5 }) : ""}`;
+    return `<h2 id="dialog-title">Crie a página do seu servidor.</h2><p>Divulgue um servidor que já existe. Comece com nome e endereço; fotos e detalhes vêm nas próximas etapas.</p><div class="source-tabs"><button type="button" data-action="source" data-value="manual" aria-pressed="${d.source === "manual"}">${icon("world")}<span>Já tenho um servidor<small>Informe o endereço de jogo</small></span></button><button type="button" data-action="source" data-value="manager" aria-pressed="${d.source === "manager"}">${icon("device-desktop")}<span>Usar o Manager<small>Experimentar importação</small></span></button></div>${d.source === "manager" ? '<div class="notice">Importação de exemplo. Confira o que ficará público; nenhuma conta do Manager é consultada.</div>' : ""}${field("name", d.name, { required: true, max: 64 })}${field("address", d.address, { required: true, hint: "Sem https://. Exemplo: jogar.seudominio.com." })}<div class="field"><span>Quem pode jogar? Selecione uma ou as duas edições.</span><div class="appearance-choice wizard-editions">${["Java", "Bedrock"].map((v) => `<button type="button" data-action="toggle-edition" data-value="${v}" aria-pressed="${d.editions.includes(v)}">${icon(v === "Java" ? "device-desktop" : "device-mobile")}<span><strong>${v}</strong><small>${v === "Java" ? "Minecraft Java no computador" : "Minecraft Bedrock em dispositivos compatíveis"}</small></span><span class="edition-check" aria-hidden="true">${d.editions.includes(v) ? icon("check") : ""}</span></button>`).join("")}</div></div>${d.editions.includes("Bedrock") ? field("port", d.port, { label: "Porta Bedrock", max: 5 }) : ""}`;
   if (step === 1)
-    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p><details class="subscriber-detail"><summary title="Recurso para assinantes: ícone em maior resolução"><span class="subscriber-badge">${icon("sparkles")} Pro</span> Ícone em alta resolução</summary><p>Até 384 px na prévia para preservar mais detalhes da sua imagem. O ícone automático e a personalização básica já fazem parte da página gratuita.</p></details></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens ficam somente neste navegador.</p>`;
+    return `<h2 id="dialog-title">Dê uma identidade ao seu mundo.</h2><p>Escolha um ícone personalizado e uma capa. Os dois são opcionais.</p><div class="wizard-media"><div><h3>Ícone do servidor</h3>${imageControl(d, "avatar", "Ícone do servidor")}<p class="field-help">Imagem preparada com até ${serverIconMaxSize(d)} px nesta prévia.</p><details class="subscriber-detail"><summary title="Recurso para assinantes: ícone em maior resolução"><span class="subscriber-badge">${icon("sparkles")} Pro</span> Ícone em alta resolução</summary><p>Até 384 px na prévia para preservar mais detalhes da sua imagem. O ícone automático e a personalização básica já fazem parte da página gratuita.</p></details></div><div><h3>Capa</h3>${imageControl(d, "cover", "Capa do servidor")}</div></div><details class="optional-setup"><summary>Adicionar imagens à galeria (opcional)</summary>${imageControl(d, "gallery", "Galeria do servidor")}</details><p class="field-help">PNG, JPG ou WebP, até 5 MB por arquivo. As imagens serão salvas na sua conta quando o armazenamento estiver conectado.</p>`;
   if (step === 2)
     return `<h2 id="dialog-title">Como é jogar aqui?</h2><p>Uma boa apresentação ajuda a pessoa a entender se este é o mundo que procura.</p>${field("summary", d.summary, { area: true, max: 180, hint: "Uma frase sobre a experiência, sem precisar de um slogan." })}<details class="optional-setup"><summary>Adicionar uma descrição completa</summary>${field("description", d.description, { area: true, max: 4000, label: "Conte um pouco mais (opcional)" })}</details><div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${field("version", d.version, { label: "Versão compatível (opcional)" })}<h3>O que as pessoas encontram?</h3>${featureChoices(d)}`;
   if (step === 3)
@@ -968,6 +971,7 @@ function wizardNext() {
       showErrors(result.errors);
       return;
     }
+    if(directory)return void directory.finish(d);
     state.draft = d;
     state.publication = result.publication;
     state.created = true;
@@ -1161,7 +1165,7 @@ function updateConnectionAvailability() {
   });
 }
 function ownerBar() {
-  return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">Publicar alterações ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
+  return `<div class="owner-bar"><div><strong>${state.guestPreview ? "Visualização como visitante" : "Esta é a sua página"}</strong><span data-save-state>Rascunho salvo neste navegador</span></div><div>${!state.guestPreview ? `<button class="button secondary small" data-action="settings">${icon("settings")} Configurações</button><button class="button secondary small" data-action="guest-preview">${icon("eye")} Ver como visitante</button><button class="button small" data-action="publish">Enviar para revisão ${icon("arrow-right")}</button>` : '<button class="button small" data-action="guest-preview">Voltar à edição</button>'}</div></div>`;
 }
 function serverDocument(d) {
   const ordered = d.modules;
@@ -1187,6 +1191,7 @@ function previewReview(server) {
 }
 
 function renderPage(id) {
+  if(directory&&/^[a-f0-9-]{36}$/i.test(id)&&!SERVERS.some(s=>s.id===id)&&!directory.publicFailed(id)){void directory.loadPublic(id);return;}
   activeServer =
     id === "minha-pagina"
       ? state.account && !state.guestPreview && state.created
@@ -1289,7 +1294,7 @@ function renderSettings() {
   else if (state.settings === "content")
     content = `<h3>Conexão e compatibilidade</h3>${field("address", d.address, { required: true })}<div class="field-row">${field("port", d.port, { label: "Porta Bedrock", max: 5 })}${field("version", d.version)}</div><div class="field-row">${select("mode", "Modalidade", MODES, d.mode)}${select("language", "Idioma", ["Português", "English", "Español"], d.language)}</div>${select("access", "Entrada", ["Aberta", "Com whitelist"], d.access === "whitelist" ? "Com whitelist" : "Aberta")}<h3>Características</h3>${featureChoices(d)}<h3>Links da comunidade</h3>${field("discord", d.discord, { label: "Discord" })}${field("website", d.website, { label: "Site ou outro canal" })}<label class="switch"><input type="checkbox" name="community" ${d.community ? "checked" : ""}><span>Perfil do servidor no Community (demonstração)</span></label><h3>Próximo encontro</h3>${field("eventTitle", d.eventTitle)}${field("eventDate", d.eventDate, { label: "Data e hora do encontro", type: "datetime-local" })}${select("eventZone", "Fuso horário", ["America/Sao_Paulo", "UTC", "Europe/Lisbon"], d.eventZone)}<p class="field-help">O horário aparece com o fuso escolhido. Não é ajustado silenciosamente ao horário do visitante.</p>`;
   else
-    content = `${visibilityChoices(d)}<div class="notice">Seu rascunho é separado da última publicação. Nesta prévia, publicar atualiza apenas os dados deste navegador.</div><button class="button" type="button" data-action="publish">Publicar alterações ${icon("arrow-right")}</button><div class="form-divider"></div><button class="text-link" type="button" data-action="reset">Recomeçar a demonstração</button>`;
+    content = `${visibilityChoices(d)}<div class="notice">Seu rascunho é separado da última publicação. Enviar para revisão permite publicar a versão salva na sua conta.</div><button class="button" type="button" data-action="publish">Enviar para revisão ${icon("arrow-right")}</button><div class="form-divider"></div><button class="text-link" type="button" data-action="reset">Minhas páginas</button>`;
   openDialog(
     `<h2 id="dialog-title">Configurações da página</h2><p>Os ajustes rápidos ficam no próprio texto. Aqui você encontra as opções de estrutura e apresentação.</p><div class="settings-tabs" role="tablist" aria-label="Configurações">${[
       ["appearance", "Aparência"],
@@ -1361,6 +1366,7 @@ async function prepareImage(file, target, draft) {
   return data;
 }
 async function uploadImages(input) {
+  if(directory)return await directory.upload(input);
   const mode = dialogMode;
   const d = workingDraft();
   const target = input.dataset.upload;
@@ -1405,6 +1411,7 @@ async function uploadImages(input) {
   }
 }
 function publish() {
+  if(directory)return void directory.publish();
   if (!canEdit()) return;
   const errors = validateDraft(state.draft);
   for (const key of ["discord", "website"])
@@ -1544,29 +1551,26 @@ function updateHeader() {
   const createButton = document.querySelector(".header-create");
   if (createButton)
     createButton.hidden = (location.hash.split("?")[0] || "#/") !== "#/";
-  const n = document.querySelector("#account-area");
-  if (!n) return;
-  n.innerHTML = state.account
-    ? `<details class="prototype-notifications">
-        <summary aria-label="Notificações">${icon("bell")}</summary>
-        <div class="account-popover notifications-popover">
-          <strong>Notificações</strong>
-          ${state.publication ? '<a href="#/servidor/minha-pagina">Sua página está pronta nesta prévia</a>' : '<p>Nenhuma notificação por aqui.</p>'}
-          <small>Atividade deste navegador</small>
-        </div>
-      </details>
-      <details class="prototype-account">
-        <summary aria-label="Minha conta"><span class="account-initial" aria-hidden="true">D</span><span>Minha conta</span>${icon("chevron-down")}</summary>
-        <div class="account-popover">
-          <div class="account-profile"><span class="account-initial" aria-hidden="true">D</span><div><strong>Perfil de demonstração</strong><small>Dados salvos neste navegador</small></div></div>
-          <a href="#/perfil/demonstracao/skins">Perfil</a>
-          <a href="https://forcaaliada.com/conta">Configurações</a>
-          <a href="https://forcaaliada.com/assinatura">Assinatura</a>
-          <button data-action="logout">${icon("logout")} Sair</button>
-        </div>
-      </details>`
-    : `<button class="button secondary small" data-action="login">${icon("users")} Entrar na prévia</button>`;
-  paintIcons(n);
+  const n = document.querySelector('#account-area');
+  if(!n)return;
+  // Use the same approved component and CSS as the Manager page.
+  let host=n.querySelector('#auth-container');if(!host){host=document.createElement('div');host.id='auth-container';n.replaceChildren(host);}
+  const notifications=state.account?`<details class="prototype-notifications"><summary aria-label="Notificações">${icon('bell')}</summary><div class="account-popover notifications-popover"><strong>Notificações</strong><p>${directory?.record?.state==='pending'?'Sua página está em revisão.':'Nenhuma nova notificação.'}</p></div></details>`:'';
+  window.FAAccountMenu?.mount(host,directory?.me||null,{prefix:notifications,onLogout:()=>void directory.logout()});
+  window.FAAccountMenu?.setPlan({kind:'unavailable'});
+  host.onclick=()=>{const top=document.querySelector('.site-header').getBoundingClientRect().bottom+8;host.style.setProperty('--fa-account-top',top+'px');const panel=host.querySelector('.fa-site-user-dropdown');if(panel)panel.style.maxHeight=Math.max(120,innerHeight-top-12)+'px';};
+  host.querySelectorAll('a[href^="/"]').forEach(a=>a.href='https://forcaaliada.com'+a.getAttribute('href'));
+  host.querySelector('.fa-account-login')?.addEventListener('click',event=>{event.preventDefault();directory.login();});
+  const menu=host.querySelector('.fa-site-user-dropdown nav');
+  if(menu){
+    const pages=document.createElement('button');pages.type='button';pages.className='fa-site-user-item';pages.dataset.directory='pages';
+    pages.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Minhas páginas</span>';menu.prepend(pages);
+    if(['owner','full'].includes(directory.me?.role)){
+      const review=document.createElement('button');review.type='button';review.className='fa-site-user-item';review.dataset.directory='moderation';
+      review.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Revisar páginas</span>';menu.append(review);
+    }
+  }
+  paintIcons(host);
 }
 function updateMini() {
   const preview = dialog.querySelector(".wizard-preview");
@@ -2006,6 +2010,7 @@ document.addEventListener("click", (e) => {
   } else if (a === "publish") publish();
   else if (a === "calendar") downloadCalendar();
   else if (a === "logout") {
+    if(directory){void directory.logout();return;}
     state.account = false;
     state.guestPreview = false;
     inline = null;
@@ -2014,16 +2019,19 @@ document.addEventListener("click", (e) => {
     else refreshPage();
     toast("Visualização sem conta conectada.");
   } else if (a === "login") {
+    if(directory){directory.login();return;}
     state.account = true;
     updateHeader();
     if (location.hash.includes("/skins")) route({ focus: false });
     else refreshPage();
     toast("Conta de demonstração conectada.");
   } else if (a === "reset") {
+    if(directory){void directory.start();return;}
     openDialog(
       '<h2 id="dialog-title">Recomeçar esta demonstração?</h2><p>O rascunho e a publicação local serão removidos. Seus favoritos permanecem.</p><div class="dialog-actions"><button class="button secondary" data-action="close-dialog">Manter página</button><button class="button" data-action="confirm-reset">Recomeçar</button></div>',
     );
   } else if (a === "confirm-reset") {
+    if(directory){void directory.start();return;}
     state.draft = initialDraft();
     state.publication = null;
     state.created = false;
@@ -2295,6 +2303,15 @@ const skinStudio = createSkinStudio({
   publishSkin: (skin) => skinLibrary.publishFromEditor(skin),
   account: () => state.account,
 });
+directory=connectDirectory({
+  state,esc,icon,safeDraft,initialDraft,openDialog,closeDialog,toast,renderWizard,renderPage,updateHeader,updateSaveStatus,
+  cacheOnly:()=>persist({remote:false}),
+  renderCurrent:()=>route({focus:false}),
+  setImageBusy:value=>imageBusy=value,
+  refreshMedia:target=>{if(dialogMode==='wizard')renderWizard();else{refreshPage();mediaDialog(target);}},
+  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.push(d);else SERVERS[index]=d;},
+});
+void directory.init();
 route({ focus: false });
 if (/^https?:$/.test(location.protocol)) {
   void refreshServerStatuses();
