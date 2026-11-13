@@ -1,5 +1,5 @@
-import {createCreationsClient} from './creations-client.mjs?v=creations-20261113';
-import { createShowroom, showroomMarkup } from "./skin-showroom.mjs?v=creations-20261113";
+import {createCreationsClient} from './creations-client.mjs?v=microsoft-20261113';
+import { createShowroom, showroomMarkup } from "./skin-showroom.mjs?v=microsoft-20261113";
 import {
   BASE_SKINS,
   safeSkin,
@@ -8,10 +8,10 @@ import {
   skinText,
   skinDimensions,
   skinCreditError,
-} from "./skin-model.mjs?v=creations-20261113";
+} from "./skin-model.mjs?v=microsoft-20261113";
 import { loadSkinViewer, imagePixels, drawSkinFront } from "./skin-viewer.mjs";
-import { safePart, CATEGORIES } from "./skin-parts.mjs?v=creations-20261113";
-import { overlay } from "./skin-pixels.mjs?v=creations-20261113";
+import { safePart, CATEGORIES } from "./skin-parts.mjs?v=microsoft-20261113";
+import { overlay } from "./skin-pixels.mjs?v=microsoft-20261113";
 
 // Original library UI backed by the isolated account API. Legacy local drafts are never uploaded automatically.
 export function createSkinLibrary({
@@ -27,6 +27,7 @@ export function createSkinLibrary({
   editSkin,
   getUser=()=>null,
   signIn=()=>{},
+  manageConnections=()=>{},
 }) {
   const remote=createCreationsClient(),profileParts=new Map();
   let favoriteVersion=0;
@@ -398,11 +399,14 @@ export function createSkinLibrary({
   }
   async function applyFlow(){
     disposeDetail();
-    openDialog(`<h2 id="dialog-title">Usar ${esc(selected.name)} no Minecraft</h2><p>Carregando suas contas Java…</p><div data-apply-options role="status"></div>`,'skin-apply');
+    const skin=selected,identity=String(getUser()?.id||'');
+    openDialog(`<h2 id="dialog-title">Usar ${esc(skin.name)} no Minecraft</h2><p>Carregando suas contas Java…</p><div data-apply-options role="status"></div>`,'skin-apply');
     try{
-      const result=account()?await remote.accounts():{configured:false,rows:[]};if(!dialog.querySelector('[data-apply-options]'))return;
-      dialog.querySelector('[data-apply-options]').innerHTML=`<section><h3>Minecraft Java</h3>${result.configured&&result.rows.length&&!selected.base?`<label class="field"><span>Conta que receberá a skin</span><select id="skin-java-account">${result.rows.map(row=>`<option value="${row.id}">${esc(row.name)}</option>`).join('')}</select></label><p>${modelName(selected)}. A troca só acontece ao confirmar abaixo.</p><button class="button" data-skin-action="apply-confirm">Confirmar troca nesta conta</button>`:`<p>${!account()?'Entre com sua conta para consultar as conexões Java.':!result.configured?'A conexão Microsoft ainda não está habilitada neste ambiente de teste. O PNG já pode ser usado no jogo.':'Vincule uma conta com Minecraft Java nas configurações da Força Aliada.'}</p><a class="text-link" href="https://www.minecraft.net/msaprofile/mygames/editskin" target="_blank" rel="noopener">Abrir o perfil oficial do Minecraft ${icon('external-link')}</a>`}</section><section><h3>Minecraft Bedrock</h3><p>Baixe o PNG e importe nas plataformas compatíveis. A troca Java não altera a skin do Bedrock.</p></section><button class="button secondary full" data-skin-action="download">Baixar PNG ${icon('arrow-down')}</button><div data-skin-error class="invalid-box" role="alert" hidden></div>`;
-    }catch(error){dialog.querySelector('[data-apply-options]').textContent=error.message;}
+      const result=account()?await remote.accounts():{configured:false,rows:[]};
+      const target=dialog.querySelector('[data-apply-options]');if(!target||selected!==skin||identity!==String(getUser()?.id||''))return;
+      const usable=result.rows.filter(row=>row.usable!==false);
+      target.innerHTML=`<section><h3>Minecraft Java</h3>${result.configured&&usable.length&&!skin.base?`<label class="field"><span>Conta que receberá a skin</span><select id="skin-java-account">${usable.map(row=>`<option value="${esc(row.id)}">${esc(row.name)}</option>`).join('')}</select></label><p>${modelName(skin)}. A troca só acontece ao confirmar abaixo.</p><button class="button" data-skin-action="apply-confirm">Confirmar troca nesta conta</button>`:`<p>${!account()?'Entre com sua conta para consultar as conexões Java.':skin.base?'Para aplicar esse modelo, baixe o PNG e use o perfil oficial do Minecraft.':!result.configured?'A conexão Microsoft está em configuração. Você já pode usar o PNG no jogo.':'Conecte uma conta com Minecraft Java para aplicar sua criação.'}</p><a class="text-link" href="https://www.minecraft.net/msaprofile/mygames/editskin" target="_blank" rel="noopener">Abrir o perfil oficial do Minecraft ${icon('external-link')}</a>`}${account()?'<p><button class="text-link" data-skin-action="connect-java">Gerenciar conexões Minecraft</button></p>':'<p><button class="text-link" data-skin-action="demo-login">Entrar na conta</button></p>'}</section><section><h3>Minecraft Bedrock</h3><p>Baixe o PNG e importe nas plataformas compatíveis. A troca Java não altera a skin do Bedrock.</p></section><button class="button secondary full" data-skin-action="download">Baixar PNG ${icon('arrow-down')}</button><div data-skin-error class="invalid-box" role="alert" hidden></div>`;
+    }catch(error){const target=dialog.querySelector('[data-apply-options]');if(target)target.textContent=error.message;}
   }
   document.addEventListener("input", (e) => {
     if (e.target.id === "skin-search") {
@@ -514,10 +518,12 @@ export function createSkinLibrary({
       a.click();
       a.remove();
       toast("PNG preparado para download.");
-    } else if (action === "apply") applyFlow();
+    } else if(action==='connect-java')manageConnections();
+    else if (action === "apply") applyFlow();
     else if(action==='apply-confirm'){
+      const entry=selected,identity=String(getUser()?.id||'');if(!entry||!identity)return;
       const value=dialog.querySelector('#skin-java-account')?.value;b.disabled=true;b.textContent='Aplicando…';
-      try{const result=await remote.apply(selected,value);openDialog(`<h2 id="dialog-title">Skin aplicada.</h2><p>A troca foi confirmada para ${esc(result.account)}. Entre novamente no servidor para atualizar o personagem.</p><button class="button" data-skin-action="back-detail">Voltar à skin</button>`);}
+      try{const result=await remote.apply(entry,value);if(identity!==String(getUser()?.id||''))return;openDialog(`<h2 id="dialog-title">Skin aplicada.</h2><p>A troca foi confirmada para ${esc(result.account)}. Entre novamente no servidor para atualizar o personagem.</p><button class="button" data-skin-action="back-detail">Voltar à skin</button>`);}
       catch(error){formError(error.message);if(b.isConnected){b.disabled=false;b.textContent='Tentar novamente';}}
     } else if (action === "back-detail" && selected) detail(selected);
     else if (action === "rotate-left" && viewer)

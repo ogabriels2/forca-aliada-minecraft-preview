@@ -21,6 +21,11 @@ export function createCreationsClient({origin='https://forca-aliada-minecraft-be
     favorite:(id,on)=>request('/favorites/'+id,{method:on?'PUT':'DELETE'}),
     accounts:()=>request('/accounts'),
     current:id=>request('/accounts/'+id+'/skin'),
-    apply:(entry,integrationId)=>request('/items/'+entry.id+'/apply',{method:'POST',body:{confirmed:true,integrationId:Number(integrationId),revision:entry.revision}}),
+    apply:(entry,integrationId)=>request('/items/'+entry.id+'/apply',{method:'POST',body:{confirmed:true,integrationId,revision:entry.revision}}),
+    microsoftStart:proof=>request('/microsoft/start',{method:'POST',body:{proof}}),
+    microsoftStatus:(id,proof)=>request('/microsoft/status',{method:'POST',body:{id,proof}}),
+    microsoftConfirm:(id,proof)=>request('/microsoft/confirm',{method:'POST',body:{id,proof,confirmed:true}}),
+    microsoftCancel:(id,proof)=>request('/microsoft/cancel',{method:'POST',body:{id,proof}}),
+    microsoftDisconnect:id=>request('/microsoft/accounts/'+id,{method:'DELETE',body:{confirmed:true}}),
   };
 }

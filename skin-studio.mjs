@@ -1,4 +1,4 @@
-import {createCreationsClient} from './creations-client.mjs?v=creations-20261113';
+import {createCreationsClient} from './creations-client.mjs?v=microsoft-20261113';
 import {
   faces,
   PART_NAMES,
@@ -13,11 +13,11 @@ import {
   extractPiece,
   extractWearable,
   overlay,
-} from "./skin-pixels.mjs?v=creations-20261113";
-import { SAMPLE_PARTS, CATEGORIES, PART_TYPES, safePart } from "./skin-parts.mjs?v=creations-20261113";
+} from "./skin-pixels.mjs?v=microsoft-20261113";
+import { SAMPLE_PARTS, CATEGORIES, PART_TYPES, safePart } from "./skin-parts.mjs?v=microsoft-20261113";
 import { loadSkinViewer, pixelCanvas, imagePixels } from "./skin-viewer.mjs";
 
-// Isolated local application. No account, marketplace or Minecraft API is called.
+// The original editor keeps its local draft; explicit account actions use the connected API.
 export function createSkinStudio({
   main,
   dialog,
@@ -31,6 +31,7 @@ export function createSkinStudio({
   account,
   getUser=()=>null,
   signIn=()=>{},
+  manageConnections=()=>{},
 }) {
   const remote=createCreationsClient();let typeFilter='',partNext=null,partRequest=0,remoteKey='',remoteTimer,partBusy=false;const remoteParts=new Map();
   const KEY = "fa-skin-studio-v1",
@@ -863,11 +864,13 @@ export function createSkinStudio({
     } else if(a==='more-parts'){await searchRemoteParts(true);}
     else if(a==='import-linked'){
       if(!account()){signIn();return;}b.disabled=true;
-      try{const result=await remote.accounts();if(!result.configured||!result.rows.length){toast('A conexão Java ainda não está disponível nesta conta de teste. Você pode importar seu PNG.');return;}
-      openDialog(`<h2 id="dialog-title">Importar sua skin do Minecraft</h2><p>Isso só traz uma cópia para o editor. Não publica e não troca sua skin no jogo.</p><label class="field"><span>Conta Java</span><select id="import-java-account">${result.rows.map(row=>`<option value="${row.id}">${esc(row.name)}</option>`).join('')}</select></label><button class="button" data-studio-action="import-current">Importar para o editor</button><div data-studio-error class="invalid-box" role="alert" hidden></div>`);
+      const identity=String(getUser()?.id||'');
+      try{const result=await remote.accounts();if(identity!==String(getUser()?.id||'')||!active())return;const usable=result.rows.filter(row=>row.usable!==false);if(!result.configured||!usable.length){manageConnections();return;}
+      openDialog(`<h2 id="dialog-title">Importar sua skin do Minecraft</h2><p>Isso só traz uma cópia para o editor. Não publica e não troca sua skin no jogo.</p><label class="field"><span>Conta Java</span><select id="import-java-account">${usable.map(row=>`<option value="${esc(row.id)}">${esc(row.name)}</option>`).join('')}</select></label><button class="button" data-studio-action="import-current">Importar para o editor</button><p><button class="text-link" data-studio-action="connections">Gerenciar conexões Minecraft</button></p><div data-studio-error class="invalid-box" role="alert" hidden></div>`);
       }catch(error){toast(error.message);}finally{if(b.isConnected)b.disabled=false;}
-    }else if(a==='import-current'){
-      b.disabled=true;try{const item=await remote.current(dialog.querySelector('#import-java-account').value);await replaceBase(item.image,item.model,item.componentCredits);toast('Skin importada para o editor. Publicar uma peça é opcional.');}catch(error){toast(error.message);if(b.isConnected)b.disabled=false;}
+    }else if(a==='connections'){manageConnections();}
+    else if(a==='import-current'){
+      const identity=String(getUser()?.id||'');b.disabled=true;try{const item=await remote.current(dialog.querySelector('#import-java-account').value);if(identity!==String(getUser()?.id||'')||!active())return;await replaceBase(item.image,item.model,item.componentCredits);toast('Skin importada para o editor. Publicar uma peça é opcional.');}catch(error){toast(error.message);if(b.isConnected)b.disabled=false;}
     } else if (a === "base") baseDialog();
     else if (a === "choose-base")
       await replaceBase(

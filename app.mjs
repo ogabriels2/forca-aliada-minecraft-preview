@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=creations-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=microsoft-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -9,8 +9,9 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs?v=creations-20261113";
-import { createSkinStudio } from "./skin-studio.mjs?v=creations-20261113";
+import { createSkinLibrary } from "./skins.mjs?v=microsoft-20261113";
+import { createSkinStudio } from "./skin-studio.mjs?v=microsoft-20261113";
+import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
   SERVERS as BASE_SERVERS,
@@ -1611,6 +1612,7 @@ function route({ focus = true } = {}) {
   inline = null;
   skinLibrary.dispose();
   skinStudio.dispose();
+  minecraftConnections.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
   const params = new URLSearchParams(query);
   const toolsMenu = document.querySelector(".tools-menu");
@@ -1632,6 +1634,9 @@ function route({ focus = true } = {}) {
   } else if (path === "/revisoes" || path.startsWith("/revisoes/")) {
     void directory?.reviewRoute(path.startsWith("/revisoes/")?path.slice(10):'');
     document.title="Revisão de páginas · Força Aliada";
+  } else if(path==='/skins/conexoes'){
+    activeServer=null;if(dialog.open)closeDialog();void minecraftConnections.render(params);
+    document.title='Conexões Minecraft · Força Aliada';
   } else if (path === "/skins/editor") {
     activeServer = null;
     skinStudio.render(editorSeed, new URLSearchParams(query).get("part"));
@@ -2328,6 +2333,7 @@ const skinLibrary = createSkinLibrary({
     if (dialog.open) closeDialog();
     location.hash = "/skins/editor";
   },
+  manageConnections:()=>{if(dialog.open)closeDialog();minecraftConnections.open();},
 });
 const skinStudio = createSkinStudio({
   main,
@@ -2342,14 +2348,16 @@ const skinStudio = createSkinStudio({
   account: () => state.account,
   getUser:()=>directory?.me,
   signIn:()=>directory.login(),
+  manageConnections:()=>{if(dialog.open)closeDialog();minecraftConnections.open();},
 });
+const minecraftConnections=createMinecraftConnections({main,getUser:()=>directory?.me,signIn:()=>directory.login(),esc,icon,paintIcons,toast,openDialog,closeDialog});
 directory=connectDirectory({
   state,esc,icon,safeDraft,initialDraft,openDialog,closeDialog,toast,renderWizard,renderPage,updateHeader,updateSaveStatus,
   cacheOnly:()=>persist({remote:false}),
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();},
+  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();},
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},
   catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},
