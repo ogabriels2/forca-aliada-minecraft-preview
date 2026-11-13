@@ -39,7 +39,7 @@ function paintSaveState(){document.querySelectorAll('[data-save-state]').forEach
 function fail(error){if(error.status===401){me=null;mountAccount();toast('Sua sessão expirou. Entre novamente para continuar.');return;}toast(error.message||'Não foi possível concluir. Tente novamente.');}
 function mountAccount(){
   const area=document.querySelector('#account-area');
-  if(beta){area.innerHTML=me?`<details class="directory-account"><summary>${icon('user-circle')} ${esc(me.display_name||me.username||'Minha conta')}</summary><div><button class="text-link" data-action="create">Minhas páginas</button><button class="text-link" data-beta-logout>Sair do teste</button></div></details>`:'<button class="button secondary" data-beta-login>Entrar no teste</button>';return;}
+  if(beta){area.innerHTML=me?`<details class="directory-account"><summary>${icon('user-circle')} ${esc(me.display_name||me.username||'Minha conta')}</summary><div><button class="text-link" data-action="create">Minhas páginas</button>${['owner','full'].includes(me.role)?'<button class="text-link" data-moderation>Revisar páginas</button>':''}<button class="text-link" data-beta-logout>Sair do teste</button></div></details>`:'<button class="button secondary" data-beta-login>Entrar no teste</button>';return;}
   window.FAAccountMenu?.mount(area,me?window.FAAccountMenu.normalize(me):null,{onLogout:logout});
 }
 function field(key,label,{area=false,max=200,hint='',required=false,type='text'}={}){const attrs=`name="${key}" maxlength="${max}" ${required?'required':''}`;return `<label class="field"><span>${label}${required?' *':''}</span>${area?`<textarea ${attrs} rows="4">${esc(draft[key])}</textarea>`:`<input ${attrs} type="${type}">`}${hint?`<small>${hint}</small>`:''}</label>`;}
@@ -149,5 +149,4 @@ if(!new URLSearchParams(location.search).has('server')){listingShell();void sear
 await api.capabilities().then(value=>capabilities=value).catch(()=>{});
 try{me=await api.me();}catch(error){if(error.status!==401)toast('Não foi possível consultar sua conta. O catálogo continua disponível.');}
 mountAccount();
-if(['owner','full'].includes(me?.role)){const button=document.createElement('button');button.className='button secondary small';button.textContent='Revisar páginas';button.dataset.moderation='';document.querySelector('.header-actions').prepend(button);}
 await route();
