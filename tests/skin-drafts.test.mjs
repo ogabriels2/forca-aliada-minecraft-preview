@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createSkinDraftSession,skinDraftKey,LEGACY_SKIN_DRAFT} from '../skin-drafts.mjs';
+const values=new Map(),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
+storage.setItem(LEGACY_SKIN_DRAFT,'rascunho anterior, sem conta');
+const owner=createSkinDraftSession(storage,3),other=createSkinDraftSession(storage,1),guest=createSkinDraftSession(storage);
+assert.equal(owner.read(),'rascunho anterior, sem conta');owner.write('skin privada importada da Microsoft');
+assert.equal(other.read(),'rascunho anterior, sem conta');assert.equal(guest.read(),'rascunho anterior, sem conta');
+assert.equal(createSkinDraftSession(storage,3).read(),'skin privada importada da Microsoft');
+const oldTab=createSkinDraftSession(storage,3),newTab=createSkinDraftSession(storage,3);newTab.write('alterado em outra aba');
+assert.throws(()=>oldTab.write('não pode sobrescrever'),error=>error.code==='SKIN_DRAFT_CONFLICT');
+const beforeSignOut=createSkinDraftSession(storage,3);beforeSignOut.write('salvamento final do dono anterior');
+assert.equal(createSkinDraftSession(storage,1).read(),'rascunho anterior, sem conta');assert.equal(createSkinDraftSession(storage).read(),'rascunho anterior, sem conta');
+assert.throws(()=>skinDraftKey('../other-account'));assert.equal(skinDraftKey('3'),skinDraftKey(3));
+assert.equal(values.get(LEGACY_SKIN_DRAFT),'rascunho anterior, sem conta');
+console.log('Skin drafts: private account isolation, safe guest continuity, immutable owner on sign-out, conflict protection and legacy preservation passed.');

@@ -10,7 +10,7 @@ import {
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
 import { createSkinLibrary } from "./skins.mjs?v=microsoft-20261113";
-import { createSkinStudio } from "./skin-studio.mjs?v=microsoft-20261113";
+import { createSkinStudio } from "./skin-studio.mjs?v=microsoft-20261113b";
 import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {

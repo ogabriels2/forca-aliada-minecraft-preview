@@ -1,4 +1,5 @@
 import {createCreationsClient} from './creations-client.mjs?v=microsoft-20261113';
+import {createSkinDraftSession,skinDraftKey} from './skin-drafts.mjs?v=microsoft-20261113b';
 import {
   faces,
   PART_NAMES,
@@ -34,8 +35,7 @@ export function createSkinStudio({
   manageConnections=()=>{},
 }) {
   const remote=createCreationsClient();let typeFilter='',partNext=null,partRequest=0,remoteKey='',remoteTimer,partBusy=false;const remoteParts=new Map();
-  const KEY = "fa-skin-studio-v1",
-    PART_KEY = "fa-skin-parts-v1";
+  let draftSession=null,draftOwnerKey=skinDraftKey();
   let live = false,
     epoch = 0,
     viewer = null,
@@ -45,7 +45,6 @@ export function createSkinStudio({
     saveTimer = 0,
     stroke = null,
     dirty = false,
-    storedAtLoad = null,
     pendingSeed = null,
     sourceCredits = [],
     loaded = false;
@@ -85,22 +84,19 @@ export function createSkinStudio({
   function saveNow() {
     if (!loaded || !dirty) return;
     try {
-      if (localStorage.getItem(KEY) !== storedAtLoad) {
-        setStatus("Alterado em outra aba. Baixe este PNG e reabra o editor.");
-        return;
-      }
       const nextDraft = JSON.stringify({
         image: pixelCanvas(state.pixels).toDataURL("image/png"),
         model: state.model,
         equipped: state.equipped,
         sourceCredits,
       });
-      localStorage.setItem(KEY, nextDraft);
-      storedAtLoad = nextDraft;
+      if(!draftSession)throw Error('Rascunho local indisponível.');
+      draftSession.write(nextDraft);
       dirty = false;
       updateDownload();
       setStatus("Rascunho salvo neste navegador");
-    } catch {
+    } catch(error) {
+      if(error.code==='SKIN_DRAFT_CONFLICT'){setStatus(error.message);return;}
       dirty = true;
       setStatus("Não foi possível salvar o rascunho");
       toast("Sem espaço para guardar o rascunho. Baixe o PNG antes de sair.");
@@ -132,6 +128,7 @@ export function createSkinStudio({
   }
   async function render(seed = null, partId = null) {
     dispose();
+    draftOwnerKey=skinDraftKey(getUser()?.id);draftSession=null;
     live = true;
     const version = epoch;
     loaded = false;
@@ -144,8 +141,8 @@ export function createSkinStudio({
       if (version !== epoch) return;
       let saved = null;
       try {
-        storedAtLoad = localStorage.getItem(KEY);
-        saved = JSON.parse(storedAtLoad || "null");
+        draftSession=createSkinDraftSession(localStorage,getUser()?.id);
+        saved = JSON.parse(draftSession.read() || "null");
       } catch {}
       const required=[partId,...Object.values(saved?.equipped||{})].filter(value=>/^[a-f0-9-]{36}$/i.test(value||'')&&!allParts.some(p=>p.id===value));
       for(const id of required)try{const p=await partFromServer(await remote.get(id));if(p)allParts.push(p);}catch{}
@@ -1087,5 +1084,14 @@ export function createSkinStudio({
     viewer?.dispose();
     viewer = null;
   }
-  return { render, dispose,accountChanged(){ownParts=[];remoteParts.clear();allParts=[...SAMPLE_PARTS];if(active())void hydrateParts().then(()=>{if(active()){renderPanel();refresh();}});}};
+  return { render, dispose,accountChanged(){
+    const nextKey=skinDraftKey(getUser()?.id),changed=nextKey!==draftOwnerKey;
+    ownParts=[];remoteParts.clear();allParts=[...SAMPLE_PARTS];++partRequest;
+    if(changed){
+      ownOnly=false;query='';typeFilter='';
+      if(dialog.querySelector('[data-studio-action]'))closeDialog();
+      if(active())void render(null,new URLSearchParams(location.hash.split('?')[1]||'').get('part'));
+      else{dispose();draftOwnerKey=nextKey;draftSession=null;state={pixels:new Uint8ClampedArray(16384),model:'classic',equipped:{}};history=new EditHistory();sourceCredits=[];pendingSeed=null;dirty=false;}
+    }else if(active())void hydrateParts().then(()=>{if(active()){renderPanel();refresh();}});
+  }};
 }
