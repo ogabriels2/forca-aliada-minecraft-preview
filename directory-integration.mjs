@@ -1,11 +1,26 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=publication-20261113b';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=account-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs';
+import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
 // this module uses its original wizard, page editor, account and dialog styles.
 export function connectDirectory(ui){
   const key='fa_directory_beta_token';
   const api=createDirectoryClient({origin:'https://forca-aliada-minecraft-beta.onrender.com',readToken:()=>sessionStorage.getItem(key)||''});
+  const centralLogin=createForcaAliadaLogin({api});
+  let centralEnabled=false,linkAvailable=false;
+  let accountStatusVersion=0,accountStatusLoaded=false,accountStatusRequest;
+  async function refreshAccountStatus(){
+    const version=++accountStatusVersion;
+    accountStatusRequest=api.accountStatus().then(status=>{
+      if(version===accountStatusVersion){
+        centralEnabled=status.enabled===true;
+        linkAvailable=status.canLink===true;
+        ui.updateHeader();
+      }
+    }).catch(()=>{}).finally(()=>{if(version===accountStatusVersion)accountStatusLoaded=true;});
+    return accountStatusRequest;
+  }
   let me=null,record=null,timer,busy=false,ready=false,status='',error=null,creationKey=null,lastQueued='',pendingSnapshot=null,setupComplete=false,imageStatus='';
   const lockedControls=new Map();
   const publicPages=new Map(),loadingPages=new Set();
@@ -68,7 +83,21 @@ export function connectDirectory(ui){
   }
   function login({continueCreation=false}={}){
     continueAfterLogin=continueCreation;
-    ui.openDialog(`<h2 id="dialog-title">${continueCreation?'Entre para criar sua página.':'Entre na sua conta de teste.'}</h2><p>Por enquanto, use a conta de teste fornecida. Sua conta do site principal permanece separada neste ambiente.</p><form id="directory-login"><label class="field"><span>Usuário de teste</span><input name="login" autocomplete="username" required></label><label class="field"><span>Senha</span><input name="password" type="password" autocomplete="current-password" required></label><div data-directory-error class="invalid-box" role="alert" hidden></div><button class="button" type="submit">Entrar ${ui.icon('arrow-right')}</button></form>`);
+    if(!accountStatusLoaded){
+      ui.openDialog('<h2 id="dialog-title">Entrar na prévia</h2><p data-account-login-loading role="status">Consultando as opções de acesso…</p><button class="text-link" type="button" data-directory="test-login">Usar um acesso de teste</button>');
+      void (accountStatusRequest||refreshAccountStatus()).then(()=>{
+        if(document.querySelector('#dialog[open] [data-account-login-loading]'))login({continueCreation});
+      });
+      return;
+    }
+    if(centralEnabled){
+      ui.openDialog(`<h2 id="dialog-title">Entre com sua conta Força Aliada</h2><p>Use o mesmo acesso do Manager e do Community para continuar.</p><div class="dialog-actions"><button class="button" type="button" data-directory="central-login">Continuar com Força Aliada ${ui.icon('arrow-right')}</button></div><div data-directory-error class="invalid-box" role="alert" hidden></div><button class="text-link" type="button" data-directory="test-login">Usar um acesso de teste</button>`);
+      return;
+    }
+    testLogin();
+  }
+  function testLogin(){
+    ui.openDialog(`<h2 id="dialog-title">${continueAfterLogin?'Entre para criar sua página.':'Entre na sua conta de teste.'}</h2><p>Use o acesso fornecido para esta prévia.</p><form id="directory-login"><label class="field"><span>Usuário de teste</span><input name="login" autocomplete="username" required></label><label class="field"><span>Senha</span><input name="password" type="password" autocomplete="current-password" required></label><div data-directory-error class="invalid-box" role="alert" hidden></div><button class="button" type="submit">Entrar ${ui.icon('arrow-right')}</button></form>`);
   }
   async function start(){
     if(!ready)return ui.toast('Consultando sua conta. Tente novamente em instantes.');
@@ -176,6 +205,7 @@ export function connectDirectory(ui){
     try{
       const response=await api.login(data);if(!response.token)throw new Error('Este acesso exige uma etapa adicional. Use a conta de teste fornecida.');
       mediaLinks.clear();sessionStorage.setItem(key,response.token);me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);ui.updateHeader();ui.accountChanged();ui.closeDialog();busy=false;if(continueAfterLogin)await start();else ui.renderCurrent();continueAfterLogin=false;
+      void refreshAccountStatus();
     }catch(e){showError(new Error(e.status===401?'Usuário ou senha incorretos.':e.message));}finally{busy=false;lock(false);}
   });
   document.addEventListener('click',async event=>{
@@ -194,6 +224,13 @@ export function connectDirectory(ui){
       if(action==='submit'){record=await api.submit(record.id,record.revision);writer.use(record);verification();}
       if(action==='moderation')location.hash='/revisoes';
       if(action==='login'){busy=false;login();}
+      if(action==='test-login')testLogin();
+      if(action==='central-login'&&centralEnabled)await centralLogin.start({createPage:continueAfterLogin});
+      if(action==='link-account'&&linkAvailable){
+        await flush();
+        ui.openDialog(`<h2 id="dialog-title">Vincular sua conta Força Aliada</h2><p>Você poderá entrar com sua conta Força Aliada e continuar usando as skins e páginas deste acesso de teste.</p><div class="dialog-actions"><button type="button" class="button" data-directory="confirm-link-account">Continuar para Força Aliada ${ui.icon('arrow-right')}</button><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button></div><div data-directory-error class="invalid-box" role="alert" hidden></div>`);
+      }
+      if(action==='confirm-link-account'&&linkAvailable&&me)await centralLogin.start({linkUserId:me.id});
       if(action==='retry-review')await reviewRoute(location.hash.startsWith('#/revisoes/')?location.hash.slice(11):'');
       if(action==='retry-page')await loadPublic(button.dataset.id,{force:true});
       if(action==='retry-catalog')await catalog.retry();
@@ -212,7 +249,7 @@ export function connectDirectory(ui){
   document.addEventListener('input',event=>{if(event.target.id==='directory-review-note'&&reviewing)reviewNotes.set(`${reviewing.id}:${reviewing.revision}`,event.target.value);});
   window.addEventListener('beforeunload',event=>{if(pendingSnapshot||writer.dirty||(record&&state.saving)){event.preventDefault();event.returnValue='';}});
   return {
-    get me(){return me;},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
+    get me(){return me;},get canLinkAccount(){return Boolean(me&&linkAvailable);},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
     publicState:id=>publicPages.get(id),loadPublic,reviewRoute,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
@@ -235,11 +272,31 @@ export function connectDirectory(ui){
     async logout(){
       try{await flush();await api.logout();}catch(e){report(e);if(pendingSnapshot)return;}
       mediaLinks.clear();sessionStorage.removeItem(key);me=null;record=null;state.account=false;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();ui.accountChanged();ui.renderCurrent();
+      linkAvailable=false;void refreshAccountStatus();
     },
     async init(){
-      try{me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);}
-      catch(e){state.account=false;if(e.status!==401)ui.toast('Sua conta está temporariamente indisponível. Você pode continuar explorando.');}
+      const completed=await centralLogin.complete(location.hash,()=>api.me());
+      if(completed?.token)sessionStorage.setItem(key,completed.token);
+      try{
+        if(sessionStorage.getItem(key)){
+          me=await api.me();
+          state.account=true;
+          try{
+            const {rows}=await api.own();
+            if(rows.length)accept(rows[0]);
+          }catch(e){report(e);}
+        }else{
+          state.account=false;
+        }
+      }
+      catch(e){me=null;state.account=false;if(e.status===401)sessionStorage.removeItem(key);else ui.toast('Sua conta está temporariamente indisponível. Você pode continuar explorando.');}
       finally{ready=true;ui.updateHeader();ui.accountChanged();}
+      if(completed){
+        ui.renderCurrent();
+        if(completed.error)ui.toast(completed.error);
+        else if(completed.token&&me){ui.toast('Você entrou com sua conta Força Aliada.');if(completed.createPage)void start();}
+      }
+      void refreshAccountStatus();
       void catalog.sync(state.filters,{immediate:true});
       if(location.hash.startsWith('#/revisoes'))ui.renderCurrent();
       if(location.hash.startsWith('#/servidor/minha-pagina'))ui.renderPage('minha-pagina');

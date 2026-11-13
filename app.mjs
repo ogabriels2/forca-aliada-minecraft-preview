@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=microsoft-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=account-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -1592,6 +1592,10 @@ function updateHeader() {
   host.querySelector('.fa-account-login')?.addEventListener('click',event=>{event.preventDefault();directory.login();});
   const menu=host.querySelector('.fa-site-user-dropdown nav');
   if(menu){
+    if(directory.canLinkAccount){
+      const link=document.createElement('button');link.type='button';link.className='fa-site-user-item';link.dataset.directory='link-account';
+      link.innerHTML=`${icon('user')}<span>Vincular conta Força Aliada</span>`;menu.prepend(link);
+    }
     const pages=document.createElement('button');pages.type='button';pages.className='fa-site-user-item';pages.dataset.directory='pages';
     pages.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Minhas páginas</span>';menu.prepend(pages);
     if(['owner','full'].includes(directory.me?.role)){

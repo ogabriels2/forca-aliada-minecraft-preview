@@ -6,8 +6,8 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
   // Cross-origin preview APIs are explicitly allowlisted; the production default
   // remains same-origin. Never infer an API destination from URL parameters.
   if(origin&&!['https://forca-aliada-site-staging.onrender.com','https://forca-aliada-minecraft-beta.onrender.com'].includes(origin))throw new Error('Origem da API não permitida.');
-  async function request(path,{method='GET',body,headers={},signal}={}) {
-    const token=readToken();
+  async function request(path,{method='GET',body,headers={},signal,authenticated=true}={}) {
+    const token=authenticated?readToken():'';
     const timeout=AbortSignal.timeout(25000);
     let response;
     try{response=await fetcher(origin+path,{method,signal:signal?AbortSignal.any([signal,timeout]):timeout,credentials:origin?'omit':'same-origin',cache:'no-store',headers:{'Accept':'application/json','X-FA-Client':'minecraft-directory',...(token?{Authorization:`Bearer ${token}`}:{...{}}),...(body instanceof FormData?{}:body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:body instanceof FormData?body:JSON.stringify(body)}:{})});}
@@ -20,6 +20,8 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     me:()=>request('/api/me'),
     capabilities:()=>request(`${BASE}/capabilities`),
     login:body=>request('/api/auth/login',{method:'POST',body}),
+    accountStatus:()=>request(BASE+'/account/status'),
+    exchangeAccount:body=>request(BASE+'/account/exchange',{method:'POST',body,authenticated:body.link}),
     logout:()=>request('/api/auth/logout',{method:'POST'}),
     mediaAccess:path=>request(path+'/access'),
     removeMedia:id=>request(`${BASE}/media/${id}`,{method:'DELETE'}),
