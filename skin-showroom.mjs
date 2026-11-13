@@ -1,33 +1,33 @@
-import { loadSkinViewer, imagePixels, pixelCanvas } from "./skin-viewer.mjs";
-import { SAMPLE_PARTS } from "./skin-parts.mjs";
-import { overlay } from "./skin-pixels.mjs";
+import { loadSkinViewer, imagePixels, pixelCanvas, drawSkinFront } from "./skin-viewer.mjs";
+import { SAMPLE_PARTS } from "./skin-parts.mjs?v=creations-20261113";
+import { overlay } from "./skin-pixels.mjs?v=creations-20261113";
 
 export const LOOKS = [
   {
-    name: "Explorador",
+    name: "Trilha",
     base: "steve",
-    color: "#38654b",
-    pieces: ["top-explorer", "pants-sand", "shoes-hike"],
+    color: "#a8473c",
+    pieces: ["fa-shirt-flannel", "fa-cargo", "fa-boots"],
   },
   {
-    name: "Oceano",
+    name: "Urbano",
     base: "alex",
     color: "#305e9c",
-    pieces: ["hair-rose", "top-ocean", "pants-ink", "shoes-white"],
+    pieces: ["fa-hair-dark", "fa-hoodie-ocean", "fa-jeans", "fa-sneakers"],
   },
   {
-    name: "Ametista",
+    name: "Jeans",
     base: "steve",
-    color: "#744c88",
-    pieces: ["top-plum", "pants-ink", "shoes-white"],
+    color: "#416980",
+    pieces: ["fa-jacket-denim", "fa-jeans", "fa-sneakers"],
   },
 ];
 
 // A self-contained try-on. It never reads or writes the user's editor draft.
 export function showroomMarkup(icon) {
   return `<div class="skin-showroom" data-showroom>
-    <div class="showroom-stage"><canvas id="showroom-viewer" role="img" aria-label="Personagem de exemplo em 3D. Arraste para girar ou use os botões abaixo."></canvas><img class="showroom-fallback" src="./assets/skins/showcase-explorer.png" alt="Exemplo de skin com jaqueta verde" width="144" height="192"><div class="showroom-shadow" aria-hidden="true"></div><span class="showroom-status" role="status">Preparando o personagem…</span></div>
-    <div class="showroom-look"><span data-look-name>Explorador</span><span>Peças gratuitas</span></div>
+    <div class="showroom-stage"><canvas id="showroom-viewer" role="img" aria-label="Personagem de exemplo em 3D. Arraste para girar ou use os botões abaixo."></canvas><canvas class="showroom-fallback" role="img" aria-label="Prévia do visual com as peças iniciais" width="144" height="192"></canvas><div class="showroom-shadow" aria-hidden="true"></div><span class="showroom-status" role="status">Preparando o personagem…</span></div>
+    <div class="showroom-look"><span data-look-name>Trilha</span><span>Peças gratuitas</span></div>
     <div class="showroom-controls"><div class="showroom-swatches" role="group" aria-label="Experimente um visual">${LOOKS.map((look, i) => `<button data-showroom-action="look" data-look="${i}" style="--look:${look.color}" aria-label="Experimentar visual ${look.name}" aria-pressed="${i === 0}">${icon("check")}</button>`).join("")}</div><div class="showroom-camera"><button class="icon-button" data-showroom-action="left" aria-label="Girar exemplo para a esquerda">${icon("arrow-left")}</button><button class="icon-button" data-showroom-action="right" aria-label="Girar exemplo para a direita">${icon("arrow-right")}</button><button class="icon-button" data-showroom-action="motion" aria-label="Pausar movimento do exemplo" aria-pressed="true">${icon("player-pause")}</button></div></div>
   </div>`;
 }
@@ -93,8 +93,7 @@ export function createShowroom(root, { dialog, edit, icon, paintIcons }) {
           String(Number(n.dataset.look) === selected),
         ),
       );
-    root.querySelector(".showroom-fallback").src =
-      `./assets/skins/showcase-${["explorer", "ocean", "plum"][index]}.png`;
+    drawSkinFront(root.querySelector(".showroom-fallback"),pixels,model);
     canvas.setAttribute(
       "aria-label",
       `Visual ${look.name} em 3D. Arraste para girar ou use os botões abaixo.`,
@@ -183,6 +182,7 @@ export function createShowroom(root, { dialog, edit, icon, paintIcons }) {
   document.addEventListener("visibilitychange", sync);
   dialog.addEventListener("toggle", sync);
   media.addEventListener("change", sync);
+  void select(0).catch(()=>{});
   init();
   return {
     dispose() {

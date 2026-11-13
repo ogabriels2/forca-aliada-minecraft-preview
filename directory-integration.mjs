@@ -175,7 +175,7 @@ export function connectDirectory(ui){
     const data=Object.fromEntries(new FormData(event.target));busy=true;lock(true);
     try{
       const response=await api.login(data);if(!response.token)throw new Error('Este acesso exige uma etapa adicional. Use a conta de teste fornecida.');
-      mediaLinks.clear();sessionStorage.setItem(key,response.token);me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);ui.updateHeader();ui.closeDialog();busy=false;if(continueAfterLogin)await start();else ui.renderCurrent();continueAfterLogin=false;
+      mediaLinks.clear();sessionStorage.setItem(key,response.token);me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);ui.updateHeader();ui.accountChanged();ui.closeDialog();busy=false;if(continueAfterLogin)await start();else ui.renderCurrent();continueAfterLogin=false;
     }catch(e){showError(new Error(e.status===401?'Usuário ou senha incorretos.':e.message));}finally{busy=false;lock(false);}
   });
   document.addEventListener('click',async event=>{
@@ -234,12 +234,12 @@ export function connectDirectory(ui){
     },
     async logout(){
       try{await flush();await api.logout();}catch(e){report(e);if(pendingSnapshot)return;}
-      mediaLinks.clear();sessionStorage.removeItem(key);me=null;record=null;state.account=false;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();ui.renderCurrent();
+      mediaLinks.clear();sessionStorage.removeItem(key);me=null;record=null;state.account=false;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();ui.accountChanged();ui.renderCurrent();
     },
     async init(){
       try{me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);}
       catch(e){state.account=false;if(e.status!==401)ui.toast('Sua conta está temporariamente indisponível. Você pode continuar explorando.');}
-      finally{ready=true;ui.updateHeader();}
+      finally{ready=true;ui.updateHeader();ui.accountChanged();}
       void catalog.sync(state.filters,{immediate:true});
       if(location.hash.startsWith('#/revisoes'))ui.renderCurrent();
       if(location.hash.startsWith('#/servidor/minha-pagina'))ui.renderPage('minha-pagina');

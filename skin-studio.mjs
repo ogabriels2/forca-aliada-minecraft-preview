@@ -1,3 +1,4 @@
+import {createCreationsClient} from './creations-client.mjs?v=creations-20261113';
 import {
   faces,
   PART_NAMES,
@@ -10,9 +11,10 @@ import {
   composeSkin,
   EditHistory,
   extractPiece,
+  extractWearable,
   overlay,
-} from "./skin-pixels.mjs";
-import { SAMPLE_PARTS, CATEGORIES, safePart } from "./skin-parts.mjs";
+} from "./skin-pixels.mjs?v=creations-20261113";
+import { SAMPLE_PARTS, CATEGORIES, PART_TYPES, safePart } from "./skin-parts.mjs?v=creations-20261113";
 import { loadSkinViewer, pixelCanvas, imagePixels } from "./skin-viewer.mjs";
 
 // Isolated local application. No account, marketplace or Minecraft API is called.
@@ -27,7 +29,10 @@ export function createSkinStudio({
   closeDialog,
   publishSkin,
   account,
+  getUser=()=>null,
+  signIn=()=>{},
 }) {
+  const remote=createCreationsClient();let typeFilter='',partNext=null,partRequest=0,remoteKey='',remoteTimer,partBusy=false;const remoteParts=new Map();
   const KEY = "fa-skin-studio-v1",
     PART_KEY = "fa-skin-parts-v1";
   let live = false,
@@ -109,22 +114,20 @@ export function createSkinStudio({
     saveTimer = setTimeout(saveNow, 450);
     refresh();
   }
-  async function hydrateParts() {
-    let rows = [];
-    try {
-      rows = JSON.parse(localStorage.getItem(PART_KEY) || "[]");
-    } catch {}
-    ownParts = [];
-    for (const row of (Array.isArray(rows) ? rows : []).slice(0, 30)) {
-      const p = safePart(row);
-      if (!p) continue;
-      try {
-        p.pixels = new Uint8ClampedArray(await imagePixels(p.image));
-        p.pixels = extractPiece(p.pixels, p.category, p.model);
-        ownParts.push(p);
-      } catch {}
-    }
-    allParts = [...SAMPLE_PARTS, ...ownParts];
+  async function partFromServer(row){const p=safePart({...row,sourceCredits:row.componentCredits});if(!p)return null;p.own=row.owned||String(row.publisher)===String(getUser()?.id);p.creator=row.publisherName;p.type=row.type;p.revision=row.revision;p.visibility=row.visibility;p.pixels=extractPiece(await imagePixels(p.image),p.category,p.model);return p;}
+  async function hydrateParts(){
+    const identity=String(getUser()?.id||''),freshOwn=[],freshPublic=new Map();
+    try{const result=await remote.list({kind:'part'});partNext=result.nextOffset;for(const row of result.rows){const p=await partFromServer(row);if(p)freshPublic.set(p.id,p);}
+      if(account()){let offset=0;do{const mine=await remote.mine({kind:'part',offset});for(const row of mine.rows){const p=await partFromServer(row);if(p)freshOwn.push(p);}offset=mine.nextOffset;}while(offset!==null);}
+    }catch{setStatus('Não foi possível carregar todas as peças da conta. As peças iniciais continuam disponíveis.');}
+    if(identity!==String(getUser()?.id||''))return;ownParts=freshOwn;remoteParts.clear();for(const [id,p] of freshPublic)remoteParts.set(id,p);
+    allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];
+  }
+  async function searchRemoteParts(more=false){
+    const request=++partRequest;try{const result=await remote.list({kind:'part',q:query,category,type:typeFilter,model:state.model,offset:more?partNext||0:0});if(request!==partRequest||!active())return;
+      partNext=result.nextOffset;for(const row of result.rows){const p=await partFromServer(row);if(p)remoteParts.set(p.id,p);}
+      allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];renderParts();
+    }catch(error){if(active())setStatus(error.message);}
   }
   async function render(seed = null, partId = null) {
     dispose();
@@ -133,7 +136,7 @@ export function createSkinStudio({
     loaded = false;
     history = new EditHistory();
     walking = false;
-    main.innerHTML = `<section class="skin-studio" aria-label="Editor de skins"><header class="studio-heading"><div><a href="#/skins" class="studio-back" aria-label="Voltar ao catálogo de skins">${icon("arrow-left")}</a><h1>Editor de skins</h1></div><div class="studio-output"><a class="button secondary" data-studio-action="download" aria-label="Baixar PNG" download="minha-skin-classic.png" aria-disabled="true">${icon("download")}<span>Baixar PNG</span></a><button class="button" data-studio-action="publish" disabled>Publicar skin ${icon("arrow-right")}</button></div></header><div class="studio-bar"><div class="studio-modes" role="group" aria-label="Modo do editor"><button data-studio-action="mode" data-mode="dress" aria-pressed="${mode === "dress"}">${icon("shirt")} Vestir</button><button data-studio-action="mode" data-mode="paint" aria-pressed="${mode === "paint"}">${icon("brush")} Pintar</button></div><span data-studio-status role="status">Carregando seu personagem…</span><div class="studio-history">${action("undo", "Desfazer (Ctrl Z)", "arrow-back-up", "disabled")}${action("redo", "Refazer (Ctrl Shift Z)", "arrow-forward-up", "disabled")}</div></div><div class="studio-workspace"><section class="studio-preview" aria-label="Personagem em 3D"><div class="studio-preview-top"><label>Modelo <select id="studio-model" aria-label="Modelo do personagem"><option value="classic">Clássico</option><option value="slim">Slim</option></select></label><button class="studio-text" data-studio-action="base">Trocar base</button></div><div class="studio-canvas-wrap"><canvas id="studio-viewer" aria-label="Personagem 3D. No modo Vestir, arraste para girar. No modo Pintar, clique no personagem para pintar." role="img"></canvas><div class="studio-loading" role="status">Preparando a prévia 3D…</div><div class="studio-floor" aria-hidden="true"></div></div><div class="studio-camera"><div>${action("rotate-left", "Girar para a esquerda", "arrow-left")}${action("front", "Ver de frente", "eye")}${action("rotate-right", "Girar para a direita", "arrow-right")}</div><span data-stage-help>Arraste para girar</span><div>${action("zoom-out", "Diminuir zoom", "zoom-out")}${action("zoom-in", "Aumentar zoom", "zoom-in")}${action("walk", "Animar personagem", "player-play", 'aria-pressed="false"')}</div></div></section><aside class="studio-panel" id="studio-panel"></aside></div><footer class="studio-footer"><span>${icon("lock")} Arquivos e rascunhos ficam só neste navegador.</span><span>Peças de textura gratuitas · PNG 64 × 64</span></footer></section>`;
+    main.innerHTML = `<section class="skin-studio" aria-label="Editor de skins"><header class="studio-heading"><div><a href="#/skins" class="studio-back" aria-label="Voltar ao catálogo de skins">${icon("arrow-left")}</a><h1>Editor de skins</h1></div><div class="studio-output"><a class="button secondary" data-studio-action="download" aria-label="Baixar PNG" download="minha-skin-classic.png" aria-disabled="true">${icon("download")}<span>Baixar PNG</span></a><button class="button" data-studio-action="publish" disabled>Salvar skin ${icon("arrow-right")}</button></div></header><div class="studio-bar"><div class="studio-modes" role="group" aria-label="Modo do editor"><button data-studio-action="mode" data-mode="dress" aria-pressed="${mode === "dress"}">${icon("shirt")} Vestir</button><button data-studio-action="mode" data-mode="paint" aria-pressed="${mode === "paint"}">${icon("brush")} Pintar</button></div><span data-studio-status role="status">Carregando seu personagem…</span><div class="studio-history">${action("undo", "Desfazer (Ctrl Z)", "arrow-back-up", "disabled")}${action("redo", "Refazer (Ctrl Shift Z)", "arrow-forward-up", "disabled")}</div></div><div class="studio-workspace"><section class="studio-preview" aria-label="Personagem em 3D"><div class="studio-preview-top"><label>Modelo <select id="studio-model" aria-label="Modelo do personagem"><option value="classic">Clássico</option><option value="slim">Slim</option></select></label><button class="studio-text" data-studio-action="base">Trocar base</button></div><div class="studio-canvas-wrap"><canvas id="studio-viewer" aria-label="Personagem 3D. No modo Vestir, arraste para girar. No modo Pintar, clique no personagem para pintar." role="img"></canvas><div class="studio-loading" role="status">Preparando a prévia 3D…</div><div class="studio-floor" aria-hidden="true"></div></div><div class="studio-camera"><div>${action("rotate-left", "Girar para a esquerda", "arrow-left")}${action("front", "Ver de frente", "eye")}${action("rotate-right", "Girar para a direita", "arrow-right")}</div><span data-stage-help>Arraste para girar</span><div>${action("zoom-out", "Diminuir zoom", "zoom-out")}${action("zoom-in", "Aumentar zoom", "zoom-in")}${action("walk", "Animar personagem", "player-play", 'aria-pressed="false"')}</div></div></section><aside class="studio-panel" id="studio-panel"></aside></div><footer class="studio-footer"><span>${icon("lock")} Rascunho local · salve na conta quando quiser guardar ou compartilhar.</span><span>Peças de textura gratuitas · PNG 64 × 64</span></footer></section>`;
     paintIcons(main);
     try {
       await hydrateParts();
@@ -143,6 +146,8 @@ export function createSkinStudio({
         storedAtLoad = localStorage.getItem(KEY);
         saved = JSON.parse(storedAtLoad || "null");
       } catch {}
+      const required=[partId,...Object.values(saved?.equipped||{})].filter(value=>/^[a-f0-9-]{36}$/i.test(value||'')&&!allParts.some(p=>p.id===value));
+      for(const id of required)try{const p=await partFromServer(await remote.get(id));if(p)allParts.push(p);}catch{}
       const requestedPart = allParts.find((p) => p.id === partId);
       pendingSeed = seed && saved ? seed : null;
       let source = (pendingSeed ? saved : seed) ||
@@ -278,6 +283,8 @@ export function createSkinStudio({
     return allParts.filter(
       (p) =>
         p.category === category &&
+        (!p.legacy||state.equipped[p.category]===p.id) &&
+        (!typeFilter||p.type===typeFilter) &&
         (p.model === "both" || p.model === state.model) &&
         (!ownOnly || p.own) &&
         (!q ||
@@ -301,7 +308,7 @@ export function createSkinStudio({
         )
         .join(
           "",
-        )}</div><div class="part-search">${icon("search")}<label class="sr-only" for="part-search">Buscar peças</label><input type="search" id="part-search" placeholder="Buscar peças" value="${esc(query)}">${action("own-parts", "Mostrar só minhas peças", "users", `aria-pressed="${ownOnly}"`)}</div><div class="part-grid" id="part-grid"></div><div class="equipped-parts"><h3>No personagem</h3><div data-equipped></div></div><p class="part-note">Amostras originais da Força Aliada. São texturas de skin, sem acessórios 3D separados. Tudo gratuito.</p>`;
+        )}</div><label class="field"><span>Tipo</span><select id="part-type"><option value="">Todos os tipos</option>${Object.entries(PART_TYPES[category]||{}).map(([id,label])=>`<option value="${id}" ${typeFilter===id?"selected":""}>${label}</option>`).join("")}</select></label><div class="part-search">${icon("search")}<label class="sr-only" for="part-search">Buscar peças</label><input type="search" id="part-search" placeholder="Buscar peças" value="${esc(query)}">${action("own-parts", "Mostrar só minhas peças", "users", `aria-pressed="${ownOnly}"`)}</div><div class="part-grid" id="part-grid"></div><button class="studio-text" data-studio-action="more-parts" data-parts-more hidden>Carregar mais peças</button><button class="studio-text" data-studio-action="publish-piece">${icon("plus")} Separar uma roupa desta skin</button><div class="equipped-parts"><h3>No personagem</h3><div data-equipped></div></div><p class="part-note">Peças iniciais e criações da comunidade. São texturas de skin, sem acessórios 3D separados. Guardar uma peça é privado por padrão.</p>`;
       renderParts();
     } else {
       root.innerHTML = `<div class="studio-panel-title"><h2>Pintar a skin</h2><p>Pinte no personagem ou nesta face ampliada.</p></div><div class="paint-tools" role="group" aria-label="Ferramenta">${[
@@ -351,6 +358,8 @@ export function createSkinStudio({
   function renderParts() {
     const grid = main.querySelector("#part-grid");
     if (!grid) return;
+    const key=JSON.stringify([query,category,state.model,typeFilter]);if(key!==remoteKey){remoteKey=key;clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>void searchRemoteParts(),250);}
+    const more=main.querySelector('[data-parts-more]');if(more)more.hidden=partNext===null;
     const list = compatibleParts();
     grid.innerHTML = list.length
       ? list
@@ -727,7 +736,7 @@ export function createSkinStudio({
   }
   function baseDialog() {
     openDialog(
-      `<h2 id="dialog-title">Escolha uma base.</h2><p>Isso substitui o personagem atual e remove as peças. Você pode desfazer.</p><div class="studio-base-choices"><button class="button secondary" data-studio-action="choose-base" data-base="steve">Steve · Clássico</button><button class="button secondary" data-studio-action="choose-base" data-base="alex">Alex · Slim</button></div><label class="studio-import">${icon("upload")} Importar minha skin<input type="file" id="studio-import" accept="image/png"><small>PNG de skin · 64 × 64 ou 64 × 32 · até 1 MB</small></label><p class="field-help">Ao importar, mantenha o crédito do criador original. Skins legadas são convertidas para o layout 64 × 64.</p><div data-studio-error class="invalid-box" role="alert" hidden></div><button class="studio-text" data-action="close-dialog">Continuar editando</button>`,
+      `<h2 id="dialog-title">Escolha uma base.</h2><p>Isso substitui o personagem atual e remove as peças. Você pode desfazer.</p><div class="studio-base-choices"><button class="button secondary" data-studio-action="choose-base" data-base="steve">Steve · Clássico</button><button class="button secondary" data-studio-action="choose-base" data-base="alex">Alex · Slim</button></div><label class="studio-import">${icon("upload")} Importar minha skin<input type="file" id="studio-import" accept="image/png"><small>PNG de skin · 64 × 64 ou 64 × 32 · até 1 MB</small></label><button class="button secondary" data-studio-action="import-linked">Importar da minha conta Minecraft</button><p class="field-help">Ao importar, mantenha o crédito do criador original. Skins legadas são convertidas para o layout 64 × 64.</p><div data-studio-error class="invalid-box" role="alert" hidden></div><button class="studio-text" data-action="close-dialog">Continuar editando</button>`,
     );
   }
   async function replaceBase(src, model, credits, equipped = {}) {
@@ -747,6 +756,8 @@ export function createSkinStudio({
                 (p) =>
                   p.id === id &&
                   p.category === category &&
+        (!p.legacy||state.equipped[p.category]===p.id) &&
+        (!typeFilter||p.type===typeFilter) &&
                   (p.model === "both" || p.model === model),
               ),
           ),
@@ -760,20 +771,16 @@ export function createSkinStudio({
       toast("Não foi possível abrir esta skin. Seu rascunho continua intacto.");
     }
   }
-  function publishPieceDialog() {
-    if (!account()) {
-      toast("Entre na conta de demonstração para publicar uma peça.");
-      return;
-    }
-    openDialog(
-      `<h2 id="dialog-title">Publique uma peça sua.</h2><p>Somente a sobreposição da categoria escolhida será exportada. A skin base não vai junto.</p><form id="studio-piece-form"><label class="field"><span>Nome da peça</span><input name="pieceName" maxlength="60" required placeholder="Ex.: minha jaqueta azul"></label><label class="field"><span>Categoria</span><select name="pieceCategory">${Object.entries(
-        CATEGORIES,
-      )
-        .map(([k, v]) => `<option value="${k}">${v}</option>`)
-        .join(
-          "",
-        )}</select></label><p class="field-help">Compatível com o modelo ${state.model === "slim" ? "Slim" : "Clássico"}. Partes fora dessa categoria não serão incluídas.</p><label class="check-label"><input type="checkbox" name="pieceRights" required>Criei esta peça ou tenho permissão para compartilhá-la.</label><div class="invalid-box" data-studio-error role="alert" hidden></div><div class="dialog-actions"><button class="button secondary" type="button" data-action="close-dialog">Cancelar</button><button class="button" type="submit">Publicar na prévia ${icon("arrow-right")}</button></div></form>`,
-    );
+  function previewPiece(){
+    const form=dialog.querySelector('#studio-piece-form');if(!form)return;
+    const cat=form.elements.pieceCategory.value,pixels=extractWearable(rendered(),cat,state.model,form.elements.pieceIncludeBase.checked);
+    const type=form.elements.pieceType;if(type&&form.dataset.category!==cat){type.innerHTML='<option value="">Outro / não informado</option>'+Object.entries(PART_TYPES[cat]||{}).map(([key,name])=>`<option value="${key}">${name}</option>`).join('');form.dataset.category=cat;}
+    drawFront(form.querySelector('[data-piece-preview]'),pixels,state.model);
+  }
+  function publishPieceDialog(){
+    if(!account()){signIn();return;}
+    openDialog(`<h2 id="dialog-title">Separe uma peça da sua skin.</h2><p>Confira o recorte. Salvar é privado por padrão; contribuir com o catálogo é uma escolha sua.</p><form id="studio-piece-form"><div class="skin-apply-preview"><canvas data-piece-preview width="96" height="128" role="img" aria-label="Prévia da peça que será salva"></canvas><p>A prévia mostra exatamente os pixels que irão junto. Ajuste a textura no editor se precisar retirar pele ou detalhes.</p></div><label class="field"><span>Nome da peça</span><input name="pieceName" maxlength="60" required placeholder="Ex.: jaqueta jeans"></label><label class="field"><span>Categoria</span><select name="pieceCategory">${Object.entries(CATEGORIES).map(([k,v])=>`<option value="${k}" ${category===k?'selected':''}>${v}</option>`).join('')}</select></label><label class="field"><span>Tipo de peça</span><select name="pieceType"></select></label><label class="check-label"><input name="pieceIncludeBase" type="checkbox" checked>Incluir a roupa desenhada na camada base</label><label class="field"><span>Autoria</span><select name="pieceCreatorMode"><option value="unspecified">Ainda não informada · uso privado</option><option value="self">Eu criei esta peça</option><option value="credited">Tenho permissão do criador</option></select></label><label class="field"><span>Criador original, se não for você</span><input name="pieceCreatorName" maxlength="70"></label><label class="check-label"><input name="piecePublic" type="checkbox">Quero disponibilizar esta peça no meu perfil e no catálogo</label><label class="check-label"><input name="pieceRights" type="checkbox" required>Confirmo que posso guardar esta peça e, se escolher torná-la pública, tenho permissão para compartilhá-la com os créditos indicados.</label><div data-studio-error class="invalid-box" role="alert" hidden></div><div class="dialog-actions"><button class="button secondary" type="button" data-action="close-dialog">Cancelar</button><button class="button" type="submit">Salvar peça na conta ${icon('arrow-right')}</button></div></form>`);
+    dialog.querySelector('#studio-piece-form').dataset.creationKey=crypto.randomUUID();previewPiece();
   }
   function updateDownload() {
     const a = main.querySelector('[data-studio-action="download"]');
@@ -790,7 +797,7 @@ export function createSkinStudio({
     if (a === "mode") changeMode(b.dataset.mode);
     else if (a === "paint-mode") changeMode("paint");
     else if (a === "category") {
-      category = b.dataset.category;
+      category = b.dataset.category;typeFilter='';
       query = "";
       renderPanel();
     } else if (a === "own-parts") {
@@ -853,6 +860,14 @@ export function createSkinStudio({
             ],
         seed.showroom ? seed.equipped : {},
       );
+    } else if(a==='more-parts'){await searchRemoteParts(true);}
+    else if(a==='import-linked'){
+      if(!account()){signIn();return;}b.disabled=true;
+      try{const result=await remote.accounts();if(!result.configured||!result.rows.length){toast('A conexão Java ainda não está disponível nesta conta de teste. Você pode importar seu PNG.');return;}
+      openDialog(`<h2 id="dialog-title">Importar sua skin do Minecraft</h2><p>Isso só traz uma cópia para o editor. Não publica e não troca sua skin no jogo.</p><label class="field"><span>Conta Java</span><select id="import-java-account">${result.rows.map(row=>`<option value="${row.id}">${esc(row.name)}</option>`).join('')}</select></label><button class="button" data-studio-action="import-current">Importar para o editor</button><div data-studio-error class="invalid-box" role="alert" hidden></div>`);
+      }catch(error){toast(error.message);}finally{if(b.isConnected)b.disabled=false;}
+    }else if(a==='import-current'){
+      b.disabled=true;try{const item=await remote.current(dialog.querySelector('#import-java-account').value);await replaceBase(item.image,item.model,item.componentCredits);toast('Skin importada para o editor. Publicar uma peça é opcional.');}catch(error){toast(error.message);if(b.isConnected)b.disabled=false;}
     } else if (a === "base") baseDialog();
     else if (a === "choose-base")
       await replaceBase(
@@ -923,6 +938,8 @@ export function createSkinStudio({
   document.addEventListener("change", async (e) => {
     if (!active()) return;
     const id = e.target.id;
+    if(e.target.closest("#studio-piece-form")){previewPiece();return;}
+    if(id==="part-type"){typeFilter=e.target.value;renderParts();return;}
     if (id === "paint-part" || id === "paint-layer") {
       if (id === "paint-part") part = e.target.value;
       else layer = e.target.value;
@@ -973,7 +990,7 @@ export function createSkinStudio({
       }
     }
   });
-  document.addEventListener("submit", (e) => {
+  document.addEventListener("submit", async (e) => {
     if (e.target.id !== "studio-piece-form" || !active()) return;
     e.preventDefault();
     const f = new FormData(e.target),
@@ -987,11 +1004,11 @@ export function createSkinStudio({
     if (!name) return fail("Dê um nome à peça.");
     if (!f.get("pieceRights"))
       return fail("Confirme que tem permissão para compartilhar.");
-    if (ownParts.length >= 30)
+    if (ownParts.length >= 50)
       return fail(
         "Esta prévia guarda até 30 peças. Baixe suas criações para preservá-las.",
       );
-    const pixels = extractPiece(rendered(), cat, state.model);
+    const pixels = extractWearable(rendered(), cat, state.model,Boolean(f.get("pieceIncludeBase")));
     if (!pixels.some((v, i) => i % 4 === 3 && v > 0))
       return fail(
         "Não há pixels nesta categoria. Pinte a sobreposição ou experimente uma peça primeiro.",
@@ -1015,23 +1032,11 @@ export function createSkinStudio({
       image: pixelCanvas(pixels).toDataURL("image/png"),
       sourceCredits: credits,
     });
-    const rows = [entry, ...ownParts.map(({ pixels, ...p }) => p)];
-    try {
-      localStorage.setItem(PART_KEY, JSON.stringify(rows));
-      entry.pixels = pixels;
-      ownParts.unshift(entry);
-      allParts = [...SAMPLE_PARTS, ...ownParts];
-      category = cat;
-      ownOnly = true;
-      query = "";
-      closeDialog();
-      changeMode("dress");
-      toast("Peça publicada no catálogo deste navegador.");
-    } catch {
-      fail(
-        "Sem espaço neste navegador. Baixe o PNG para não perder sua criação.",
-      );
-    }
+    const submit=e.target.querySelector('button[type=submit]');if(partBusy)return;partBusy=true;submit.disabled=true;
+    try{
+      const value=await remote.save({...entry,creationKey:e.target.dataset.creationKey,creatorMode:f.get('pieceCreatorMode'),creatorName:f.get('pieceCreatorName'),type:f.get('pieceType'),componentCredits:credits.map(value=>String(value).slice(0,120)).slice(0,30),visibility:f.get('piecePublic')?'listed':'private',rightsAccepted:true},'part');
+      const saved=await partFromServer(value);ownParts.unshift(saved);allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];category=cat;ownOnly=true;query='';closeDialog();changeMode('dress');toast(value.visibility==='private'?'Peça salva só para você.':'Peça publicada com seus créditos.');
+    }catch(error){fail(error.message);}finally{partBusy=false;if(submit.isConnected)submit.disabled=false;}
   });
   document.addEventListener("keydown", (e) => {
     if (
@@ -1079,5 +1084,5 @@ export function createSkinStudio({
     viewer?.dispose();
     viewer = null;
   }
-  return { render, dispose };
+  return { render, dispose,accountChanged(){ownParts=[];remoteParts.clear();allParts=[...SAMPLE_PARTS];if(active())void hydrateParts().then(()=>{if(active()){renderPanel();refresh();}});}};
 }

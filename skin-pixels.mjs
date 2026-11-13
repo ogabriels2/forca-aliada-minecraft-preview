@@ -144,13 +144,12 @@ export function pieceMask(category, model = "classic") {
           if (category === "hair" && face === "bottom") continue;
           if (
             category === "bottoms" &&
-            ((face !== "top" && face !== "bottom" && y >= 9) ||
-              face === "bottom")
+            face === "bottom"
           )
             continue;
           if (
             category === "shoes" &&
-            ((face !== "top" && face !== "bottom" && y < 9) || face === "top")
+            ((face !== "top" && face !== "bottom" && y < 8) || face === "top")
           )
             continue;
           mask[(r[1] + y) * 64 + r[0] + x] = 1;
@@ -164,9 +163,23 @@ export function extractPiece(pixels, category, model) {
     if (mask[p]) out.set(pixels.subarray(p * 4, p * 4 + 4), p * 4);
   return out;
 }
+// Imported outfits often live on the base layer. Move the selected UV region
+// onto the clothing overlay, then retain its existing outer details.
+export function extractWearable(pixels,category,model,includeBase=false){
+  if(!includeBase)return extractPiece(pixels,category,model);
+  const out=blankPixels(),base=faces(model,'base'),outer=faces(model,'outer'),mask=pieceMask(category,model);
+  for(const [part,ff] of Object.entries(outer))for(const [face,r] of Object.entries(ff)){
+    const from=base[part][face];
+    for(let y=0;y<r[3];y++)for(let x=0;x<r[2];x++){
+      const target=(r[1]+y)*64+r[0]+x;if(!mask[target])continue;
+      const source=((from[1]+y)*64+from[0]+x)*4;out.set(pixels.subarray(source,source+4),target*4);
+    }
+  }
+  return extractPiece(overlay(out,pixels),category,model);
+}
 export function composeSkin(pixels, equipped, parts, model) {
   let out = new Uint8ClampedArray(pixels);
-  for (const id of Object.values(equipped || {})) {
+  for (const id of ['hair','tops','bottoms','shoes'].map(category=>equipped?.[category]).filter(Boolean)) {
     const part = parts.find((p) => p.id === id);
     if (part)
       out = overlay(out, part.pixelsFor ? part.pixelsFor(model) : part.pixels);

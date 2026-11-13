@@ -1044,3 +1044,5 @@ body.studio-open {
     min-height: 220px;
   }
 }
+
+.profile-piece-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px}.profile-piece-container{min-width:0}

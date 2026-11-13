@@ -1,111 +1,43 @@
-import {
-  blankPixels,
-  pieceMask,
-  faces,
-  rgba,
-  extractPiece,
-} from "./skin-pixels.mjs";
-export const CATEGORIES = {
-  hair: "Cabelos",
-  tops: "Roupas",
-  bottoms: "Calças",
-  shoes: "Calçados",
-};
-const designs = [
-  ["hair-castanho", "Castanho curto", "hair", "#5b3828", "#825539"],
-  ["hair-black", "Cabelo escuro", "hair", "#252329", "#48424d"],
-  ["hair-rose", "Rosa pixel", "hair", "#d66b9b", "#f39ec1"],
-  ["hair-blond", "Loiro dourado", "hair", "#b98739", "#e4be68"],
-  ["top-explorer", "Jaqueta explorador", "tops", "#38654b", "#b9d6a1"],
-  ["top-ocean", "Moletom oceano", "tops", "#305e9c", "#83c7d6"],
-  ["top-plum", "Moletom ameixa", "tops", "#744c88", "#d7b4dc"],
-  ["top-red", "Jaqueta terracota", "tops", "#aa4b3f", "#efb28d"],
-  ["pants-ink", "Jeans escuro", "bottoms", "#343d58", "#6b7896"],
-  ["pants-sand", "Calça areia", "bottoms", "#9d845e", "#d5c09a"],
-  ["shoes-white", "Tênis claros", "shoes", "#ece8dc", "#777f87"],
-  ["shoes-hike", "Botas de trilha", "shoes", "#674b39", "#b89765"],
+import {blankPixels,pieceMask,faces,rgba,extractPiece} from './skin-pixels.mjs?v=creations-20261113';
+import {SAMPLE_PARTS as LEGACY_PARTS} from './skin-parts-legacy.mjs';
+export const CATEGORIES={hair:'Cabelos',tops:'Parte de cima',bottoms:'Parte de baixo',shoes:'Calçados'};
+export const PART_TYPES={hair:{short:'Curtos',layered:'Em camadas'},tops:{tshirt:'Camisetas',shirt:'Camisas',hoodie:'Moletons',jacket:'Jaquetas'},bottoms:{jeans:'Jeans',cargo:'Calças cargo'},shoes:{sneakers:'Tênis',boots:'Botas'}};
+const designs=[
+ ['fa-tee-night','Camiseta noite','tops','tshirt','#263345','#dae1d7'],
+ ['fa-shirt-flannel','Camisa xadrez','tops','shirt','#a8473c','#ebc5a3'],
+ ['fa-hoodie-ocean','Moletom azul','tops','hoodie','#315e9c','#e4e3d7'],
+ ['fa-jacket-denim','Jaqueta jeans','tops','jacket','#416980','#b8b6a4'],
+ ['fa-jeans','Jeans escuro','bottoms','jeans','#303c53','#b29972'],
+ ['fa-cargo','Calça cargo','bottoms','cargo','#626f53','#9aab7f'],
+ ['fa-sneakers','Tênis de lona','shoes','sneakers','#e8e5d9','#2f4059'],
+ ['fa-boots','Botas de trilha','shoes','boots','#70513b','#bf9b6b'],
+ ['fa-hair-crop','Cabelo curto castanho','hair','short','#593c2f','#967052'],
+ ['fa-hair-dark','Cabelo escuro em camadas','hair','layered','#25252c','#55515b'],
 ];
-function designPixels(category, base, detail, model) {
-  const mask = pieceMask(category, model),
-    out = blankPixels(),
-    c = rgba(base),
-    d = rgba(detail),
-    f = faces(model, "outer");
-  for (const [part, ff] of Object.entries(f))
-    for (const [face, r] of Object.entries(ff)) {
-      for (let y = 0; y < r[3]; y++)
-        for (let x = 0; x < r[2]; x++) {
-          const p = (r[1] + y) * 64 + r[0] + x;
-          if (!mask[p]) continue;
-          const edge = x === 0 || x === r[2] - 1,
-            shade = c.map((v, i) =>
-              i === 3
-                ? v
-                : Math.max(
-                    0,
-                    Math.min(
-                      255,
-                      v +
-                        (face === "top"
-                          ? 10
-                          : face === "right" || face === "back"
-                            ? -12
-                            : 0) +
-                        (edge ? -7 : 0),
-                    ),
-                  ),
-            );
-          out.set(shade, p * 4);
-          if (category === "hair" && x % 3 === 0)
-            out.set(
-              c.map((v, i) => (i === 3 ? v : Math.max(0, v - 12))),
-              p * 4,
-            );
-        }
-    }
-  const rect = (x, y, w, h, col) => {
-    for (let py = y; py < y + h; py++)
-      for (let px = x; px < x + w; px++) {
-        const p = py * 64 + px;
-        if (mask[p]) out.set(col, p * 4);
-      }
-  };
-  if (category === "tops") {
-    const [x, y, w, h] = f.body.front;
-    rect(x + w / 2 - 1, y, 2, h, d);
-    rect(x + 1, y + 6, 2, 2, d);
-    rect(x + w - 3, y + 6, 2, 2, d);
-    rect(x + 2, y, 4, 2, [0, 0, 0, 0]);
-    for (const part of ["leftArm", "rightArm"]) {
-      const r = f[part].front;
-      rect(r[0], r[1] + 10, r[2], 2, d);
-    }
-  }
-  if (category === "bottoms")
-    for (const part of ["leftLeg", "rightLeg"]) {
-      const r = f[part].front;
-      rect(r[0], r[1], r[2], 1, d);
-      rect(r[0] + 1, r[1] + 1, 2, 2, d);
-    }
-  if (category === "shoes")
-    for (const part of ["leftLeg", "rightLeg"]) {
-      const r = f[part].front;
-      rect(r[0], r[1] + 11, r[2], 1, d);
-    }
-  return out;
+function designPixels(category,type,base,detail,model){
+ const output=blankPixels(),mask=pieceMask(category,model),body=faces(model,'outer'),main=rgba(base),accent=rgba(detail);
+ const put=(part,face,x,y,color)=>{const r=body[part][face],p=(r[1]+y)*64+r[0]+x;if(mask[p])output.set(color,p*4);};
+ for(const [part,ff] of Object.entries(body))for(const [face,r] of Object.entries(ff))for(let y=0;y<r[3];y++)for(let x=0;x<r[2];x++){
+   if(category==='tops'&&part.includes('Arm')&&(face==='bottom'||y>=(type==='tshirt'?4:10)))continue;
+   let shift=face==='top'?12:['right','back'].includes(face)?-12:0;shift+=(x===0||x===r[2]-1)?-5:0;shift+=((x*7+y*3)%13===0)?3:0;
+   let color=main.map((v,i)=>i===3?v:Math.max(0,Math.min(255,v+shift)));
+   if(type==='shirt'&&((x%4<2)!==(y%4<2)))color=main.map((v,i)=>i===3?v:Math.max(0,v-27));
+   if(category==='hair'&&((type==='layered'?x:x+y)%3===0))color=accent.map((v,i)=>i===3?v:Math.max(0,v-12));
+   put(part,face,x,y,color);
+ }
+ const rect=(part,face,x,y,w,h,color)=>{const r=body[part][face];for(let yy=y;yy<Math.min(y+h,r[3]);yy++)for(let xx=x;xx<Math.min(x+w,r[2]);xx++)put(part,face,xx,yy,color);};
+ if(category==='tops'){
+   if(type==='tshirt'){rect('body','front',2,0,4,1,accent);rect('body','front',3,1,2,1,accent);rect('body','front',1,7,6,1,accent);}
+   if(type==='hoodie'){rect('body','front',2,0,4,2,rgba('#263e61'));rect('body','front',2,2,1,4,accent);rect('body','front',5,2,1,3,accent);rect('body','front',1,7,6,3,rgba('#25446f'));rect('body','front',2,7,4,1,accent);}
+   if(type==='jacket'){rect('body','front',3,0,2,12,rgba('#d8d2c2'));rect('body','front',0,1,3,1,accent);rect('body','front',5,1,3,1,accent);for(const x of [1,6]){rect('body','front',x,4,1,2,accent);rect('body','front',x,8,1,2,accent);}}
+   if(type==='shirt'){rect('body','front',3,0,2,12,rgba('#56382e'));for(let y=2;y<12;y+=3)rect('body','front',4,y,1,1,accent);rect('body','front',1,3,2,2,accent);}
+   for(const arm of ['leftArm','rightArm'])if(type!=='tshirt')for(const face of ['front','back','left','right'])rect(arm,face,0,9,4,1,accent);
+ }
+ if(category==='bottoms')for(const leg of ['leftLeg','rightLeg']){for(const face of ['front','back','left','right'])rect(leg,face,0,0,4,1,accent);rect(leg,'front',1,1,2,2,accent);if(type==='cargo'){rect(leg,'front',0,5,3,3,rgba('#4c5842'));rect(leg,'front',0,5,3,1,accent);}else rect(leg,'front',0,10,4,1,accent);}
+ if(category==='shoes')for(const leg of ['leftLeg','rightLeg']){for(const face of ['front','back','left','right'])rect(leg,face,0,11,4,1,accent);rect(leg,'front',1,9,2,1,accent);if(type==='boots')rect(leg,'front',1,8,2,1,accent);}
+ return output;
 }
-export const SAMPLE_PARTS = designs.map(
-  ([id, name, category, color, detail]) => ({
-    id,
-    name,
-    category,
-    color,
-    creator: "Força Aliada · amostra",
-    model: "both",
-    sample: true,
-    pixelsFor: (model) => designPixels(category, color, detail, model),
-  }),
-);
+export const SAMPLE_PARTS=[...designs.map(([id,name,category,type,color,detail])=>({id,name,category,type,color,creator:'Força Aliada',model:'both',sample:true,pixelsFor:model=>designPixels(category,type,color,detail,model)})),...LEGACY_PARTS.map(part=>({...part,legacy:true}))];
 export function safePart(value) {
   if (
     !value ||
@@ -127,7 +59,7 @@ export function safePart(value) {
     creator: "Você",
     own: true,
     sourceCredits: Array.isArray(value.sourceCredits)
-      ? value.sourceCredits.map((x) => String(x).slice(0, 100)).slice(0, 20)
+      ? value.sourceCredits.map((x) => String(x).slice(0, 120)).slice(0, 30)
       : [],
   };
 }

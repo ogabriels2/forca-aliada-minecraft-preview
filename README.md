@@ -15,3 +15,14 @@ Páginas aprovadas entram primeiro nas recomendações e nas categorias existent
 Verificação local da coordenação da busca: `node tests/directory-catalog.test.mjs`. A consulta de status respeita o limite publicado pelo [mcstatus.io](https://mcstatus.io/docs) e não representa o número de jogadores demonstrativo como atividade real.
 
 `/beta/` redireciona para a raiz; a interface reduzida criada anteriormente deixou de ser o caminho de desenvolvimento.
+
+## Skins e guarda-roupa
+
+- Skins e peças agora são persistidas na conta, com visibilidade privada, pública por link ou pública no catálogo/perfil. `#/minhas-skins` reúne a coleção e suas peças; `#/perfil/USUARIO/skins` mostra somente as publicações listadas. O editor continua usando a interface aprovada.
+- O guarda-roupa começa com dez peças autorais distintas e tipos de roupa próprios. Modelos antigos ficam disponíveis apenas para recuperar um rascunho que já os usava. Importar uma skin não publica nada; a extração de uma peça mostra o recorte, permite incluir a camada base e mantém os créditos. A contribuição pública é uma escolha separada.
+- PNGs mantêm os pixels, transparência, dimensão e modelo. Peças só podem ocupar a região UV da sua categoria. Não passam pela compressão de fotos. São texturas pequenas, limitadas a 32 KB após validação, guardadas com seus metadados no banco existente: até 50 criações por conta e mil neste beta, sem novo serviço pago.
+- Edição/exclusão verificam dono e versão; favoritos de criações são sincronizados na conta. Rascunhos antigos do navegador não são enviados automaticamente para outro usuário.
+- Importar a skin da conta Java e aplicar uma skin usam as conexões Microsoft existentes e exigem a conta correta. A aplicação tem confirmação explícita e preserva clássico/slim. Uma skin privada não precisa ser publicada para aplicar: somente o Minecraft recebe uma URL de textura válida por 60 segundos, vinculada à imagem e à versão.
+- **Limitação atual da prévia:** o servidor isolado ainda não possui uma conexão Microsoft real configurada. Importação por PNG, edição, publicação, perfil, roupas e download já funcionam. Importação/troca da conta Java aparecem como indisponíveis nesse ambiente; o sistema não apresenta um sucesso simulado. Nenhuma skin real do usuário foi alterada nos testes.
+
+A validação cobre persistência PostgreSQL, privacidade entre contas, PNG/alpha, direitos/créditos, revisões, exclusão, máscaras UV e confirmação de conta/modelo. O percurso de navegador usou o armazenamento real, perfil público, download e outra pessoa vestindo uma peça publicada, em desktop/mobile. Antes de abrir cadastros, falta concluir o acesso unificado à conta real, moderação/denúncias operacionais e políticas de publicação.

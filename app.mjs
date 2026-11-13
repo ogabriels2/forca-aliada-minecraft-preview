@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=publication-20261113b";
+import {connectDirectory} from "./directory-integration.mjs?v=creations-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -9,8 +9,8 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs";
-import { createSkinStudio } from "./skin-studio.mjs";
+import { createSkinLibrary } from "./skins.mjs?v=creations-20261113";
+import { createSkinStudio } from "./skin-studio.mjs?v=creations-20261113";
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
   SERVERS as BASE_SERVERS,
@@ -1637,10 +1637,14 @@ function route({ focus = true } = {}) {
     skinStudio.render(editorSeed, new URLSearchParams(query).get("part"));
     editorSeed = null;
     document.title = "Editor de skins · Força Aliada · Protótipo";
-  } else if (path === "/skins" || path === "/perfil/demonstracao/skins") {
+  } else if(path.startsWith("/skins/")&&path!=="/skins/editor"){
+    skinLibrary.render(false);void skinLibrary.open(path.slice(7));
+  } else if (path === "/minhas-skins" || /^\/perfil\/[^/]+\/skins$/.test(path) || path === "/skins") {
     activeServer = null;
-    skinLibrary.render(path.startsWith("/perfil/"));
-    document.title = `${path.startsWith("/perfil/") ? "Minhas skins" : "Skins de Minecraft"} · Força Aliada · Protótipo`;
+    const own=path==="/minhas-skins"||path==="/perfil/demonstracao/skins";
+    let author="";try{author=!own&&path.startsWith("/perfil/")?decodeURIComponent(path.split("/")[2]):"";}catch{main.innerHTML='<section class="container empty"><h1>Perfil não encontrado.</h1><a href="#/skins">Voltar às skins</a></section>';return;}
+    skinLibrary.render(own,author);
+    document.title = `${own ? "Minhas skins" : author ? "Skins de "+author : "Skins de Minecraft"} · Força Aliada · Protótipo`;
   } else if (path.startsWith("/servidor/")) {
     let id = "";
     try {
@@ -2317,6 +2321,8 @@ const skinLibrary = createSkinLibrary({
   toast,
   paintIcons,
   account: () => state.account,
+  getUser:()=>directory?.me,
+  signIn:()=>directory.login(),
   editSkin: (skin) => {
     editorSeed = skin;
     if (dialog.open) closeDialog();
@@ -2334,6 +2340,8 @@ const skinStudio = createSkinStudio({
   closeDialog,
   publishSkin: (skin) => skinLibrary.publishFromEditor(skin),
   account: () => state.account,
+  getUser:()=>directory?.me,
+  signIn:()=>directory.login(),
 });
 directory=connectDirectory({
   state,esc,icon,safeDraft,initialDraft,openDialog,closeDialog,toast,renderWizard,renderPage,updateHeader,updateSaveStatus,
@@ -2341,6 +2349,7 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
+  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();},
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},
   catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},

@@ -40,7 +40,7 @@ export function safeSkin(value) {
     !value ||
     !/^[a-zA-Z0-9-]{1,70}$/.test(value.id || "") ||
     !/^data:image\/png;base64,[a-zA-Z0-9+/=]+$/.test(value.image || "") ||
-    value.image.length > 100000
+    value.image.length > 1400000
   )
     return null;
   return {

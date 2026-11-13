@@ -1,4 +1,5 @@
-import { createShowroom, showroomMarkup } from "./skin-showroom.mjs";
+import {createCreationsClient} from './creations-client.mjs?v=creations-20261113';
+import { createShowroom, showroomMarkup } from "./skin-showroom.mjs?v=creations-20261113";
 import {
   BASE_SKINS,
   safeSkin,
@@ -7,12 +8,12 @@ import {
   skinText,
   skinDimensions,
   skinCreditError,
-} from "./skin-model.mjs";
+} from "./skin-model.mjs?v=creations-20261113";
 import { loadSkinViewer, imagePixels, drawSkinFront } from "./skin-viewer.mjs";
-import { safePart, CATEGORIES } from "./skin-parts.mjs";
-import { overlay } from "./skin-pixels.mjs";
+import { safePart, CATEGORIES } from "./skin-parts.mjs?v=creations-20261113";
+import { overlay } from "./skin-pixels.mjs?v=creations-20261113";
 
-// Local prototype only: this module never calls the production account or skin API.
+// Original library UI backed by the isolated account API. Legacy local drafts are never uploaded automatically.
 export function createSkinLibrary({
   main,
   dialog,
@@ -24,20 +25,33 @@ export function createSkinLibrary({
   paintIcons,
   account,
   editSkin,
+  getUser=()=>null,
+  signIn=()=>{},
 }) {
+  const remote=createCreationsClient(),profileParts=new Map();
+  let favoriteVersion=0;
+  let remoteRows=[],publicAuthor='',nextOffset=null,collectionError='',collectionLoading=false,loadVersion=0,searchTimer,userKey='';
+  const fromServer=value=>({...value,owner:value.owned||String(value.publisher)===String(getUser()?.id)?String(value.publisher):null,base:false});
+  const ownEntry=skin=>Boolean(skin?.owner)&&String(skin.owner)===String(getUser()?.id);
+  const profileLink=skin=>'#/perfil/'+encodeURIComponent(skin.publisherUsername||getUser()?.username||'')+'/skins';
+  async function reload({more=false}={}){
+    const version=++loadVersion,identity=String(getUser()?.id||'');collectionLoading=true;collectionError='';showCollectionStatus();
+    const values={kind:'skin',q:query,model,offset:more?nextOffset||0:0};
+    try{const result=savedOnly&&getUser()?await remote.favorites(values):publicAuthor?await remote.profile(publicAuthor,values):profile?await remote.mine(values):await remote.list(values);
+      if(version!==loadVersion||identity!==String(getUser()?.id||''))return;remoteRows=more?[...remoteRows,...result.rows.map(fromServer)]:result.rows.map(fromServer);nextOffset=result.nextOffset;
+    }catch(error){if(version===loadVersion){collectionError=error.message;nextOffset=null;}}finally{if(version===loadVersion){collectionLoading=false;results();}}
+  }
+  function showCollectionStatus(){const note=main.querySelector('.skin-library-note');if(note)note.innerHTML=collectionError?esc(collectionError)+' <button class="text-link" data-skin-action="retry">Tentar novamente</button>':collectionLoading?'Carregando skins da plataforma…':'Suas criações ficam salvas na conta. Só as que você tornar públicas aparecem no perfil e no catálogo.';const more=main.querySelector('[data-skin-more]');if(more){more.hidden=nextOffset===null;more.disabled=collectionLoading;}}
+  function scheduleReload(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>void reload(),250);}
   const key = "fa-minecraft-skins-prototype-v1";
   let stored = {};
   try {
-    stored = JSON.parse(localStorage.getItem(key) || "{}") || {};
+    stored = JSON.parse(localStorage.getItem("fa-minecraft-skins-favorites-v2") || localStorage.getItem(key) || "{}") || {};
   } catch {}
   const data = {
-    own: (Array.isArray(stored.own) ? stored.own : [])
-      .slice(0, 20)
-      .map(safeSkin)
-      .filter(Boolean),
     favorites: new Set(
       Array.isArray(stored.favorites)
-        ? stored.favorites.slice(0, 50).filter((s) => typeof s === "string")
+        ? stored.favorites.slice(0, 50).filter((s) => typeof s === "string" && s.startsWith("base-"))
         : [],
     ),
   };
@@ -52,12 +66,12 @@ export function createSkinLibrary({
     resizeObserver = null,
     viewerEpoch = 0,
     showroom = null;
-  const all = () => [...data.own, ...BASE_SKINS];
+  const all = () => [...new Map([...remoteRows,...BASE_SKINS].map(s=>[s.id,s])).values()];
   const save = () => {
     try {
       localStorage.setItem(
-        key,
-        JSON.stringify({ own: data.own, favorites: [...data.favorites] }),
+        "fa-minecraft-skins-favorites-v2",
+        JSON.stringify({ favorites: [...data.favorites].filter(id=>id.startsWith("base-")) }),
       );
       return true;
     } catch {
@@ -96,45 +110,48 @@ export function createSkinLibrary({
       : skin.base
         ? "Modelo base da Mojang Studios"
         : skin.creatorMode === "self"
-          ? "Criação sua"
+          ? "Criação de "+esc(skin.publisherName||"você")
           : skin.creatorMode === "credited" && skin.creatorName
             ? `Criação de ${esc(skin.creatorName)}`
             : "Autoria não informada";
   function thumb(s) {
     return `<canvas class="skin-thumb" width="128" height="160" data-skin-texture="${esc(s.id)}" role="img" aria-label="Vista frontal da skin ${esc(s.name)}"></canvas>`;
   }
-  function render(own = false) {
+  function render(own = false,author='') {
+    publicAuthor=author;remoteRows=[];nextOffset=null;collectionError='';
     dispose();
     profile = own;
     if (own && !account()) {
-      main.innerHTML = `<section class="container skin-empty"><h1>Suas skins, no seu perfil.</h1><p>Entre na conta de demonstração para testar sua coleção. Nenhuma conta real será acessada.</p><button class="button" data-skin-action="demo-login">Entrar na prévia ${icon("arrow-right")}</button><a href="#/skins">Explorar skins</a></section>`;
+      main.innerHTML = `<section class="container skin-empty"><h1>Suas skins, no seu perfil.</h1><p>Entre para ver as skins salvas na sua conta.</p><button class="button" data-skin-action="demo-login">Entrar na conta ${icon("arrow-right")}</button><a href="#/skins">Explorar skins</a></section>`;
       paintIcons(main);
       return;
     }
-    main.innerHTML = `<section class="container skins-heading">${own ? '<a class="text-link" href="#/skins">← Catálogo de skins</a>' : ""}<div><div><h1>${own ? "Suas skins." : "Skins para Minecraft."}</h1><p>${own ? "Uma coleção no seu perfil. Pronta para escolher, baixar e compartilhar." : "Encontre uma pronta. Ou crie do seu jeito."}</p></div><div class="skin-heading-actions"><button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar PNG</button><a class="text-link skin-open-editor" href="#/skins/editor">${icon("brush")} Abrir editor</a></div></div>${own ? '<div class="skin-profile-line">Conta de demonstração · seção Skins do perfil Força Aliada</div>' : ""}</section>${!own ? `<section class="container skin-discovery"><div class="skin-discovery-copy"><h2>Experimente um<br>novo visual.</h2><p>Roupas, cabelos e cores. Veja cada mudança no personagem e continue criando no editor.</p><a class="button" href="#/skins/editor" data-showroom-action="edit">Personalizar este visual ${icon("arrow-right")}</a><small>Peças de textura gratuitas · amostras da Força Aliada</small></div>${showroomMarkup(icon)}</section>` : ""}<section class="container skins-catalog" aria-label="Catálogo de skins"><div class="skin-toolbar"><label class="skin-search">${icon("search")}<span class="sr-only">Buscar skins</span><input type="search" id="skin-search" placeholder="Nome, criador ou tag" value="${esc(query)}"></label><label class="select-wrap"><span class="sr-only">Modelo da skin</span><select id="skin-model"><option value="">Todos os modelos</option><option value="classic" ${model === "classic" ? "selected" : ""}>Clássico</option><option value="slim" ${model === "slim" ? "selected" : ""}>Slim</option></select></label><button class="skin-saved button secondary" data-skin-action="saved" aria-pressed="${savedOnly}">${icon("heart")} Salvas</button>${!own ? '<a class="text-link" href="#/perfil/demonstracao/skins">Minhas skins</a>' : ""}</div><p class="skin-count" role="status" aria-live="polite"></p><div class="skin-grid" id="skin-results"></div><div class="skin-library-note">Catálogo de demonstração: os modelos base são da Mojang. Seus envios ficam neste navegador; não são publicados na internet.</div></section><section class="container skin-how"><div><h2>Do perfil para o jogo.</h2><p>Escolha uma skin, confira o modelo e veja como usá-la no Minecraft.</p></div><ol><li><strong>Veja por todos os lados.</strong><span>Abra a prévia 3D e gire o personagem.</span></li><li><strong>Escolha como usar.</strong><span>Baixe o PNG ou teste o fluxo da conta Java vinculada. No Bedrock, confira como importar.</span></li><li><strong>Guarde as favoritas.</strong><span>Sua coleção fica à mão, sem precisar publicar outra cópia.</span></li></ol></section>`;
+    main.innerHTML = `<section class="container skins-heading">${own ? '<a class="text-link" href="#/skins">← Catálogo de skins</a>' : ""}<div><div><h1>${own ? "Suas skins." : publicAuthor ? "Skins de "+esc(publicAuthor) : "Skins para Minecraft."}</h1><p>${own ? "Uma coleção no seu perfil. Pronta para escolher, baixar e compartilhar." : "Encontre uma pronta. Ou crie do seu jeito."}</p></div><div class="skin-heading-actions"><button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar PNG</button><a class="text-link skin-open-editor" href="#/skins/editor">${icon("brush")} Abrir editor</a></div></div>${own ? '<div class="skin-profile-line">Sua coleção · itens privados só aparecem para você</div>' : ""}</section>${!own && !publicAuthor ? `<section class="container skin-discovery"><div class="skin-discovery-copy"><h2>Experimente um<br>novo visual.</h2><p>Roupas, cabelos e cores. Veja cada mudança no personagem e continue criando no editor.</p><a class="button" href="#/skins/editor" data-showroom-action="edit">Personalizar este visual ${icon("arrow-right")}</a><small>Peças de textura gratuitas · amostras da Força Aliada</small></div>${showroomMarkup(icon)}</section>` : ""}<section class="container skins-catalog" aria-label="Catálogo de skins"><div class="skin-toolbar"><label class="skin-search">${icon("search")}<span class="sr-only">Buscar skins</span><input type="search" id="skin-search" placeholder="Nome, criador ou tag" value="${esc(query)}"></label><label class="select-wrap"><span class="sr-only">Modelo da skin</span><select id="skin-model"><option value="">Todos os modelos</option><option value="classic" ${model === "classic" ? "selected" : ""}>Clássico</option><option value="slim" ${model === "slim" ? "selected" : ""}>Slim</option></select></label><button class="skin-saved button secondary" data-skin-action="saved" aria-pressed="${savedOnly}">${icon("heart")} Salvas</button>${!own ? '<a class="text-link" href="#/minhas-skins">Minhas skins</a>' : ""}</div><p class="skin-count" role="status" aria-live="polite"></p><div class="skin-grid" id="skin-results"></div><button class="button secondary" data-skin-action="more" data-skin-more hidden>Carregar mais skins</button><div class="skin-library-note" role="status"></div></section><section class="container skin-how"><div><h2>Do perfil para o jogo.</h2><p>Escolha uma skin, confira o modelo e veja como usá-la no Minecraft.</p></div><ol><li><strong>Veja por todos os lados.</strong><span>Abra a prévia 3D e gire o personagem.</span></li><li><strong>Escolha como usar.</strong><span>Baixe o PNG ou use a conexão Java quando ela estiver disponível. No Bedrock, confira como importar.</span></li><li><strong>Guarde as favoritas.</strong><span>Sua coleção fica à mão, sem precisar publicar outra cópia.</span></li></ol></section>`;
     results();
-    if (!own)
+    void reload();
+    if (!own && !publicAuthor)
       showroom = createShowroom(main.querySelector(".skin-discovery"), {
         dialog,
         edit: editSkin,
         icon,
         paintIcons,
       });
-    if (own) renderProfileParts();
+    if (own||publicAuthor) void renderProfileParts();
     paintIcons(main);
   }
   async function renderProfileParts() {
-    let rows = [];
-    try {
-      rows = JSON.parse(localStorage.getItem("fa-skin-parts-v1") || "[]");
-    } catch {}
+    const anchor=main.querySelector('.skins-heading');let rows=[];
+    try{let offset=0;do{const result=publicAuthor?await remote.profile(publicAuthor,{kind:'part',offset}):await remote.mine({kind:'part',offset});rows.push(...result.rows.map(value=>({...value,sourceCredits:value.componentCredits})));offset=result.nextOffset;}while(offset!==null&&rows.length<50);}catch{return;}
+    if(!anchor?.isConnected)return;
+    profileParts.clear();for(const row of rows)profileParts.set(row.id,row);
     const parts = (Array.isArray(rows) ? rows : [])
       .map(safePart)
       .filter(Boolean)
-      .slice(0, 30);
+      .slice(0, 50);
+    if(publicAuthor&&!parts.length)return;
     const section = document.createElement("section");
     section.className = "container profile-parts";
-    section.innerHTML = `<div><h2>Suas peças</h2><a class="text-link" href="#/skins/editor">${icon("brush")} Criar uma peça</a></div>${parts.length ? `<div class="profile-parts-grid">${parts.map((p) => `<a href="#/skins/editor?part=${p.id}" class="profile-piece"><canvas width="96" height="128" data-profile-part="${p.id}" role="img" aria-label="Prévia de ${esc(p.name)}"></canvas><strong>${esc(p.name)}</strong><small>${CATEGORIES[p.category]} · ${p.model === "slim" ? "Slim" : "Clássico"}</small><span>Experimentar ${icon("arrow-right")}</span></a>`).join("")}</div>` : "<p>Crie roupas, cabelos ou calçados no editor. As peças publicadas na prévia aparecem aqui.</p>"}`;
+    section.innerHTML = `<div><h2>${publicAuthor?"Peças de "+esc(publicAuthor):"Suas peças"}</h2><a class="text-link" href="#/skins/editor">${icon("brush")} Criar uma peça</a></div>${parts.length ? `<div class="profile-parts-grid">${parts.map((p) => `<article class="profile-piece-container"><a href="#/skins/editor?part=${p.id}" class="profile-piece"><canvas width="96" height="128" data-profile-part="${p.id}" role="img" aria-label="Prévia de ${esc(p.name)}"></canvas><strong>${esc(p.name)}</strong><small>${CATEGORIES[p.category]} · ${p.model === "slim" ? "Slim" : "Clássico"}</small><span>Experimentar ${icon("arrow-right")}</span></a>${!publicAuthor?`<div class="profile-piece-actions"><button class="text-link" data-skin-action="edit-part" data-id="${p.id}">${icon("pencil")} Gerenciar</button><button class="text-link danger" data-skin-action="remove-part" data-id="${p.id}" aria-label="Excluir ${esc(p.name)}">${icon("trash")}</button></div>`:""}</article>`).join("")}</div>` : "<p>Crie roupas, cabelos ou calçados no editor. As peças publicadas na prévia aparecem aqui.</p>"}`;
     main.querySelector(".skin-how")?.before(section);
     paintIcons(section);
     for (const p of parts) {
@@ -151,24 +168,23 @@ export function createSkinLibrary({
   }
   function results() {
     const list = findSkins(
-      profile
-        ? data.own
-        : all().filter((s) => s.base || s.visibility === "listed"),
+      profile || publicAuthor || savedOnly ? remoteRows : all(),
       query,
       model,
-    ).filter((s) => !savedOnly || data.favorites.has(s.id));
+    ).filter((s) => !savedOnly || !s.base || data.favorites.has(s.id));
     const root = main.querySelector("#skin-results");
     if (!root) return;
     root.innerHTML = list.length
       ? list
           .map(
             (s) =>
-              `<article class="skin-card"><button class="skin-card-stage" data-skin-action="open" data-id="${s.id}">${thumb(s)}<span class="skin-view-hint">Ver em 3D ${icon("arrow-right")}</span></button><div class="skin-card-copy"><div><h2><button data-skin-action="open" data-id="${s.id}">${esc(s.name)}</button></h2><button class="favorite" data-skin-action="favorite" data-id="${s.id}" aria-label="${data.favorites.has(s.id) ? "Remover" : "Salvar"} ${esc(s.name)}" aria-pressed="${data.favorites.has(s.id)}">${icon("heart")}</button></div><p>${s.base ? `<a href="https://help.minecraft.net/hc/pt-br/articles/4408894664461" target="_blank" rel="noopener">${esc(s.author)}</a>` : `<a href="#/perfil/demonstracao/skins">Publicada por você</a>`}</p><span>${modelName(s)}</span>${s.base ? "<small>Modelo base oficial</small>" : `<small>${credit(s)}</small>`}</div></article>`,
+              `<article class="skin-card"><button class="skin-card-stage" data-skin-action="open" data-id="${s.id}">${thumb(s)}<span class="skin-view-hint">Ver em 3D ${icon("arrow-right")}</span></button><div class="skin-card-copy"><div><h2><button data-skin-action="open" data-id="${s.id}">${esc(s.name)}</button></h2><button class="favorite" data-skin-action="favorite" data-id="${s.id}" aria-label="${data.favorites.has(s.id) ? "Remover" : "Salvar"} ${esc(s.name)}" aria-pressed="${data.favorites.has(s.id)}">${icon("heart")}</button></div><p>${s.base ? `<a href="https://help.minecraft.net/hc/pt-br/articles/4408894664461" target="_blank" rel="noopener">${esc(s.author)}</a>` : `<a href="${profileLink(s)}">${esc(s.publisherName)}</a>`}</p><span>${modelName(s)}</span>${s.base ? "<small>Modelo base oficial</small>" : `<small>${credit(s)}</small>`}</div></article>`,
           )
           .join("")
-      : `<div class="skin-empty"><h2>${profile && !query && !savedOnly ? "Sua coleção começa com uma criação." : "Nenhuma skin encontrada."}</h2><p>${profile ? "Envie um PNG de skin para testar a publicação no seu perfil." : "Tente outro nome, modelo ou limpe os filtros."}</p><button class="button secondary" data-skin-action="${profile ? "upload" : "clear"}">${profile ? "Enviar minha primeira skin" : "Limpar filtros"}</button></div>`;
+      : `<div class="skin-empty"><h2>${profile && !query && !savedOnly ? "Sua coleção começa com uma criação." : "Nenhuma skin encontrada."}</h2><p>${profile ? "Envie um PNG ou salve uma criação do editor na sua conta." : "Tente outro nome, modelo ou limpe os filtros."}</p><button class="button secondary" data-skin-action="${profile ? "upload" : "clear"}">${profile ? "Enviar minha primeira skin" : "Limpar filtros"}</button></div>`;
     const smallCatalog =
       !profile &&
+      !publicAuthor &&
       !query &&
       !model &&
       !savedOnly &&
@@ -179,10 +195,11 @@ export function createSkinLibrary({
     if (smallCatalog)
       root.insertAdjacentHTML(
         "beforeend",
-        `<aside class="skin-onboard"><h2>Tem uma skin sua?</h2><p>Adicione ao seu perfil e deixe outras pessoas encontrarem sua criação. Ou experimente roupas e pinte cada pixel no editor.</p><button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar meu PNG</button><small>O protótipo guarda o envio só neste navegador.</small></aside>`,
+        `<aside class="skin-onboard"><h2>Tem uma skin sua?</h2><p>Adicione ao seu perfil e deixe outras pessoas encontrarem sua criação. Ou experimente roupas e pinte cada pixel no editor.</p><button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar meu PNG</button><small>Comece guardando só para você; publicar é opcional.</small></aside>`,
       );
     main.querySelector(".skin-count").textContent =
-      `${list.length} ${list.length === 1 ? "skin" : "skins"}${profile ? " no seu perfil" : ""}`;
+      `${list.length} ${list.length === 1 ? "skin" : "skins"}${profile ? " na sua coleção" : ""}`;
+    showCollectionStatus();
     paintIcons(root);
     drawThumbs(root);
   }
@@ -244,7 +261,7 @@ export function createSkinLibrary({
   function uploadDialog(existing = null, fromEditor = null) {
     if (!account()) {
       openDialog(
-        `<h2 id="dialog-title">Publique com seu perfil.</h2><p>Entre na conta de demonstração para testar o envio. Nenhuma conta real será acessada.</p><button class="button" data-skin-action="demo-login">Entrar na prévia</button>`,
+        `<h2 id="dialog-title">Publique com seu perfil.</h2><p>Entre para guardar sua skin e escolher quem pode vê-la.</p><button class="button" data-skin-action="demo-login">Entrar na conta</button>`,
       );
       return;
     }
@@ -252,13 +269,16 @@ export function createSkinLibrary({
       ? { ...existing }
       : {
           id: "upload-preview",
+          creationKey: crypto.randomUUID(),
+          visibility: "private",
+          creatorMode: "unspecified",
           image: "",
           name: "",
           model: "classic",
           ...fromEditor,
         };
     openDialog(
-      `<h2 id="dialog-title">${existing ? "Editar publicação" : "Publique sua skin."}</h2><p>${fromEditor ? "Dê um nome à sua criação e confira os créditos antes de publicar." : "Envie o arquivo original. Você verá o personagem antes de publicar."}</p><form id="skin-upload-form" novalidate>${fromEditor ? "" : `<label class="skin-upload-target">${icon("upload")}<strong data-skin-file-label>Escolher PNG da skin</strong><span>64 × 64 ou 64 × 32 px · até 1 MB</span><input type="file" accept="image/png" id="skin-file" aria-label="Enviar arquivo PNG de skin"></label>`}<div class="skin-upload-preview" ${upload.image ? "" : "hidden"}><canvas class="skin-thumb" width="128" height="160" data-skin-texture="${upload.id}" role="img" aria-label="Prévia da skin enviada"></canvas></div><label class="field"><span>Nome da skin</span><input name="skinName" maxlength="70" value="${esc(upload.name)}" required></label><label class="field"><span>Modelo</span><select name="skinVariant"><option value="classic" ${upload.model === "classic" ? "selected" : ""}>Clássico · braços largos</option><option value="slim" ${upload.model === "slim" ? "selected" : ""}>Slim · braços finos</option></select><small>Escolha o modelo para o qual o arquivo foi criado.</small></label><label class="field"><span>Tags (opcional)</span><input name="skinTags" maxlength="125" placeholder="Ex.: aventureiro, azul, medieval" value="${esc(upload.tags?.join(", ") || "")}"><small>Até 5 tags, separadas por vírgulas.</small></label>${upload.componentCredits?.length ? `<div class="skin-editor-credits"><strong>Créditos preservados</strong><ul>${upload.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>` : ""}<label class="field"><span>Quem criou esta skin?</span><select name="skinCreatorMode" aria-label="Quem criou esta skin?" required><option value="" disabled ${!["self", "credited"].includes(upload.creatorMode) ? "selected" : ""}>Escolher autoria</option><option value="self" ${upload.creatorMode === "self" ? "selected" : ""}>${upload.componentCredits?.length ? "Eu criei esta composição · manter créditos originais" : "Eu criei esta skin"}</option><option value="credited" ${upload.creatorMode === "credited" ? "selected" : ""}>Outra pessoa · tenho permissão para publicar</option></select></label><div class="skin-credit-fields" ${upload.creatorMode === "credited" ? "" : "hidden"}><label class="field"><span>Nome do criador</span><input name="skinCreatorName" maxlength="70" value="${esc(upload.creatorName || "")}" aria-label="Nome do criador"></label><label class="field"><span>Link da origem (opcional)</span><input name="skinSourceUrl" type="url" maxlength="2048" placeholder="https://" value="${esc(upload.sourceUrl || "")}" aria-label="Link da origem (opcional)"><small>O crédito acompanha a publicação e aparece no detalhe.</small></label></div><label class="check-label"><input name="skinListed" type="checkbox" ${upload.visibility !== "unlisted" ? "checked" : ""}>Mostrar no catálogo de demonstração</label><label class="check-label skin-rights"><input name="skinRights" type="checkbox" ${existing ? "checked" : ""}>Esta skin é minha ou tenho permissão para publicá-la.</label><div class="invalid-box" data-skin-error role="alert" hidden></div><p class="field-help">Envio local. Sua skin e sua conta do Minecraft não serão alteradas.</p><div class="dialog-actions"><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" type="submit">${existing ? "Salvar publicação" : "Publicar nesta prévia"} ${icon("arrow-right")}</button></div></form>`,
+      `<h2 id="dialog-title">${existing ? "Editar publicação" : "Salve sua skin."}</h2><p>${fromEditor ? "Dê um nome à sua criação e confira os créditos antes de publicar." : "Envie o arquivo original. Você verá o personagem antes de publicar."}</p><form id="skin-upload-form" novalidate>${fromEditor ? "" : `<label class="skin-upload-target">${icon("upload")}<strong data-skin-file-label>Escolher PNG da skin</strong><span>64 × 64 ou 64 × 32 px · até 1 MB</span><input type="file" accept="image/png" id="skin-file" aria-label="Enviar arquivo PNG de skin"></label>`}<div class="skin-upload-preview" ${upload.image ? "" : "hidden"}><canvas class="skin-thumb" width="128" height="160" data-skin-texture="${upload.id}" role="img" aria-label="Prévia da skin enviada"></canvas></div><label class="field"><span>${upload.kind==="part"?"Nome da peça":"Nome da skin"}</span><input name="skinName" maxlength="70" value="${esc(upload.name)}" required></label><label class="field"><span>Modelo</span><select name="skinVariant"><option value="classic" ${upload.model === "classic" ? "selected" : ""}>Clássico · braços largos</option><option value="slim" ${upload.model === "slim" ? "selected" : ""}>Slim · braços finos</option></select><small>Escolha o modelo para o qual o arquivo foi criado.</small></label><label class="field"><span>Tags (opcional)</span><input name="skinTags" maxlength="125" placeholder="Ex.: aventureiro, azul, medieval" value="${esc(upload.tags?.join(", ") || "")}"><small>Até 5 tags, separadas por vírgulas.</small></label>${upload.componentCredits?.length ? `<div class="skin-editor-credits"><strong>Créditos preservados</strong><ul>${upload.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>` : ""}<label class="field"><span>Quem criou esta skin?</span><select name="skinCreatorMode" aria-label="Quem criou esta skin?" required><option value="" disabled ${!["self", "credited"].includes(upload.creatorMode) ? "selected" : ""}>Escolher autoria</option><option value="unspecified" ${upload.creatorMode==="unspecified"?"selected":""}>Autoria não informada · só para guardar em privado</option><option value="self" ${upload.creatorMode === "self" ? "selected" : ""}>${upload.componentCredits?.length ? "Eu criei esta composição · manter créditos originais" : "Eu criei esta skin"}</option><option value="credited" ${upload.creatorMode === "credited" ? "selected" : ""}>Outra pessoa · tenho permissão para publicar</option></select></label><div class="skin-credit-fields" ${upload.creatorMode === "credited" ? "" : "hidden"}><label class="field"><span>Nome do criador</span><input name="skinCreatorName" maxlength="70" value="${esc(upload.creatorName || "")}" aria-label="Nome do criador"></label><label class="field"><span>Link da origem (opcional)</span><input name="skinSourceUrl" type="url" maxlength="2048" placeholder="https://" value="${esc(upload.sourceUrl || "")}" aria-label="Link da origem (opcional)"><small>O crédito acompanha a publicação e aparece no detalhe.</small></label></div><label class="field"><span>Quem pode ver?</span><select name="skinVisibility"><option value="private" ${upload.visibility==="private"?"selected":""}>Só eu</option><option value="unlisted" ${upload.visibility==="unlisted"?"selected":""}>Público, apenas pelo link</option><option value="listed" ${upload.visibility==="listed"?"selected":""}>Público, no perfil e no catálogo</option></select><small>Importar ou salvar não publica sem sua escolha.</small></label><label class="check-label skin-rights"><input name="skinRights" type="checkbox" ${existing ? "checked" : ""}>Esta skin é minha ou tenho permissão para publicá-la.</label><div class="invalid-box" data-skin-error role="alert" hidden></div><p class="field-help">Salvar a criação não troca sua skin no Minecraft.</p><div class="dialog-actions"><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" type="submit">${existing ? "Salvar publicação" : "Salvar na conta"} ${icon("arrow-right")}</button></div></form>`,
       "skin-upload",
     );
     const slimOption = dialog.querySelector('option[value="slim"]');
@@ -292,7 +312,8 @@ export function createSkinLibrary({
       bitmap.close();
       if (epoch !== uploadEpoch || !dialog.querySelector("#skin-upload-form"))
         return;
-      upload.image = canvas.toDataURL("image/png");
+      const originalPNG = await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Não foi possível ler o PNG.'));reader.readAsDataURL(file);});
+      if(epoch!==uploadEpoch||!dialog.querySelector('#skin-upload-form'))return;upload.image=originalPNG;
       upload.height = canvas.height;
       dialog.querySelector('option[value="slim"]').disabled =
         canvas.height === 32;
@@ -319,7 +340,7 @@ export function createSkinLibrary({
           submit.disabled = false;
           submit.textContent = upload?.owner
             ? "Salvar publicação"
-            : "Publicar nesta prévia";
+            : "Salvar na conta";
         }
       }
     }
@@ -331,7 +352,7 @@ export function createSkinLibrary({
     disposeDetail();
     selected = skin;
     openDialog(
-      `<div class="skin-detail"><div class="skin-viewer-stage"><canvas id="skin-viewer" role="img" aria-label="Prévia 3D de ${esc(skin.name)}. Use os botões para girar."></canvas><div class="skin-viewer-status" role="status">Carregando personagem…</div><div class="skin-viewer-controls"><button class="icon-button" data-skin-action="rotate-left" aria-label="Girar personagem para a esquerda">${icon("chevron-right")}</button><button class="icon-button" data-skin-action="motion" aria-label="Animar personagem" aria-pressed="false">${icon("users")}</button><button class="icon-button" data-skin-action="rotate-right" aria-label="Girar personagem para a direita">${icon("chevron-right")}</button></div></div><div class="skin-detail-copy"><h2 id="dialog-title">${esc(skin.name)}</h2><p>${skin.base ? "Modelo base da Mojang Studios" : `Publicada por <a href="#/perfil/demonstracao/skins">você</a> · demonstração`}</p>${!skin.base ? `<p class="skin-credit">${credit(skin)}${skin.sourceUrl ? `<br><a href="${esc(skin.sourceUrl)}" target="_blank" rel="noopener noreferrer ugc">Ver origem ${icon("external-link")}</a>` : ""}</p>` : ""}${skin.componentCredits?.length ? `<details class="skin-component-credits"><summary>Créditos da composição</summary><ul>${skin.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></details>` : ""}<span class="tag">${modelName(skin)}</span><div class="skin-detail-tags">${skin.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div><button class="button full" data-skin-action="apply">Usar no Minecraft ${icon("arrow-right")}</button><button class="button secondary full" data-skin-action="customize">${icon("brush")} Personalizar no editor</button><button class="button secondary full" data-skin-action="download">Baixar PNG ${icon("arrow-down")}</button><button class="text-link" data-skin-action="favorite" data-id="${skin.id}">${icon("heart")} ${data.favorites.has(skin.id) ? "Remover das salvas" : "Salvar na coleção"}</button>${skin.owner === "demo" && account() ? '<div class="skin-manage"><button class="text-link" data-skin-action="edit">Editar publicação</button><button class="text-link danger" data-skin-action="remove">Excluir da prévia</button></div>' : ""}<small>${skin.base ? "Modelo disponibilizado pela Mojang para personalização. Não é uma criação da Força Aliada." : "Publicação local: não aparece para outras pessoas ou dispositivos."}</small></div></div>`,
+      `<div class="skin-detail"><div class="skin-viewer-stage"><canvas id="skin-viewer" role="img" aria-label="Prévia 3D de ${esc(skin.name)}. Use os botões para girar."></canvas><div class="skin-viewer-status" role="status">Carregando personagem…</div><div class="skin-viewer-controls"><button class="icon-button" data-skin-action="rotate-left" aria-label="Girar personagem para a esquerda">${icon("chevron-right")}</button><button class="icon-button" data-skin-action="motion" aria-label="Animar personagem" aria-pressed="false">${icon("users")}</button><button class="icon-button" data-skin-action="rotate-right" aria-label="Girar personagem para a direita">${icon("chevron-right")}</button></div></div><div class="skin-detail-copy"><h2 id="dialog-title">${esc(skin.name)}</h2><p>${skin.base ? "Modelo base da Mojang Studios" : `Por <a href="${profileLink(skin)}">${esc(skin.publisherName)}</a>`}</p>${!skin.base ? `<p class="skin-credit">${credit(skin)}${skin.sourceUrl ? `<br><a href="${esc(skin.sourceUrl)}" target="_blank" rel="noopener noreferrer ugc">Ver origem ${icon("external-link")}</a>` : ""}</p>` : ""}${skin.componentCredits?.length ? `<details class="skin-component-credits"><summary>Créditos da composição</summary><ul>${skin.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></details>` : ""}<span class="tag">${modelName(skin)}</span><div class="skin-detail-tags">${skin.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div><button class="button full" data-skin-action="apply">Usar no Minecraft ${icon("arrow-right")}</button><button class="button secondary full" data-skin-action="customize">${icon("brush")} Personalizar no editor</button><button class="button secondary full" data-skin-action="download">Baixar PNG ${icon("arrow-down")}</button>${!skin.base&&skin.visibility!=="private"?`<button class="text-link" data-skin-action="share">${icon("link")} Copiar link</button>`:""}<button class="text-link" data-skin-action="favorite" data-id="${skin.id}">${icon("heart")} ${data.favorites.has(skin.id) ? "Remover das salvas" : "Salvar na coleção"}</button>${ownEntry(skin) && account() ? '<div class="skin-manage"><button class="text-link" data-skin-action="edit">Editar publicação</button><button class="text-link danger" data-skin-action="remove">Excluir criação</button></div>' : ""}<small>${skin.base ? "Modelo disponibilizado pela Mojang para personalização. Não é uma criação da Força Aliada." : (skin.visibility==="private"?"Privada · só você pode ver.":skin.visibility==="unlisted"?"Pública apenas pelo link.":"Pública no perfil e no catálogo.")}</small></div></div>`,
       "skin-detail",
     );
     const epoch = viewerEpoch;
@@ -375,24 +396,24 @@ export function createSkinLibrary({
         }
       });
   }
-  function applyFlow(connected = false) {
+  async function applyFlow(){
     disposeDetail();
-    openDialog(
-      `<h2 id="dialog-title">Usar ${esc(selected.name)} no Minecraft</h2><div class="skin-apply-preview">${thumb(selected)}<div><strong>${esc(selected.name)}</strong><p>${modelName(selected)}</p></div></div><div class="skin-apply-options"><section><h3>Minecraft Java</h3><p>${connected ? "Conta Java vinculada · jogador de exemplo. Confira a skin e o modelo antes de confirmar." : "A aplicação direta precisa de uma conta Microsoft com Minecraft Java vinculada ao seu perfil Força Aliada."}</p><button class="button" data-skin-action="${connected ? "apply-confirm" : "apply-linked"}">${connected ? "Simular aplicação" : "Testar com conta Java vinculada"} ${icon("arrow-right")}</button></section><section><h3>Minecraft Bedrock</h3><p>Baixe o PNG e importe nas plataformas compatíveis. A troca da conta Java não altera a skin do Bedrock.</p><button class="text-link" data-skin-action="download">Baixar PNG ${icon("arrow-down")}</button><a class="text-link" href="https://help.minecraft.net/hc/pt-br/articles/4408902716557" target="_blank" rel="noopener">Instruções do Minecraft ${icon("external-link")}</a></section></div><p class="field-help">Fluxo demonstrativo: não acessa nem modifica uma conta real.</p>`,
-      "skin-apply",
-    );
-    drawThumbs();
+    openDialog(`<h2 id="dialog-title">Usar ${esc(selected.name)} no Minecraft</h2><p>Carregando suas contas Java…</p><div data-apply-options role="status"></div>`,'skin-apply');
+    try{
+      const result=account()?await remote.accounts():{configured:false,rows:[]};if(!dialog.querySelector('[data-apply-options]'))return;
+      dialog.querySelector('[data-apply-options]').innerHTML=`<section><h3>Minecraft Java</h3>${result.configured&&result.rows.length&&!selected.base?`<label class="field"><span>Conta que receberá a skin</span><select id="skin-java-account">${result.rows.map(row=>`<option value="${row.id}">${esc(row.name)}</option>`).join('')}</select></label><p>${modelName(selected)}. A troca só acontece ao confirmar abaixo.</p><button class="button" data-skin-action="apply-confirm">Confirmar troca nesta conta</button>`:`<p>${!account()?'Entre com sua conta para consultar as conexões Java.':!result.configured?'A conexão Microsoft ainda não está habilitada neste ambiente de teste. O PNG já pode ser usado no jogo.':'Vincule uma conta com Minecraft Java nas configurações da Força Aliada.'}</p><a class="text-link" href="https://www.minecraft.net/msaprofile/mygames/editskin" target="_blank" rel="noopener">Abrir o perfil oficial do Minecraft ${icon('external-link')}</a>`}</section><section><h3>Minecraft Bedrock</h3><p>Baixe o PNG e importe nas plataformas compatíveis. A troca Java não altera a skin do Bedrock.</p></section><button class="button secondary full" data-skin-action="download">Baixar PNG ${icon('arrow-down')}</button><div data-skin-error class="invalid-box" role="alert" hidden></div>`;
+    }catch(error){dialog.querySelector('[data-apply-options]').textContent=error.message;}
   }
   document.addEventListener("input", (e) => {
     if (e.target.id === "skin-search") {
       query = e.target.value;
-      results();
+      results();scheduleReload();
     }
   });
   document.addEventListener("change", (e) => {
     if (e.target.id === "skin-model") {
       model = e.target.value;
-      results();
+      results();void reload();
     }
     if (e.target.id === "skin-file") readSkin(e.target.files?.[0]);
     if (e.target.name === "skinCreatorMode" && upload) {
@@ -404,7 +425,7 @@ export function createSkinLibrary({
       drawThumbs();
     }
   });
-  document.addEventListener("submit", (e) => {
+  document.addEventListener("submit", async (e) => {
     if (e.target.id !== "skin-upload-form") return;
     e.preventDefault();
     if (uploadBusy) return;
@@ -423,18 +444,12 @@ export function createSkinLibrary({
       sourceUrl: f.get("skinSourceUrl"),
     };
     const creditError = skinCreditError(attribution);
-    if (creditError) {
+    if (creditError && !(f.get("skinVisibility")==="private"&&attribution.creatorMode==="unspecified")) {
       formError(creditError);
       return;
     }
     if (!f.get("skinRights")) {
       formError("Confirme que pode publicar esta skin.");
-      return;
-    }
-    if (!upload.owner && data.own.length >= 20) {
-      formError(
-        "Esta prévia comporta até 20 skins. Exclua um teste antigo para continuar.",
-      );
       return;
     }
     const entry = safeSkin({
@@ -444,7 +459,7 @@ export function createSkinLibrary({
       name: f.get("skinName"),
       model: f.get("skinVariant"),
       tags: skinTags(f.get("skinTags")),
-      visibility: f.get("skinListed") ? "listed" : "unlisted",
+      visibility: f.get("skinVisibility"),
     });
     if (!entry) {
       formError(
@@ -452,48 +467,45 @@ export function createSkinLibrary({
       );
       return;
     }
-    const previousEntries = data.own;
-    data.own = data.own.filter((s) => s.id !== entry.id);
-    data.own.unshift(entry);
-    if (!save()) {
-      data.own = previousEntries;
-      formError(
-        "Não foi possível guardar a publicação. Baixe o PNG ou libere espaço neste navegador e tente novamente.",
-      );
-      return;
-    }
-    closeDialog();
-    if (location.hash === "#/perfil/demonstracao/skins") render(true);
-    else location.hash = "/perfil/demonstracao/skins";
-    toast("Skin adicionada ao perfil de demonstração.");
+    const identity=String(getUser()?.id||'');uploadBusy=true;const form=e.target,buttons=[...form.querySelectorAll('button,input,select')];buttons.forEach(button=>button.disabled=true);
+    try{
+      const result=await remote.save({...entry,id:upload.id,revision:upload.revision,creationKey:upload.creationKey,creatorMode:attribution.creatorMode,rightsAccepted:true,category:upload.category||'',type:upload.type||'',visibility:f.get('skinVisibility')},upload.kind||'skin');
+      if(identity!==String(getUser()?.id||''))return;
+      if(form.isConnected&&dialog.open){closeDialog();location.hash='/minhas-skins';if(profile)render(true);}
+      toast(result.kind==='part'?(result.visibility==='private'?'Peça salva só para você.':'Peça publicada com seus créditos.'):(result.visibility==='private'?'Skin salva só para você.':'Skin publicada com seus créditos.'));
+    }catch(error){if(form.isConnected)formError(error.message);}finally{uploadBusy=false;buttons.forEach(button=>{if(button.isConnected)button.disabled=false;});}
   });
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", async (e) => {
     const b = e.target.closest("[data-skin-action]");
     if (!b) return;
     const action = b.dataset.skinAction,
       s = all().find((s) => s.id === b.dataset.id);
-    if (action === "open" && s) detail(s);
+    if(action==='edit-part'&&profileParts.has(b.dataset.id)){uploadDialog(fromServer(profileParts.get(b.dataset.id)));}
+    else if(action==='remove-part'&&profileParts.has(b.dataset.id)){
+      selected=fromServer(profileParts.get(b.dataset.id));openDialog(`<h2 id="dialog-title">Excluir ${esc(selected.name)}?</h2><p>A peça será removida da conta e do catálogo.</p><div class="dialog-actions"><button class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" data-skin-action="remove-confirm">Excluir peça</button></div>`);
+    }else if (action === "open" && s) detail(s);
     else if (action === "upload") uploadDialog();
     else if (action === "customize" && selected) editSkin(selected);
-    else if (action === "edit" && selected?.owner === "demo" && account())
+    else if (action === "edit" && ownEntry(selected) && account())
       uploadDialog(selected);
     else if (action === "clear") {
       query = "";
       model = "";
       savedOnly = false;
-      render(profile);
-    } else if (action === "saved") {
+      render(profile,publicAuthor);
+    } else if (action === "retry")void reload();
+    else if(action === "more")void reload({more:true});
+    else if (action === "saved") {
       savedOnly = !savedOnly;
       b.setAttribute("aria-pressed", String(savedOnly));
-      results();
+      void reload();
     } else if (action === "favorite" && (s || selected)) {
-      const target = s || selected;
-      data.favorites.has(target.id)
-        ? data.favorites.delete(target.id)
-        : data.favorites.add(target.id);
-      save();
-      if (main.querySelector("#skin-results")) results();
-      if (dialog.querySelector(".skin-detail")) detail(target);
+      ++favoriteVersion;const target=s||selected,on=!data.favorites.has(target.id);
+      try{if(!target.base){if(!account()){signIn();return;}await remote.favorite(target.id,on);}
+        on?data.favorites.add(target.id):data.favorites.delete(target.id);save();if(main.querySelector('#skin-results'))results();
+        if(dialog.querySelector('.skin-detail')){b.textContent=on?'Remover das salvas':'Salvar na coleção';}
+      }catch(error){toast(error.message);}
+    } else if(action==='share'&&selected){const url=new URL(location.href);url.hash='/skins/'+selected.id;try{await navigator.clipboard.writeText(url.href);toast('Link da skin copiado.');}catch{openDialog(`<h2 id="dialog-title">Link da skin</h2><p>Selecione e copie o endereço abaixo.</p><div class="address-field"><code>${esc(url.href)}</code></div><button class="button" data-action="close-dialog">Concluir</button>`);}
     } else if (action === "download" && selected) {
       const a = document.createElement("a");
       a.href = selected.image;
@@ -503,11 +515,10 @@ export function createSkinLibrary({
       a.remove();
       toast("PNG preparado para download.");
     } else if (action === "apply") applyFlow();
-    else if (action === "apply-linked") applyFlow(true);
-    else if (action === "apply-confirm") {
-      openDialog(
-        `<h2 id="dialog-title">Fluxo de aplicação concluído.</h2><p>Na versão conectada, este seria o retorno da troca no Minecraft Java.</p><div class="notice">Nenhuma skin foi alterada. Esta conta e esta aplicação são demonstrativas.</div><button class="button full" data-skin-action="back-detail">Voltar à skin</button>`,
-      );
+    else if(action==='apply-confirm'){
+      const value=dialog.querySelector('#skin-java-account')?.value;b.disabled=true;b.textContent='Aplicando…';
+      try{const result=await remote.apply(selected,value);openDialog(`<h2 id="dialog-title">Skin aplicada.</h2><p>A troca foi confirmada para ${esc(result.account)}. Entre novamente no servidor para atualizar o personagem.</p><button class="button" data-skin-action="back-detail">Voltar à skin</button>`);}
+      catch(error){formError(error.message);if(b.isConnected){b.disabled=false;b.textContent='Tentar novamente';}}
     } else if (action === "back-detail" && selected) detail(selected);
     else if (action === "rotate-left" && viewer)
       viewer.playerObject.rotation.y -= Math.PI / 4;
@@ -521,27 +532,18 @@ export function createSkinLibrary({
         "aria-label",
         on ? "Pausar animação" : "Animar personagem",
       );
-    } else if (action === "remove" && selected?.owner === "demo" && account()) {
+    } else if (action === "remove" && ownEntry(selected) && account()) {
       disposeDetail();
       openDialog(
-        `<h2 id="dialog-title">Excluir ${esc(selected.name)} desta prévia?</h2><p>Ela sairá do perfil e do catálogo deste navegador. O arquivo original no seu computador não será alterado.</p><div class="dialog-actions"><button class="button secondary" data-skin-action="back-detail">Manter skin</button><button class="button" data-skin-action="remove-confirm">Excluir da prévia</button></div>`,
+        `<h2 id="dialog-title">Excluir ${esc(selected.name)} desta prévia?</h2><p>Ela sairá do perfil e do catálogo da plataforma. O arquivo original no seu computador não será alterado.</p><div class="dialog-actions"><button class="button secondary" data-skin-action="back-detail">Manter skin</button><button class="button" data-skin-action="remove-confirm">Excluir criação</button></div>`,
       );
     } else if (
       action === "remove-confirm" &&
-      selected?.owner === "demo" &&
+      ownEntry(selected) &&
       account()
     ) {
-      data.own = data.own.filter((s) => s.id !== selected.id);
-      data.favorites.delete(selected.id);
-      save();
-      closeDialog();
-      render(profile);
-      toast("Skin removida da demonstração.");
-    } else if (action === "demo-login") {
-      document.querySelector('[data-action="login"]')?.click();
-      if (dialog.open) closeDialog();
-      render(profile);
-    }
+      b.disabled=true;try{await remote.remove(selected);data.favorites.delete(selected.id);save();closeDialog();render(profile,publicAuthor);toast('Criação removida da conta.');}catch(error){b.disabled=false;toast(error.message);}
+    } else if(action==='demo-login'){if(dialog.open)closeDialog();signIn();}
   });
   dialog.addEventListener("close", () => {
     disposeDetail();
@@ -554,6 +556,9 @@ export function createSkinLibrary({
   return {
     render,
     dispose,
+    async open(id){try{detail(fromServer(await remote.get(id)));}catch(error){toast(error.message);}},
+    accountChanged(){const next=String(getUser()?.id||'');if(next===userKey)return;userKey=next;if(!next){savedOnly=false;data.favorites=new Set([...data.favorites].filter(id=>id.startsWith('base-')));}
+      const version=favoriteVersion;if(dialog.querySelector('#skin-upload-form,.skin-detail'))closeDialog();remoteRows=[];selected=null;++loadVersion;if(main.querySelector('.skins-heading')||location.hash==='#/minhas-skins')render(profile,publicAuthor);if(next)void remote.favoriteIds().then(result=>{if(userKey!==next||version!==favoriteVersion)return;data.favorites=new Set([...data.favorites].filter(id=>id.startsWith('base-')).concat(result.ids));if(main.querySelector('#skin-results'))results();}).catch(()=>{});},
     publishFromEditor: (skin) => uploadDialog(null, skin),
   };
 }
