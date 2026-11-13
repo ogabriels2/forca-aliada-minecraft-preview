@@ -1,0 +1,421 @@
+/* Keep the route into the game above the stories and gallery. */
+.server-play-band {
+  position: relative;
+  margin-block: 18px 24px;
+}
+
+.server-page .server-layout {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 920px;
+}
+
+.official-server .official-breadcrumb {
+  padding-block: 13px;
+}
+
+.official-server .official-hero {
+  min-height: 0;
+}
+
+.official-server .official-hero-copy {
+  padding-block: clamp(23px, 2.7vw, 36px) 40px;
+}
+
+.official-server .official-wordmark {
+  margin-bottom: 12px;
+}
+
+.official-server .official-hero h1 {
+  margin-bottom: 12px;
+  font-size: clamp(33px, 4.6vw, 60px);
+}
+
+.official-server .official-hero-copy > p {
+  font-size: 15px;
+  line-height: 1.55;
+  margin-bottom: 17px;
+}
+
+.official-server .official-hero-actions .button:not(.secondary) {
+  background: var(--finder-leaf);
+  color: var(--finder-night);
+}
+
+.official-server .official-entry {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.play-panel {
+  --play-ink: var(--finder-chalk);
+  --play-muted: var(--finder-dark-muted);
+  --play-surface: var(--finder-dark-panel);
+  --play-copy: var(--finder-brand-bright);
+  --play-dark: var(--finder-night);
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.25fr) minmax(0, 1fr);
+  gap: clamp(16px, 2.4vw, 34px);
+  align-items: start;
+  width: 100%;
+  max-width: none;
+  padding: clamp(16px, 2.25vw, 28px);
+  border: 0;
+  border-radius: 14px;
+  background: var(--finder-night);
+  color: var(--play-ink);
+  scroll-margin-top: 100px;
+}
+
+.play-panel :focus-visible {
+  outline: 2px solid var(--finder-brand-bright);
+  outline-offset: 3px;
+}
+
+.play-panel .connection-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.play-panel h2 {
+  color: var(--play-ink);
+  margin: 0 0 6px;
+  font-size: clamp(19px, 1.9vw, 25px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.play-panel .connection-access,
+.play-panel .connection-players,
+.play-panel .connection-single-edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--play-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.play-panel .connection-access .icon,
+.play-panel .connection-players .icon,
+.play-panel .connection-single-edition .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.play-panel .connection-icon-button {
+  display: inline-grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid #77889c;
+  border-radius: 9px;
+  margin: 0;
+  background: transparent;
+  color: var(--play-muted);
+  transition: transform 140ms var(--ease-out);
+}
+
+.play-panel .connection-icon-button .icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.play-panel .follow-server[aria-pressed="true"] {
+  color: var(--finder-favorite);
+  background: var(--finder-favorite-bg);
+  border-color: var(--finder-favorite-bg);
+}
+
+.play-panel .edition-tabs {
+  width: fit-content;
+  max-width: 100%;
+  gap: 3px;
+  padding: 3px;
+  margin: 0 0 10px;
+  background: var(--play-surface);
+  border-radius: 9px;
+}
+
+.play-panel .edition-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  gap: 6px;
+  min-height: 35px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--play-muted);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.play-panel .edition-tabs .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.play-panel .edition-tabs button[aria-selected="true"] {
+  color: var(--play-dark);
+  background: var(--finder-panel);
+  box-shadow: none;
+}
+
+
+.play-panel .connection-status-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  min-height: 20px;
+  margin-bottom: 10px;
+}
+
+.play-panel .availability {
+  margin: 0;
+  color: var(--play-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.play-panel .availability::before {
+  background: currentColor;
+}
+
+.play-panel .availability.online {
+  color: var(--finder-online);
+}
+
+.play-panel .availability.offline {
+  color: var(--finder-offline);
+}
+
+.play-panel .connection-players {
+  font-variant-numeric: tabular-nums;
+}
+
+.play-panel .connection-version {
+  font-size: 12px;
+  color: var(--play-muted);
+  overflow-wrap: anywhere;
+}
+
+.play-panel .connection-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: end;
+  gap: 8px;
+}
+
+.play-panel .connection-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+}
+
+.play-panel .connection-fields.with-port {
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.52fr);
+}
+
+.play-panel .connection-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 5px 6px 5px 11px;
+  background: var(--play-surface);
+  border-radius: 9px;
+}
+
+.play-panel .connection-field-text {
+  flex: 1 1 7ch;
+  min-width: 0;
+}
+
+.play-panel .connection-field-text > span {
+  display: block;
+  font-size: 11px;
+  font-weight: 750;
+  color: var(--play-muted);
+  line-height: 1.4;
+}
+
+.play-panel .connection-field code {
+  display: block;
+  color: var(--play-ink);
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.play-panel .connection-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--play-copy);
+  color: var(--play-dark);
+  font-size: 12px;
+  font-weight: 850;
+  transition: transform 140ms var(--ease-out);
+}
+
+.play-panel .connection-copy .icon,
+.play-panel .connection-help .icon,
+.play-panel .connection-demo-note .icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.play-panel .connection-copy.copied {
+  background: var(--finder-leaf-hover);
+}
+
+.play-panel .connection-copy.copied .icon {
+  animation: copy-check-in 180ms var(--ease-out);
+}
+
+@keyframes copy-check-in {
+  from { opacity: 0.45; transform: scale(0.78) rotate(-12deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.play-panel .button.connection-help {
+  min-height: 50px;
+  background: transparent;
+  border: 1px solid #77889c;
+  color: var(--play-ink);
+  border-radius: 9px;
+  padding-inline: 11px;
+  font-size: 12px;
+}
+
+.play-panel .connection-copy-feedback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.play-panel .copy-failed .connection-copy-feedback {
+  position: static;
+  flex: 1 0 100%;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  padding-bottom: 3px;
+  font-size: 12px;
+  color: #e9cf94;
+}
+
+.play-panel .connection-demo-note {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: start;
+  gap: 6px;
+  color: #e9cf94;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.play-panel .connection-copy:active,
+.play-panel .connection-icon-button:active {
+  transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .play-panel .connection-icon-button:hover,
+  .play-panel .connection-help:hover {
+    background: #3b4b5f;
+    color: var(--play-ink);
+  }
+
+  .play-panel .connection-copy:hover {
+    background: var(--finder-leaf-hover);
+  }
+
+  .play-panel .edition-tabs button:not([aria-selected="true"]):hover {
+    background: #3b4b5f;
+    color: var(--play-ink);
+  }
+}
+
+@media (max-width: 860px) {
+  .play-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .play-panel .connection-heading {
+    align-items: center;
+  }
+}
+
+@media (max-width: 580px) {
+  .server-play-band {
+    margin-block: 12px 16px;
+  }
+
+  .official-server .official-hero-copy {
+    padding-bottom: 43px;
+  }
+
+  .official-server .official-hero-actions .button {
+    flex: 0 1 auto;
+  }
+
+  .play-panel .connection-content,
+  .play-panel .connection-fields.with-port {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .play-panel .button.connection-help {
+    justify-self: start;
+    min-height: 42px;
+  }
+
+  .play-panel .edition-tabs button,
+  .play-panel .connection-copy {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-panel .connection-copy,
+  .play-panel .connection-icon-button {
+    transition: none;
+    transform: none;
+  }
+
+  .play-panel .connection-copy.copied .icon {
+    animation: none;
+  }
+}
+
+/* Keep the floating help control clear of the play actions on short screens. */
+body[data-surface="server"] .catalog-help summary {
+  padding: 0;
+  border-radius: 50%;
+}
+
+body[data-surface="server"] .catalog-help summary span {
+  display: none;
+}
