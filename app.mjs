@@ -5,7 +5,7 @@ import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
 import {createCreatorProfile} from "./creator-profile.mjs?v=profiles-20261113b";
 import {communityConnection} from './community-connection.mjs?v=community-20261114';
-import {mountCommunityNotifications} from './community-panel.mjs?v=community-20261114';
+import {mountCommunityNotifications} from './community-panel.mjs?v=site-20261114';
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -2610,7 +2610,7 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{if(!onMainSite)communityConnection.bind(directory?.me,{load:directory.community,connect:()=>directory.connectCommunity(),read:directory.readCommunity,disconnect:directory.disconnectCommunity});if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
+  accountChanged:()=>{communityConnection.bind(directory?.me,{load:directory.community,connect:()=>directory.connectCommunity(),read:directory.readCommunity,disconnect:directory.disconnectCommunity});if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
   communityAvailabilityChanged:value=>communityConnection.setAvailable(value),
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},

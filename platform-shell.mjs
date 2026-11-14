@@ -1,4 +1,4 @@
-import {createCommunityPanel} from "./community-panel.mjs?v=community-20261114";
+import {createCommunityPanel} from "./community-panel.mjs?v=site-20261114";
 const icon = name => `<i class="icon" aria-hidden="true" style="--icon:url('./vendor/tabler/${name}.svg')"></i>`;
 const storageKey = 'fa-minecraft-shell-v1';
 let prefs = {};
