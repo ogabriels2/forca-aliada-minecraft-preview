@@ -204,7 +204,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
       <div class="catalog-views" role="group" aria-label="Listas de servidores">
         ${view("explore", "Explorar", !f.favorites && !f.recent)}
         ${view("favorites", "Favoritos", f.favorites)}
-        ${hasRecent || f.recent ? view("recent", "Histórico", f.recent) : ""}
+        ${view("recent", "Histórico", f.recent)}
       </div>
       <button type="button" class="filter-more" data-action="filters" aria-expanded="${extra}" aria-controls="extra-filters">${icon("adjustments-horizontal")} Filtros <span class="filter-count" hidden></span></button>
     </div>

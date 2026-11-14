@@ -8,7 +8,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=publication-20261113b";
+} from "./discovery.mjs?v=library-20261113";
 import { createSkinLibrary } from "./skins.mjs?v=moderation-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
