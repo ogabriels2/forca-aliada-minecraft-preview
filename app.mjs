@@ -140,8 +140,12 @@ let libraryReady = false;
 let currentLibraryView = "";
 function updateLibraryUI() {
   if (document.querySelector("#results")) updateResults();
-  if (activeServer) {
-    for (const button of main.querySelectorAll('[data-action="favorite"]')) {
+  for (const button of main.querySelectorAll('[data-action="favorite"]')) {
+    if (libraryOwner && isRealServer(button.dataset.id)) {
+      button.disabled = !libraryReady || pendingFavorites.has(`${libraryOwner}:${button.dataset.id}`);
+      button.setAttribute("aria-busy", String(!libraryReady));
+    }
+    if (activeServer) {
       const saved = state.favorites.has(button.dataset.id);
       button.setAttribute("aria-pressed", String(saved));
       const label = saved ? "Remover dos favoritos" : "Guardar nos favoritos";
@@ -173,6 +177,12 @@ async function loadLibrary() {
     updateLibraryUI();
     if (activeServer?.id && location.hash.startsWith("#/servidor/")) rememberServer(activeServer.id);
   } catch {
+    if (request === libraryLoad) {
+      for (const button of main.querySelectorAll('[data-action="favorite"]')) {
+        button.disabled = false;
+        button.setAttribute("aria-busy","false");
+      }
+    }
     if (request === libraryLoad && (state.filters.favorites || state.filters.recent))
       toast("Não foi possível sincronizar sua biblioteca. Tente abrir a seção novamente.");
   }
