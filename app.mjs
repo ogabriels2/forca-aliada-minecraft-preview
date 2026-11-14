@@ -1,8 +1,10 @@
-import {connectDirectory} from "./directory-integration.mjs?v=profiles-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=community-20261114";
 let directory=null;
 import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
 import {createCreatorProfile} from "./creator-profile.mjs?v=profiles-20261113b";
+import {communityConnection} from './community-connection.mjs?v=community-20261114';
+import {mountCommunityNotifications} from './community-panel.mjs?v=community-20261114';
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -1720,8 +1722,9 @@ function updateHeader() {
   if(!n)return;
   // Use the same approved component and CSS as the Manager page.
   let host=n.querySelector('#auth-container');if(!host){host=document.createElement('div');host.id='auth-container';n.replaceChildren(host);}
-  const notifications=state.account?`<details class="prototype-notifications"><summary aria-label="Notificações">${icon('bell')}</summary><div class="account-popover notifications-popover"><strong>Notificações</strong><p>${directory?.record?.state==='pending'?'Sua página está em revisão.':'Nenhuma nova notificação.'}</p></div></details>`:'';
+  const notifications=state.account?'<span id="community-notifications"></span>':'';
   window.FAAccountMenu?.mount(host,directory?.me||null,{prefix:notifications,onLogout:()=>void directory.logout()});
+  mountCommunityNotifications(host.querySelector('#community-notifications'),{pending:directory?.record?.state==='pending'});
   window.FAAccountMenu?.setPlan({kind:'unavailable'});
   host.onclick=()=>{const top=document.querySelector('.site-header').getBoundingClientRect().bottom+8;host.style.setProperty('--fa-account-top',top+'px');const panel=host.querySelector('.fa-site-user-dropdown');if(panel)panel.style.maxHeight=Math.max(120,innerHeight-top-12)+'px';};
   host.querySelectorAll('a[href^="/"]').forEach(a=>a.href='https://forcaaliada.com'+a.getAttribute('href'));
@@ -2568,7 +2571,8 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
+  accountChanged:()=>{communityConnection.bind(directory?.me,{load:directory.community,connect:()=>directory.connectCommunity(),read:directory.readCommunity,disconnect:directory.disconnectCommunity});if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
+  communityAvailabilityChanged:value=>communityConnection.setAvailable(value),
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},
   catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},

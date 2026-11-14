@@ -1,7 +1,7 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=profiles-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=community-20261114';
 import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=insights-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs?v=status-20261113';
-import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
+import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=community-20261114';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
 // this module uses its original wizard, page editor, account and dialog styles.
@@ -9,7 +9,7 @@ export function connectDirectory(ui){
   const key='fa_directory_beta_token';
   const api=createDirectoryClient({origin:'https://forca-aliada-minecraft-beta.onrender.com',readToken:()=>sessionStorage.getItem(key)||''});
   const centralLogin=createForcaAliadaLogin({api});
-  let centralEnabled=false,linkAvailable=false;
+  let centralEnabled=false,linkAvailable=false,communityAvailable=false;
   let accountStatusVersion=0,accountStatusLoaded=false,accountStatusRequest;
   async function refreshAccountStatus(){
     const version=++accountStatusVersion;
@@ -17,7 +17,9 @@ export function connectDirectory(ui){
       if(version===accountStatusVersion){
         centralEnabled=status.enabled===true;
         linkAvailable=status.canLink===true;
+        communityAvailable=status.community===true;
         ui.updateHeader();
+        ui.communityAvailabilityChanged?.(communityAvailable);
       }
     }).catch(()=>{}).finally(()=>{if(version===accountStatusVersion)accountStatusLoaded=true;});
     return accountStatusRequest;
@@ -313,6 +315,13 @@ export function connectDirectory(ui){
     get me(){return me;},get canLinkAccount(){return Boolean(me&&linkAvailable);},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
     publicState:id=>publicPages.get(id),loadPublic,reviewRoute,pagesRoute,showPages,
     library:api.library,changeLibrary:api.changeLibrary,
+    community:api.community,readCommunity:api.readCommunity,disconnectCommunity:api.disconnectCommunity,
+    async connectCommunity(){
+      await refreshAccountStatus();
+      if(!communityAvailable)throw new Error('A conexão do Community ainda não está disponível nesta prévia.');
+      await flush();
+      return centralLogin.start({community:true,linkUserId:me&&linkAvailable?me.id:null});
+    },
     serverStatus:api.status,
     insights:api.insights,activity:api.activity,
     profile:api.profile,profileServers:api.profileServers,rememberPublic:remember,

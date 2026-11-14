@@ -9,7 +9,7 @@ function returnPath(hash) {
 
 export function createForcaAliadaLogin({ api, storage = sessionStorage, browser = location }) {
   return {
-    async start({ linkUserId = null, createPage = false } = {}) {
+    async start({ linkUserId = null, createPage = false,community=false } = {}) {
       const verifier = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
       const state = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
       const challenge = toBase64Url(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))));
@@ -18,6 +18,7 @@ export function createForcaAliadaLogin({ api, storage = sessionStorage, browser 
       }));
       const target = new URL(AUTH_START);
       target.search = new URLSearchParams({ challenge, state });
+      if(community)target.searchParams.set('community','1');
       browser.assign(target.href);
     },
     async complete(hash, getCurrentUser) {
