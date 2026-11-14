@@ -15,7 +15,7 @@ import {
   extractWearable,
   overlay,
 } from "./skin-pixels.mjs?v=microsoft-20261113";
-import { SAMPLE_PARTS, CATEGORIES, PART_TYPES, safePart } from "./skin-parts.mjs?v=microsoft-20261113";
+import { SAMPLE_PARTS, CATEGORIES, PART_TYPES, safePart } from "./skin-parts.mjs?v=wardrobe-20261113";
 import { loadSkinViewer, pixelCanvas, imagePixels } from "./skin-viewer.mjs";
 
 // The original editor keeps its local draft; explicit account actions use the connected API.
@@ -34,7 +34,7 @@ export function createSkinStudio({
   signIn=()=>{},
   manageConnections=()=>{},
 }) {
-  const remote=createCreationsClient();let typeFilter='',partNext=null,partRequest=0,remoteKey='',remoteTimer,partBusy=false;const remoteParts=new Map();
+  const remote=createCreationsClient();let typeFilter='',partNext=null,partRequest=0,remoteKey='',remoteTimer,partBusy=false,partsLoading=false;const remoteParts=new Map(),visibleRemoteParts=new Set();
   let draftSession=null,draftOwnerKey=skinDraftKey();
   let live = false,
     epoch = 0,
@@ -113,20 +113,28 @@ export function createSkinStudio({
   }
   async function partFromServer(row){const p=safePart({...row,sourceCredits:row.componentCredits});if(!p)return null;p.own=row.owned||String(row.publisher)===String(getUser()?.id);p.creator=row.publisherName;p.type=row.type;p.revision=row.revision;p.visibility=row.visibility;p.pixels=extractPiece(await imagePixels(p.image),p.category,p.model);return p;}
   async function hydrateParts(){
-    const identity=String(getUser()?.id||''),freshOwn=[],freshPublic=new Map();
-    try{const result=await remote.list({kind:'part'});partNext=result.nextOffset;for(const row of result.rows){const p=await partFromServer(row);if(p)freshPublic.set(p.id,p);}
+    const identity=String(getUser()?.id||''),version=epoch,freshOwn=[],freshPublic=new Map();
+    try{const result=await remote.list({kind:'part'});for(const row of result.rows){const p=await partFromServer(row);if(p)freshPublic.set(p.id,p);}
       if(account()){let offset=0;do{const mine=await remote.mine({kind:'part',offset});for(const row of mine.rows){const p=await partFromServer(row);if(p)freshOwn.push(p);}offset=mine.nextOffset;}while(offset!==null);}
-    }catch{setStatus('Não foi possível carregar todas as peças da conta. As peças iniciais continuam disponíveis.');}
-    if(identity!==String(getUser()?.id||''))return;ownParts=freshOwn;remoteParts.clear();for(const [id,p] of freshPublic)remoteParts.set(id,p);
+    }catch{if(version===epoch)setStatus('Não foi possível carregar todas as peças da conta. As peças iniciais continuam disponíveis.');}
+    if(version!==epoch||identity!==String(getUser()?.id||''))return;ownParts=freshOwn;remoteParts.clear();for(const [id,p] of freshPublic)remoteParts.set(id,p);
     allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];
   }
   async function searchRemoteParts(more=false){
-    const request=++partRequest;try{const result=await remote.list({kind:'part',q:query,category,type:typeFilter,model:state.model,offset:more?partNext||0:0});if(request!==partRequest||!active())return;
-      partNext=result.nextOffset;for(const row of result.rows){const p=await partFromServer(row);if(p)remoteParts.set(p.id,p);}
-      allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];renderParts();
-    }catch(error){if(active())setStatus(error.message);}
+    if(more&&(partsLoading||partNext===null))return;
+    const request=++partRequest;
+    partsLoading=true;
+    try{
+      const result=await remote.list({kind:'part',q:query,category,type:typeFilter,model:state.model,offset:more?partNext:0});
+      const parts=await Promise.all(result.rows.map(partFromServer));
+      if(request!==partRequest||!active())return;
+      partNext=result.nextOffset;
+      for(const p of parts.filter(Boolean)){remoteParts.set(p.id,p);visibleRemoteParts.add(p.id);}
+      allParts=[...new Map([...allParts,...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];
+    }catch(error){if(request===partRequest&&active())setStatus(error.message);}
+    finally{if(request===partRequest&&active()){partsLoading=false;renderParts();}}
   }
-  async function render(seed = null, partId = null) {
+  async function render(seed = null, partId = null, createPiece = false) {
     dispose();
     draftOwnerKey=skinDraftKey(getUser()?.id);draftSession=null;
     live = true;
@@ -147,6 +155,8 @@ export function createSkinStudio({
       const required=[partId,...Object.values(saved?.equipped||{})].filter(value=>/^[a-f0-9-]{36}$/i.test(value||'')&&!allParts.some(p=>p.id===value));
       for(const id of required)try{const p=await partFromServer(await remote.get(id));if(p)allParts.push(p);}catch{}
       const requestedPart = allParts.find((p) => p.id === partId);
+      if (version !== epoch) return;
+      if (partId && !requestedPart) toast("Esta peça não está disponível. Seu rascunho foi mantido.");
       pendingSeed = seed && saved ? seed : null;
       let source = (pendingSeed ? saved : seed) ||
         saved || {
@@ -202,7 +212,11 @@ export function createSkinStudio({
         );
         history.commit(before, state);
         category = requestedPart.category;
+        typeFilter = "";
+        query = "";
+        ownOnly = false;
         mode = "dress";
+        if (state.model !== before.model) toast("Modelo ajustado para experimentar a peça. Use Desfazer para voltar.");
       }
       sourceCredits =
         source === seed
@@ -230,7 +244,7 @@ export function createSkinStudio({
         openDialog(
           `<h2 id="dialog-title">Continuar seu rascunho ou abrir ${esc(pendingSeed.name || "outra skin")}?</h2><p>Seu rascunho está guardado neste navegador. Abrir esta skin substitui o personagem atual; você poderá desfazer enquanto estiver no editor.</p><p class="field-help">Para guardar as duas versões, baixe o PNG do rascunho antes de trocar.</p><div class="dialog-actions"><button class="button secondary" data-studio-action="confirm-seed">Abrir ${esc(pendingSeed.name || "nova skin")}</button><button class="button" data-studio-action="keep-draft">Continuar rascunho</button></div>`,
         );
-      }
+      } else if (createPiece) publishPieceDialog();
       api = await loadSkinViewer();
       if (version !== epoch) return;
       const canvas = main.querySelector("#studio-viewer"),
@@ -281,6 +295,7 @@ export function createSkinStudio({
     return allParts.filter(
       (p) =>
         p.category === category &&
+        (p.sample || p.legacy || p.own || visibleRemoteParts.has(p.id) || state.equipped[p.category]===p.id) &&
         (!p.legacy||state.equipped[p.category]===p.id) &&
         (!typeFilter||p.type===typeFilter) &&
         (p.model === "both" || p.model === state.model) &&
@@ -306,7 +321,7 @@ export function createSkinStudio({
         )
         .join(
           "",
-        )}</div><label class="field"><span>Tipo</span><select id="part-type"><option value="">Todos os tipos</option>${Object.entries(PART_TYPES[category]||{}).map(([id,label])=>`<option value="${id}" ${typeFilter===id?"selected":""}>${label}</option>`).join("")}</select></label><div class="part-search">${icon("search")}<label class="sr-only" for="part-search">Buscar peças</label><input type="search" id="part-search" placeholder="Buscar peças" value="${esc(query)}">${action("own-parts", "Mostrar só minhas peças", "users", `aria-pressed="${ownOnly}"`)}</div><div class="part-grid" id="part-grid"></div><button class="studio-text" data-studio-action="more-parts" data-parts-more hidden>Carregar mais peças</button><button class="studio-text" data-studio-action="publish-piece">${icon("plus")} Separar uma roupa desta skin</button><div class="equipped-parts"><h3>No personagem</h3><div data-equipped></div></div><p class="part-note">Peças iniciais e criações da comunidade. São texturas de skin, sem acessórios 3D separados. Guardar uma peça é privado por padrão.</p>`;
+        )}</div><label class="field"><span>Tipo</span><select id="part-type"><option value="">Todos os tipos</option>${Object.entries(PART_TYPES[category]||{}).map(([id,label])=>`<option value="${id}" ${typeFilter===id?"selected":""}>${label}</option>`).join("")}</select></label><div class="part-search">${icon("search")}<label class="sr-only" for="part-search">Buscar peças</label><input type="search" id="part-search" placeholder="Buscar peças" value="${esc(query)}">${action("own-parts", "Mostrar só minhas peças", "users", `aria-pressed="${ownOnly}"`)}</div><div class="part-grid" id="part-grid"></div><button class="studio-text" data-studio-action="more-parts" data-parts-more hidden>Carregar mais peças</button><a class="studio-text" href="#/skins/roupas">Explorar catálogo de roupas</a><button class="studio-text" data-studio-action="publish-piece">${icon("plus")} Separar uma roupa desta skin</button><div class="equipped-parts"><h3>No personagem</h3><div data-equipped></div></div><p class="part-note">Peças iniciais e criações da comunidade. São texturas de skin, sem acessórios 3D separados. Guardar uma peça é privado por padrão.</p>`;
       renderParts();
     } else {
       root.innerHTML = `<div class="studio-panel-title"><h2>Pintar a skin</h2><p>Pinte no personagem ou nesta face ampliada.</p></div><div class="paint-tools" role="group" aria-label="Ferramenta">${[
@@ -356,8 +371,8 @@ export function createSkinStudio({
   function renderParts() {
     const grid = main.querySelector("#part-grid");
     if (!grid) return;
-    const key=JSON.stringify([query,category,state.model,typeFilter]);if(key!==remoteKey){remoteKey=key;clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>void searchRemoteParts(),250);}
-    const more=main.querySelector('[data-parts-more]');if(more)more.hidden=partNext===null;
+    const key=JSON.stringify([query,category,state.model,typeFilter]);if(key!==remoteKey){remoteKey=key;++partRequest;partNext=null;visibleRemoteParts.clear();clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>void searchRemoteParts(),250);}
+    const more=main.querySelector('[data-parts-more]');if(more){more.hidden=ownOnly||partNext===null;more.disabled=partsLoading;}
     const list = compatibleParts();
     grid.innerHTML = list.length
       ? list
@@ -899,7 +914,7 @@ export function createSkinStudio({
         model: state.model,
         name: "Minha criação",
         componentCredits: components,
-        creatorMode: "self",
+        creatorMode: "unspecified",
         creatorName: "",
       });
     } else if (viewer) {
@@ -1002,11 +1017,15 @@ export function createSkinStudio({
       err.textContent = text;
     };
     if (!name) return fail("Dê um nome à peça.");
+    if (f.get("piecePublic") && f.get("pieceCreatorMode")==="unspecified")
+      return fail("Informe a autoria antes de publicar no catálogo.");
+    if (f.get("pieceCreatorMode")==="credited" && !String(f.get("pieceCreatorName")||"").trim())
+      return fail("Informe o nome de quem criou a peça.");
     if (!f.get("pieceRights"))
-      return fail("Confirme que tem permissão para compartilhar.");
+      return fail("Confirme que pode guardar a peça e respeitar a visibilidade escolhida.");
     if (ownParts.length >= 50)
       return fail(
-        "Esta prévia guarda até 30 peças. Baixe suas criações para preservá-las.",
+        "Você atingiu o limite de 50 peças da prévia.",
       );
     const pixels = extractWearable(rendered(), cat, state.model,Boolean(f.get("pieceIncludeBase")));
     if (!pixels.some((v, i) => i % 4 === 3 && v > 0))
@@ -1033,10 +1052,15 @@ export function createSkinStudio({
       sourceCredits: credits,
     });
     const submit=e.target.querySelector('button[type=submit]');if(partBusy)return;partBusy=true;submit.disabled=true;
+    const identity=getUser()?.id,version=epoch;
     try{
       const value=await remote.save({...entry,creationKey:e.target.dataset.creationKey,creatorMode:f.get('pieceCreatorMode'),creatorName:f.get('pieceCreatorName'),type:f.get('pieceType'),componentCredits:credits.map(value=>String(value).slice(0,120)).slice(0,30),visibility:f.get('piecePublic')?'listed':'private',rightsAccepted:true},'part');
-      const saved=await partFromServer(value);ownParts.unshift(saved);allParts=[...SAMPLE_PARTS,...new Map([...remoteParts.values(),...ownParts].map(p=>[p.id,p])).values()];category=cat;ownOnly=true;query='';closeDialog();changeMode('dress');toast(value.visibility==='private'?'Peça salva só para você.':'Peça publicada com seus créditos.');
-    }catch(error){fail(error.message);}finally{partBusy=false;if(submit.isConnected)submit.disabled=false;}
+      const saved=await partFromServer(value);
+      if(identity!==getUser()?.id||version!==epoch)return;
+      if(saved){ownParts.unshift(saved);allParts=[...new Map([...allParts,saved].map(p=>[p.id,p])).values()];}
+      if(!submit.isConnected||!dialog.open)return;
+      category=cat;ownOnly=true;query='';typeFilter='';closeDialog();changeMode('dress');toast(value.visibility==='private'?'Peça salva só para você.':'Peça publicada com seus créditos.');
+    }catch(error){if(submit.isConnected&&dialog.open)fail(error.message);}finally{partBusy=false;if(submit.isConnected)submit.disabled=false;}
   });
   document.addEventListener("keydown", (e) => {
     if (
@@ -1077,6 +1101,12 @@ export function createSkinStudio({
     epoch++;
     stroke = null;
     clearTimeout(saveTimer);
+    clearTimeout(remoteTimer);
+    ++partRequest;
+    remoteKey='';
+    partNext=null;
+    partsLoading=false;
+    visibleRemoteParts.clear();
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
     resize?.disconnect();

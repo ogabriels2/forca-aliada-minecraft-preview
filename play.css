@@ -1485,6 +1485,40 @@ a {
 .profile-piece:hover {
   background: #dbe9cc;
 }
+.wardrobe-catalog > .text-link {
+  width: fit-content;
+  margin-bottom: 16px;
+}
+.wardrobe-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.wardrobe-heading h1 {
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1.05;
+}
+.wardrobe-heading p {
+  margin-top: 8px;
+}
+.wardrobe-catalog .profile-parts-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 145px), 1fr));
+  gap: 12px;
+}
+.wardrobe-catalog .profile-piece {
+  height: 100%;
+  max-width: none;
+  text-align: center;
+}
+.wardrobe-catalog .profile-piece > span {
+  margin-top: auto;
+}
+.wardrobe-more {
+  margin-top: 20px;
+}
 .theme-option {
   border-radius: 10px;
   min-height: 43px;

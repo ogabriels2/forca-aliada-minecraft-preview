@@ -1,5 +1,5 @@
 import { loadSkinViewer, imagePixels, pixelCanvas, drawSkinFront } from "./skin-viewer.mjs";
-import { SAMPLE_PARTS } from "./skin-parts.mjs?v=creations-20261113";
+import { SAMPLE_PARTS } from "./skin-parts.mjs?v=wardrobe-20261113";
 import { overlay } from "./skin-pixels.mjs?v=creations-20261113";
 
 export const LOOKS = [
@@ -20,6 +20,12 @@ export const LOOKS = [
     base: "steve",
     color: "#416980",
     pieces: ["fa-jacket-denim", "fa-jeans", "fa-sneakers"],
+  },
+  {
+    name: "Costa",
+    base: "alex",
+    color: "#63385f",
+    pieces: ["fa-hair-curls", "fa-sweater-plum", "fa-shorts-coast", "fa-sneakers"],
   },
 ];
 

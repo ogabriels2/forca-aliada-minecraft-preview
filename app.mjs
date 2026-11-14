@@ -9,8 +9,9 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs?v=skin-import-20261113";
-import { createSkinStudio } from "./skin-studio.mjs?v=microsoft-20261113b";
+import { createSkinLibrary } from "./skins.mjs?v=wardrobe-20261113";
+import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
+import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=wardrobe-20261113";
 import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
@@ -1612,8 +1613,11 @@ function updateMini() {
     paintIcons(preview);
   }
 }
+let disposeWardrobe;
 function route({ focus = true } = {}) {
   inline = null;
+  disposeWardrobe?.();
+  disposeWardrobe = null;
   skinLibrary.dispose();
   skinStudio.dispose();
   minecraftConnections.dispose();
@@ -1641,9 +1645,14 @@ function route({ focus = true } = {}) {
   } else if(path==='/skins/conexoes'){
     activeServer=null;if(dialog.open)closeDialog();void minecraftConnections.render(params);
     document.title='Conexões Minecraft · Força Aliada';
+  } else if (path === "/skins/roupas") {
+    activeServer = null;
+    if (dialog.open) closeDialog();
+    disposeWardrobe = renderWardrobeCatalog(main, { esc, icon, paintIcons });
+    document.title = "Roupas para skins de Minecraft · Força Aliada";
   } else if (path === "/skins/editor") {
     activeServer = null;
-    skinStudio.render(editorSeed, new URLSearchParams(query).get("part"));
+    skinStudio.render(editorSeed, params.get("part"), params.get("criar") === "peca");
     editorSeed = null;
     document.title = "Editor de skins · Força Aliada · Protótipo";
   } else if(path.startsWith("/skins/")&&path!=="/skins/editor"){
