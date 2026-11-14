@@ -1,5 +1,7 @@
-import {connectDirectory} from "./directory-integration.mjs?v=status-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=insights-20261113";
 let directory=null;
+import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
+import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -1364,6 +1366,7 @@ function renderPage(id) {
   if (activeServer.id === "forca-aliada") bindOfficialStories(main);
   paintIcons();
   updateSaveStatus();
+  serverActivity.view(displayServer);
 }
 function refreshPage() {
   if (activeServer) renderPage(activeServer.id);
@@ -1636,8 +1639,11 @@ async function copyText(text, trigger) {
   const isCard = scope?.classList.contains("card-address");
   const isConnection = scope?.hasAttribute("data-connection-field");
   const fieldLabel = scope?.querySelector(".connection-field-text > span")?.textContent;
+  const copiedServer=activeServer;
+  const copiedEdition=trigger?.closest('[data-connect-edition]')?.dataset.connectEdition||state.selectedEdition||copiedServer?.editions[0];
   try {
     await navigator.clipboard.writeText(text);
+    if(fieldLabel!=='Porta')serverActivity.copied(copiedServer,copiedEdition);
     if (feedback?.isConnected) {
       feedback.textContent = fieldLabel === "Porta" ? "Porta copiada." : "Endereço copiado.";
       scope.classList.remove("copy-failed");
@@ -1745,6 +1751,7 @@ function route({ focus = true } = {}) {
   serverReviews.dispose();
   skinStudio.dispose();
   minecraftConnections.dispose();
+  pageInsights.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
   if (!path.startsWith("/servidor/")) currentLibraryView = "";
   const params = new URLSearchParams(query);
@@ -1764,6 +1771,11 @@ function route({ focus = true } = {}) {
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
+  } else if(/^\/minhas-paginas\/[a-f0-9-]{36}\/estatisticas$/i.test(path)){
+    activeServer=null;
+    if(dialog.open)closeDialog();
+    void pageInsights.render(path.split('/')[2]);
+    document.title='Estatísticas da página · Força Aliada';
   } else if(path==='/minhas-paginas'||path.startsWith('/minhas-paginas/')){
     activeServer=null;
     void directory?.pagesRoute(path==='/minhas-paginas'?'':path.slice('/minhas-paginas/'.length),params.has('assistente'));
@@ -2486,7 +2498,7 @@ window.addEventListener("hashchange", () => {
   void refreshServerStatuses();
 });
 window.addEventListener("pagehide", persist);
-document.addEventListener("visibilitychange", refreshServerStatuses);
+document.addEventListener("visibilitychange", ()=>{void refreshServerStatuses();if(activeServer)serverActivity.view(activeServer);});
 let editorSeed = null;
 const serverReviews=createServerReviews({main,esc,icon,paintIcons,getUser:()=>directory?.me,signIn:()=>directory.login(),toast,onSummary:(id,rating)=>{const server=SERVERS.find(row=>row.id===id);if(server)server.rating=rating;}});
 const creationModeration = createCreationModeration({main,dialog,esc,icon,paintIcons,openDialog,closeDialog,toast,getUser:()=>directory?.me,signIn:()=>directory.login()});
@@ -2543,6 +2555,8 @@ directory=connectDirectory({
   removePublic:id=>{const index=SERVERS.findIndex(s=>s.id===id&&s.directory);if(index>=0)SERVERS.splice(index,1);},
   addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true,rating:value.rating};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
 });
+const pageInsights=createPageInsights({api:directory,main,esc,icon,paintIcons,getUser:()=>directory.me,signIn:()=>directory.login()});
+const serverActivity=createServerActivity(directory);
 void directory.init();
 route({ focus: false });
 if (/^https?:$/.test(location.protocol)) {
