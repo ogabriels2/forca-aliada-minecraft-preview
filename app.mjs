@@ -2,7 +2,7 @@ import {connectDirectory} from "./directory-integration.mjs?v=profiles-20261113"
 let directory=null;
 import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
-import {createCreatorProfile} from "./creator-profile.mjs?v=profiles-20261113";
+import {createCreatorProfile} from "./creator-profile.mjs?v=profiles-20261113b";
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {

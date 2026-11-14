@@ -24,7 +24,7 @@ export function createCreatorProfile({api,main,esc,icon,paintIcons,card,refreshS
   }
   async function render(name){
     const request=++generation,collections=new Map();
-    let type='servers',loading=false;
+    let type='servers',loadingType=null,collectionRequest=0;
     section=document.createElement('section');
     section.className='container creator-profile';
     section.innerHTML='<p role="status">Carregando perfil…</p>';
@@ -46,14 +46,15 @@ export function createCreatorProfile({api,main,esc,icon,paintIcons,card,refreshS
       const content=root.querySelector('[data-profile-content]');
       type=Object.keys(labels).find(key=>profile.counts[key]>0)||'servers';
       async function drawPreviews(rows){
+        const previewType=type,previewRequest=collectionRequest;
         for(const item of rows){
           try{
             let pixels=await imagePixels(item.image);
-            if(type==='parts'){
+            if(previewType==='parts'){
               const base=await imagePixels(item.model==='slim'?'./assets/skins/alex.png':'./assets/skins/steve.png');
               pixels=overlay(base,pixels);
             }
-            if(!isCurrent())return;
+            if(!isCurrent()||previewType!==type||previewRequest!==collectionRequest)return;
             const canvas=content.querySelector(`canvas[data-profile-preview="${item.id}"]`);
             if(canvas)drawSkinFront(canvas,pixels,item.model);
           }catch{}
@@ -87,12 +88,16 @@ export function createCreatorProfile({api,main,esc,icon,paintIcons,card,refreshS
         paintIcons(content);
       }
       async function load(more=false){
-        if(loading)return;
+        if(loadingType===type)return;
         const selected=type;
+        const currentLoad=++collectionRequest;
+        loadingType=null;
+        content.removeAttribute('aria-busy');
+        root.querySelectorAll('[data-profile-tab]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.profileTab===type)));
         const prior=collections.get(type);
         if(!more&&prior){show(prior);return;}
         if(!profile.counts[type]){show({rows:[],nextOffset:null});return;}
-        loading=true;
+        loadingType=type;
         content.setAttribute('aria-busy','true');
         if(!more)content.innerHTML='<p role="status">Carregando publicações…</p>';
         const button=content.querySelector('[data-profile-more]');
@@ -101,23 +106,23 @@ export function createCreatorProfile({api,main,esc,icon,paintIcons,card,refreshS
           const result=type==='servers'
             ?await api.profileServers(profile.username,more?prior.nextOffset:0)
             :await creations.profile(profile.username,{kind:type==='skins'?'skin':'part',limit:12,offset:more?prior.nextOffset:0});
-          if(!isCurrent()||selected!==type)return;
+          if(!isCurrent()||selected!==type||currentLoad!==collectionRequest)return;
           const collection={rows:more?[...prior.rows,...result.rows]:result.rows,nextOffset:result.nextOffset};
           collections.set(type,collection);
           show(collection);
         }catch(error){
-          if(!isCurrent()||selected!==type)return;
+          if(!isCurrent()||selected!==type||currentLoad!==collectionRequest)return;
           if(more&&prior)show(prior);
           else content.replaceChildren();
           const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=error.message;
           const retry=document.createElement('button');retry.className='text-link';retry.type='button';retry.textContent='Tentar novamente';
           retry.addEventListener('click',()=>{message.remove();retry.remove();void load(more);});
           content.append(message,retry);
-        }finally{loading=false;content.removeAttribute('aria-busy');}
+        }finally{if(currentLoad===collectionRequest){loadingType=null;content.removeAttribute('aria-busy');}}
       }
       root.addEventListener('click',event=>{
         const tab=event.target.closest('[data-profile-tab]');
-        if(tab&&!loading){type=tab.dataset.profileTab;void load();}
+        if(tab&&tab.dataset.profileTab!==type){type=tab.dataset.profileTab;void load();}
         if(event.target.closest('[data-profile-more]'))void load(true);
       });
       root.querySelector('[data-profile-share]').addEventListener('click',async()=>{
