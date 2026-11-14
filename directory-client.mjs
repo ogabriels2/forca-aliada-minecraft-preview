@@ -30,6 +30,7 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     draft:id=>request(`${BASE}/drafts/${id}`),
     archive:(id,revision,archived)=>request(`${BASE}/drafts/${id}/archive`,{method:'POST',headers:{'If-Match':String(revision)},body:{archived}}),
     publicPage:id=>request(`${BASE}/servers/${id}`),
+    status:id=>request(`${BASE}/servers/${id}/status`),
     reviews:(id,offset=0)=>request(`${BASE}/servers/${id}/reviews?offset=${offset}`),
     saveReview:(id,body,revision)=>request(`${BASE}/servers/${id}/reviews/mine`,{method:'PUT',headers:{'If-Match':String(revision)},body}),
     removeReview:(id,review,revision)=>request(`${BASE}/servers/${id}/reviews/${review}`,{method:'DELETE',headers:{'If-Match':String(revision)}}),

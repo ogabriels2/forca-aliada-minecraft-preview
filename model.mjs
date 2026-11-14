@@ -320,7 +320,7 @@ export function catalogFilters(params) {
     language: ["Português", "English", "Español"],
     access: ["open", "whitelist"],
     status: ["online", "offline", "unknown"],
-    sort: ["name", "online", "players"],
+    sort: ["name", "online", "players", "rating"],
   };
   const filters = {};
   const query = params.get("q")?.trim().slice(0, 160);
@@ -425,7 +425,11 @@ export function filterServers(servers, filters = {}) {
 
   return ranked
     .sort((a, b) =>
-      filters.sort === "name"
+      filters.sort === "rating"
+        ? Number(b.server.rating?.count>=3)-Number(a.server.rating?.count>=3)
+          || (b.server.rating?.count>=3 ? Number(b.server.rating.score) : -1)-(a.server.rating?.count>=3 ? Number(a.server.rating.score) : -1)
+          || (b.server.rating?.count||0)-(a.server.rating?.count||0)
+        : filters.sort === "name"
         ? a.server.name.localeCompare(b.server.name, "pt-BR")
         : filters.sort === "online" || filters.sort === "players"
           ? Number(Boolean(a.server.example)) - Number(Boolean(b.server.example))

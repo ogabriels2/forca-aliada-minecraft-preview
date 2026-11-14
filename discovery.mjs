@@ -147,7 +147,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
     { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
     { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
     ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),
-    { name: "Mais bem avaliados", note: reviewed.length ? "Notas dos jogadores · pelo menos 3 avaliações" : "Notas simuladas nesta prévia", matches: reviewed.length?reviewed:topRated },
+    { name: "Mais bem avaliados", query: reviewed.length ? {sort:"rating"} : undefined, note: reviewed.length ? "Notas dos jogadores · pelo menos 3 avaliações" : "Notas simuladas nesta prévia", matches: reviewed.length?reviewed:topRated },
   ];
   for (const name of GAMEPLAY) {
     if (MODES.includes(name)) continue;
@@ -217,7 +217,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
       ${filterField("feature", "Características", categories(GAMEPLAY, "Todas"), esc)}
       ${filterField("language", "Idioma", [["", "Todos"], ["Português", "Português"], ["English", "Inglês"], ["Español", "Espanhol"]], esc)}
       ${filterField("access", "Entrada", [["", "Qualquer acesso"], ["open", "Entrada livre"], ["whitelist", "Com aprovação"]], esc)}
-      ${filterField("sort", "Ordenar por", [["", "Relevância"], ["online", "Online primeiro"], ["players", "Mais jogadores online"], ["name", "Nome de A a Z"]], esc)}
+      ${filterField("sort", "Ordenar por", [["", "Relevância"], ["online", "Online primeiro"], ["players", "Mais jogadores online"], ["name", "Nome de A a Z"], ["rating", "Mais bem avaliados"]], esc)}
       <div class="filter-panel-actions">
         <button class="text-link edition-help" data-action="edition-help">Qual edição eu uso?</button>
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>

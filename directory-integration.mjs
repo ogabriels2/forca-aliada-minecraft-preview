@@ -1,6 +1,6 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=pages-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=status-20261113';
 import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=pages-20261113';
-import {createPublicCatalog} from './directory-catalog.mjs';
+import {createPublicCatalog} from './directory-catalog.mjs?v=status-20261113';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
@@ -313,6 +313,7 @@ export function connectDirectory(ui){
     get me(){return me;},get canLinkAccount(){return Boolean(me&&linkAvailable);},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
     publicState:id=>publicPages.get(id),loadPublic,reviewRoute,pagesRoute,showPages,
     library:api.library,changeLibrary:api.changeLibrary,
+    serverStatus:api.status,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
       const caps=await api.capabilities().catch(()=>({media:false}));

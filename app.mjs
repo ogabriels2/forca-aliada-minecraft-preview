@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=pages-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=status-20261113";
 let directory=null;
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
@@ -9,7 +9,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=reviews-20261113";
+} from "./discovery.mjs?v=status-20261113";
 import { createSkinLibrary } from "./skins.mjs?v=moderation-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
@@ -37,7 +37,7 @@ import {
   safeMedia,
   mediaSource,
   eventUTC,
-} from "./model.mjs?v=publication-20261113b";
+} from "./model.mjs?v=status-20261113";
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const main = document.querySelector("#main"),
@@ -535,6 +535,22 @@ async function queryServerStatus(address, edition) {
   }
 }
 
+async function publishedServerStatus(server){
+  try{
+    const result=await directory.serverStatus(server.id);
+    return Object.fromEntries(await Promise.all(server.editions.map(async edition=>{
+      const sample=result.editions?.[edition],now=Date.now();
+      if(!sample||!['online','offline','unknown'].includes(sample.status)||!Number.isFinite(sample.expiresAt)||
+        sample.expiresAt<=now||sample.expiresAt>now+90000)return [edition,{status:'unknown'}];
+      const players=sample.status==='online'&&Number.isSafeInteger(sample.players?.online)&&sample.players.online>=0
+        ?{online:sample.players.online,max:Number.isSafeInteger(sample.players.max)&&sample.players.max>0?sample.players.max:undefined}:undefined;
+      return [edition,{status:sample.status,expiresAt:sample.expiresAt,checkedAt:sample.checkedAt,players,
+        version:typeof sample.version==='string'?sample.version.slice(0,160):undefined,
+        icon:edition==='Java'?await decodedServerIcon(sample.icon):undefined}];
+    })));
+  }catch{return Object.fromEntries(server.editions.map(edition=>[edition,{status:'unknown'}]));}
+}
+
 function refreshLiveAvailabilityUI() {
   updateConnectionAvailability();
   if (state.wizard && dialogMode === "wizard") {
@@ -598,9 +614,11 @@ function refreshServerSample(server) {
   const requestedAt = Date.now();
   const address = publicServerAddress(server);
   const task = (async () => {
-    const editions = Object.fromEntries(await Promise.all(server.editions.map(async (edition) =>
-      [edition, await queryServerStatus(address, edition)],
-    )));
+    const editions = directory&&(server.id==='forca-aliada'||server.directory)
+      ?await publishedServerStatus(server)
+      :Object.fromEntries(await Promise.all(server.editions.map(async (edition) =>
+        [edition, await queryServerStatus(address, edition)],
+      )));
     liveServerSamples.set(key, {
       editions,
       requestedAt,
@@ -831,7 +849,7 @@ function updateResults() {
   const displayFilter = (key, value) =>
     key === "access"
       ? labels[key]
-      : key === "sort" ? ({ name: "Nome de A a Z", online: "Online primeiro", players: "Mais jogadores online" }[value] || value)
+      : key === "sort" ? ({ name: "Nome de A a Z", online: "Online primeiro", players: "Mais jogadores online", rating: "Mais bem avaliados" }[value] || value)
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
   const browsing = !Object.entries(state.filters).some(([key, value]) => key !== "sort" && value);
@@ -1265,10 +1283,23 @@ function updateConnectionAvailability() {
   const server = withServerAvailability(activeServer);
   document.querySelectorAll("[data-connect-edition]").forEach((panel) => {
     const { status, text, count } = connectionStatus(server, panel.dataset.connectEdition);
+    const sample=liveServerSamples.get(liveServerKey(activeServer))?.editions[panel.dataset.connectEdition];
     const badge = panel.querySelector("[data-connection-availability]");
     const players = panel.querySelector("[data-connection-players]");
     badge.className = `availability ${status}`;
     badge.textContent = text;
+    badge.title=sample?.checkedAt
+      ?'Consultado às '+new Date(sample.checkedAt).toLocaleTimeString('pt-BR')
+      :'Não foi possível confirmar o estado agora.';
+    const declaredVersion=activeServer.version&&!/^(a informar|consulte a equipe)$/i.test(activeServer.version);
+    if(!declaredVersion){
+      let version=panel.querySelector('[data-observed-version]');
+      if(sample?.status==='online'&&sample.version){
+        if(!version){version=document.createElement('span');version.className='connection-version';version.dataset.observedVersion='';panel.querySelector('.connection-status-line').append(version);}
+        version.textContent=sample.version;
+        version.title='Versão informada pelo servidor nesta consulta';
+      }else{version?.remove();}
+    }
     players.hidden = !count;
     players.querySelector("[data-connection-count]").textContent = count;
   });

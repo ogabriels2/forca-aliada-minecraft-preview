@@ -2,7 +2,7 @@
 export function createPublicCatalog({client,remember,onChange=()=>{}}){
   let current={key:'',ids:new Set(),loading:false,error:null,nextOffset:null,loaded:false};
   let params={},controller,timer,version=0;
-  const query=filters=>Object.fromEntries(Object.entries({q:filters.q||'',edition:filters.edition||'',category:filters.mode||'',feature:filters.feature||'',language:filters.language||'',access:filters.access||''}).filter(([,v])=>v));
+  const query=filters=>Object.fromEntries(Object.entries({q:filters.q||'',edition:filters.edition||'',category:filters.mode||'',feature:filters.feature||'',language:filters.language||'',access:filters.access||'',sort:['name','rating'].includes(filters.sort)?filters.sort:''}).filter(([,v])=>v));
   function changed(){queueMicrotask(onChange);}
   async function load({append=false}={}){
     const generation=++version;controller?.abort();controller=new AbortController();
