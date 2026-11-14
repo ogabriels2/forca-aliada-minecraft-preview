@@ -127,7 +127,7 @@ export function createSkinLibrary({
       paintIcons(main);
       return;
     }
-    main.innerHTML = `<section class="container skins-heading">${own ? '<a class="text-link" href="#/skins">← Catálogo de skins</a>' : ""}<div><div><h1>${own ? "Suas skins." : publicAuthor ? "Skins de "+esc(publicAuthor) : "Skins para Minecraft."}</h1><p>${own ? "Uma coleção no seu perfil. Pronta para escolher, baixar e compartilhar." : "Encontre uma pronta. Ou crie do seu jeito."}</p></div><div class="skin-heading-actions"><button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar PNG</button><a class="text-link skin-open-editor" href="#/skins/editor">${icon("brush")} Abrir editor</a></div></div>${own ? '<div class="skin-profile-line">Sua coleção · itens privados só aparecem para você</div>' : ""}</section>${!own && !publicAuthor ? `<section class="container skin-discovery"><div class="skin-discovery-copy"><h2>Experimente um<br>novo visual.</h2><p>Roupas, cabelos e cores. Veja cada mudança no personagem e continue criando no editor.</p><a class="button" href="#/skins/editor" data-showroom-action="edit">Personalizar este visual ${icon("arrow-right")}</a><small>Peças de textura gratuitas · amostras da Força Aliada</small></div>${showroomMarkup(icon)}</section>` : ""}<section class="container skins-catalog" aria-label="Catálogo de skins"><div class="skin-toolbar"><label class="skin-search">${icon("search")}<span class="sr-only">Buscar skins</span><input type="search" id="skin-search" placeholder="Nome, criador ou tag" value="${esc(query)}"></label><label class="select-wrap"><span class="sr-only">Modelo da skin</span><select id="skin-model"><option value="">Todos os modelos</option><option value="classic" ${model === "classic" ? "selected" : ""}>Clássico</option><option value="slim" ${model === "slim" ? "selected" : ""}>Slim</option></select></label><button class="skin-saved button secondary" data-skin-action="saved" aria-pressed="${savedOnly}">${icon("heart")} Salvas</button>${!own ? '<a class="text-link" href="#/minhas-skins">Minhas skins</a>' : ""}</div><p class="skin-count" role="status" aria-live="polite"></p><div class="skin-grid" id="skin-results"></div><button class="button secondary" data-skin-action="more" data-skin-more hidden>Carregar mais skins</button><div class="skin-library-note" role="status"></div></section><section class="container skin-how"><div><h2>Do perfil para o jogo.</h2><p>Escolha uma skin, confira o modelo e veja como usá-la no Minecraft.</p></div><ol><li><strong>Veja por todos os lados.</strong><span>Abra a prévia 3D e gire o personagem.</span></li><li><strong>Escolha como usar.</strong><span>Baixe o PNG ou use a conexão Java quando ela estiver disponível. No Bedrock, confira como importar.</span></li><li><strong>Guarde as favoritas.</strong><span>Sua coleção fica à mão, sem precisar publicar outra cópia.</span></li></ol></section>`;
+    main.innerHTML = `<section class="container skins-heading">${own ? '<a class="text-link" href="#/skins">← Catálogo de skins</a>' : ""}<div><div><h1>${own ? "Suas skins." : publicAuthor ? "Skins de "+esc(publicAuthor) : "Skins para Minecraft."}</h1><p>${own ? "Uma coleção no seu perfil. Pronta para escolher, baixar e compartilhar." : "Encontre uma pronta. Ou crie do seu jeito."}</p></div><div class="skin-heading-actions">${own ? `<button class="button secondary" data-skin-action="import-minecraft">${icon("download")} Importar do Minecraft</button>` : ""}<button class="button secondary" data-skin-action="upload">${icon("upload")} Enviar PNG</button><a class="text-link skin-open-editor" href="#/skins/editor">${icon("brush")} Abrir editor</a></div></div>${own ? '<div class="skin-profile-line">Sua coleção · itens privados só aparecem para você</div>' : ""}</section>${!own && !publicAuthor ? `<section class="container skin-discovery"><div class="skin-discovery-copy"><h2>Experimente um<br>novo visual.</h2><p>Roupas, cabelos e cores. Veja cada mudança no personagem e continue criando no editor.</p><a class="button" href="#/skins/editor" data-showroom-action="edit">Personalizar este visual ${icon("arrow-right")}</a><small>Peças de textura gratuitas · amostras da Força Aliada</small></div>${showroomMarkup(icon)}</section>` : ""}<section class="container skins-catalog" aria-label="Catálogo de skins"><div class="skin-toolbar"><label class="skin-search">${icon("search")}<span class="sr-only">Buscar skins</span><input type="search" id="skin-search" placeholder="Nome, criador ou tag" value="${esc(query)}"></label><label class="select-wrap"><span class="sr-only">Modelo da skin</span><select id="skin-model"><option value="">Todos os modelos</option><option value="classic" ${model === "classic" ? "selected" : ""}>Clássico</option><option value="slim" ${model === "slim" ? "selected" : ""}>Slim</option></select></label><button class="skin-saved button secondary" data-skin-action="saved" aria-pressed="${savedOnly}">${icon("heart")} Salvas</button>${!own ? '<a class="text-link" href="#/minhas-skins">Minhas skins</a>' : ""}</div><p class="skin-count" role="status" aria-live="polite"></p><div class="skin-grid" id="skin-results"></div><button class="button secondary" data-skin-action="more" data-skin-more hidden>Carregar mais skins</button><div class="skin-library-note" role="status"></div></section><section class="container skin-how"><div><h2>Do perfil para o jogo.</h2><p>Escolha uma skin, confira o modelo e veja como usá-la no Minecraft.</p></div><ol><li><strong>Veja por todos os lados.</strong><span>Abra a prévia 3D e gire o personagem.</span></li><li><strong>Escolha como usar.</strong><span>Baixe o PNG ou use a conexão Java quando ela estiver disponível. No Bedrock, confira como importar.</span></li><li><strong>Guarde as favoritas.</strong><span>Sua coleção fica à mão, sem precisar publicar outra cópia.</span></li></ol></section>`;
     results();
     void reload();
     if (!own && !publicAuthor)
@@ -259,7 +259,7 @@ export function createSkinLibrary({
       image.src = skin.image;
     });
   }
-  function uploadDialog(existing = null, fromEditor = null) {
+  function uploadDialog(existing = null, prepared = null, { imported = false } = {}) {
     if (!account()) {
       openDialog(
         `<h2 id="dialog-title">Publique com seu perfil.</h2><p>Entre para guardar sua skin e escolher quem pode vê-la.</p><button class="button" data-skin-action="demo-login">Entrar na conta</button>`,
@@ -276,15 +276,57 @@ export function createSkinLibrary({
           image: "",
           name: "",
           model: "classic",
-          ...fromEditor,
+          ...prepared,
         };
     openDialog(
-      `<h2 id="dialog-title">${existing ? "Editar publicação" : "Salve sua skin."}</h2><p>${fromEditor ? "Dê um nome à sua criação e confira os créditos antes de publicar." : "Envie o arquivo original. Você verá o personagem antes de publicar."}</p><form id="skin-upload-form" novalidate>${fromEditor ? "" : `<label class="skin-upload-target">${icon("upload")}<strong data-skin-file-label>Escolher PNG da skin</strong><span>64 × 64 ou 64 × 32 px · até 1 MB</span><input type="file" accept="image/png" id="skin-file" aria-label="Enviar arquivo PNG de skin"></label>`}<div class="skin-upload-preview" ${upload.image ? "" : "hidden"}><canvas class="skin-thumb" width="128" height="160" data-skin-texture="${upload.id}" role="img" aria-label="Prévia da skin enviada"></canvas></div><label class="field"><span>${upload.kind==="part"?"Nome da peça":"Nome da skin"}</span><input name="skinName" maxlength="70" value="${esc(upload.name)}" required></label><label class="field"><span>Modelo</span><select name="skinVariant"><option value="classic" ${upload.model === "classic" ? "selected" : ""}>Clássico · braços largos</option><option value="slim" ${upload.model === "slim" ? "selected" : ""}>Slim · braços finos</option></select><small>Escolha o modelo para o qual o arquivo foi criado.</small></label><label class="field"><span>Tags (opcional)</span><input name="skinTags" maxlength="125" placeholder="Ex.: aventureiro, azul, medieval" value="${esc(upload.tags?.join(", ") || "")}"><small>Até 5 tags, separadas por vírgulas.</small></label>${upload.componentCredits?.length ? `<div class="skin-editor-credits"><strong>Créditos preservados</strong><ul>${upload.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>` : ""}<label class="field"><span>Quem criou esta skin?</span><select name="skinCreatorMode" aria-label="Quem criou esta skin?" required><option value="" disabled ${!["self", "credited"].includes(upload.creatorMode) ? "selected" : ""}>Escolher autoria</option><option value="unspecified" ${upload.creatorMode==="unspecified"?"selected":""}>Autoria não informada · só para guardar em privado</option><option value="self" ${upload.creatorMode === "self" ? "selected" : ""}>${upload.componentCredits?.length ? "Eu criei esta composição · manter créditos originais" : "Eu criei esta skin"}</option><option value="credited" ${upload.creatorMode === "credited" ? "selected" : ""}>Outra pessoa · tenho permissão para publicar</option></select></label><div class="skin-credit-fields" ${upload.creatorMode === "credited" ? "" : "hidden"}><label class="field"><span>Nome do criador</span><input name="skinCreatorName" maxlength="70" value="${esc(upload.creatorName || "")}" aria-label="Nome do criador"></label><label class="field"><span>Link da origem (opcional)</span><input name="skinSourceUrl" type="url" maxlength="2048" placeholder="https://" value="${esc(upload.sourceUrl || "")}" aria-label="Link da origem (opcional)"><small>O crédito acompanha a publicação e aparece no detalhe.</small></label></div><label class="field"><span>Quem pode ver?</span><select name="skinVisibility"><option value="private" ${upload.visibility==="private"?"selected":""}>Só eu</option><option value="unlisted" ${upload.visibility==="unlisted"?"selected":""}>Público, apenas pelo link</option><option value="listed" ${upload.visibility==="listed"?"selected":""}>Público, no perfil e no catálogo</option></select><small>Importar ou salvar não publica sem sua escolha.</small></label><label class="check-label skin-rights"><input name="skinRights" type="checkbox" ${existing ? "checked" : ""}>Esta skin é minha ou tenho permissão para publicá-la.</label><div class="invalid-box" data-skin-error role="alert" hidden></div><p class="field-help">Salvar a criação não troca sua skin no Minecraft.</p><div class="dialog-actions"><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" type="submit">${existing ? "Salvar publicação" : "Salvar na conta"} ${icon("arrow-right")}</button></div></form>`,
+      `<h2 id="dialog-title">${existing ? "Editar publicação" : "Salve sua skin."}</h2><p>${imported ? "Confira sua skin e escolha quem pode vê-la. Ela fica privada por padrão." : prepared ? "Dê um nome à sua criação e confira os créditos antes de publicar." : "Envie o arquivo original. Você verá o personagem antes de publicar."}</p><form id="skin-upload-form" novalidate>${prepared ? "" : `<label class="skin-upload-target">${icon("upload")}<strong data-skin-file-label>Escolher PNG da skin</strong><span>64 × 64 ou 64 × 32 px · até 1 MB</span><input type="file" accept="image/png" id="skin-file" aria-label="Enviar arquivo PNG de skin"></label>`}<div class="skin-upload-preview" ${upload.image ? "" : "hidden"}><canvas class="skin-thumb" width="128" height="160" data-skin-texture="${upload.id}" role="img" aria-label="Prévia da skin enviada"></canvas></div><label class="field"><span>${upload.kind==="part"?"Nome da peça":"Nome da skin"}</span><input name="skinName" maxlength="70" value="${esc(upload.name)}" required></label><label class="field"><span>Modelo</span><select name="skinVariant"><option value="classic" ${upload.model === "classic" ? "selected" : ""}>Clássico · braços largos</option><option value="slim" ${upload.model === "slim" ? "selected" : ""}>Slim · braços finos</option></select><small>Escolha o modelo para o qual o arquivo foi criado.</small></label><label class="field"><span>Tags (opcional)</span><input name="skinTags" maxlength="125" placeholder="Ex.: aventureiro, azul, medieval" value="${esc(upload.tags?.join(", ") || "")}"><small>Até 5 tags, separadas por vírgulas.</small></label>${upload.componentCredits?.length ? `<div class="skin-editor-credits"><strong>Créditos preservados</strong><ul>${upload.componentCredits.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>` : ""}<label class="field"><span>Quem criou esta skin?</span><select name="skinCreatorMode" aria-label="Quem criou esta skin?" required><option value="" disabled ${!["unspecified", "self", "credited"].includes(upload.creatorMode) ? "selected" : ""}>Escolher autoria</option><option value="unspecified" ${upload.creatorMode==="unspecified"?"selected":""}>Autoria não informada · só para guardar em privado</option><option value="self" ${upload.creatorMode === "self" ? "selected" : ""}>${upload.componentCredits?.length ? "Eu criei esta composição · manter créditos originais" : "Eu criei esta skin"}</option><option value="credited" ${upload.creatorMode === "credited" ? "selected" : ""}>Outra pessoa · tenho permissão para publicar</option></select></label><div class="skin-credit-fields" ${upload.creatorMode === "credited" ? "" : "hidden"}><label class="field"><span>Nome do criador</span><input name="skinCreatorName" maxlength="70" value="${esc(upload.creatorName || "")}" aria-label="Nome do criador"></label><label class="field"><span>Link da origem (opcional)</span><input name="skinSourceUrl" type="url" maxlength="2048" placeholder="https://" value="${esc(upload.sourceUrl || "")}" aria-label="Link da origem (opcional)"><small>O crédito acompanha a publicação e aparece no detalhe.</small></label></div><label class="field"><span>Quem pode ver?</span><select name="skinVisibility"><option value="private" ${upload.visibility==="private"?"selected":""}>Só eu</option><option value="unlisted" ${upload.visibility==="unlisted"?"selected":""}>Público, apenas pelo link</option><option value="listed" ${upload.visibility==="listed"?"selected":""}>Público, no perfil e no catálogo</option></select><small>Importar ou salvar não publica sem sua escolha.</small></label><label class="check-label skin-rights"><input name="skinRights" type="checkbox" ${existing ? "checked" : ""}>Posso guardar esta skin e, se escolher compartilhá-la, tenho permissão para isso.</label><div class="invalid-box" data-skin-error role="alert" hidden></div><p class="field-help">Salvar a criação não troca sua skin no Minecraft.</p><div class="dialog-actions"><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" type="submit">${existing ? "Salvar publicação" : "Salvar na conta"} ${icon("arrow-right")}</button></div></form>`,
       "skin-upload",
     );
     const slimOption = dialog.querySelector('option[value="slim"]');
     if (slimOption) slimOption.disabled = upload.height === 32;
     drawThumbs();
+  }
+  async function importFromMinecraft() {
+    if (!getUser()) { signIn(); return; }
+    const identity = getUser().id;
+    openDialog(`<h2 id="dialog-title">Importar do Minecraft</h2><p>Copie sua skin atual do Minecraft Java para a sua coleção.</p><div data-minecraft-import aria-live="polite">Buscando suas conexões…</div><div class="dialog-actions"><button type="button" class="button secondary" data-action="close-dialog">Cancelar</button></div>`);
+    const content = dialog.querySelector('[data-minecraft-import]');
+    try {
+      const result = await remote.accounts();
+      if (!dialog.open || !content.isConnected || identity !== getUser()?.id) return;
+      const accounts = result.configured ? result.rows.filter(row => row.usable !== false) : [];
+      content.innerHTML = accounts.length
+        ? `<label class="field"><span>Conta Minecraft Java</span><select data-import-account>${accounts.map(row => `<option value="${esc(row.id)}">${esc(row.name)}</option>`).join('')}</select></label><button class="button" data-skin-action="load-minecraft-skin">Ver skin ${icon('arrow-right')}</button><p data-import-error role="alert" hidden></p>`
+        : '<p>Você precisa de uma conta Minecraft Java conectada para importar a skin atual.</p><button class="button" data-skin-action="connect-java">Gerenciar conexões Minecraft</button>';
+      paintIcons(dialog);
+    } catch (error) {
+      if (!dialog.open || !content.isConnected || identity !== getUser()?.id) return;
+      content.innerHTML = `<p role="alert">${esc(error.message)}</p><button class="button secondary" data-skin-action="import-minecraft">Tentar novamente</button>`;
+    }
+  }
+  async function loadMinecraftSkin(button) {
+    if (!getUser() || button.disabled) return;
+    const identity = getUser().id;
+    const select = dialog.querySelector('[data-import-account]');
+    const errorMessage = dialog.querySelector('[data-import-error]');
+    if (!select?.value) return;
+    button.disabled = select.disabled = true;
+    button.textContent = 'Buscando sua skin…';
+    errorMessage.hidden = true;
+    try {
+      const skin = await remote.current(select.value);
+      if (!dialog.open || !button.isConnected || identity !== getUser()?.id) return;
+      uploadDialog(null, { ...skin, visibility: 'private', creatorMode: 'unspecified' }, { imported: true });
+    } catch (error) {
+      if (!dialog.open || !button.isConnected || identity !== getUser()?.id) return;
+      errorMessage.textContent = error.message;
+      errorMessage.hidden = false;
+    } finally {
+      if (button.isConnected) {
+        button.disabled = select.disabled = false;
+        button.textContent = 'Ver skin';
+      }
+    }
   }
   let uploadEpoch = 0;
   async function readSkin(file) {
@@ -453,7 +495,7 @@ export function createSkinLibrary({
       return;
     }
     if (!f.get("skinRights")) {
-      formError("Confirme que pode publicar esta skin.");
+      formError("Confirme que pode guardar a skin e respeitar a visibilidade escolhida.");
       return;
     }
     const entry = safeSkin({
@@ -489,6 +531,8 @@ export function createSkinLibrary({
       selected=fromServer(profileParts.get(b.dataset.id));openDialog(`<h2 id="dialog-title">Excluir ${esc(selected.name)}?</h2><p>A peça será removida da conta e do catálogo.</p><div class="dialog-actions"><button class="button secondary" data-action="close-dialog">Cancelar</button><button class="button" data-skin-action="remove-confirm">Excluir peça</button></div>`);
     }else if (action === "open" && s) detail(s);
     else if (action === "upload") uploadDialog();
+    else if (action === "import-minecraft") await importFromMinecraft();
+    else if (action === "load-minecraft-skin") await loadMinecraftSkin(b);
     else if (action === "customize" && selected) editSkin(selected);
     else if (action === "edit" && ownEntry(selected) && account())
       uploadDialog(selected);
@@ -564,7 +608,7 @@ export function createSkinLibrary({
     dispose,
     async open(id){try{detail(fromServer(await remote.get(id)));}catch(error){toast(error.message);}},
     accountChanged(){const next=String(getUser()?.id||'');if(next===userKey)return;userKey=next;if(!next){savedOnly=false;data.favorites=new Set([...data.favorites].filter(id=>id.startsWith('base-')));}
-      const version=favoriteVersion;if(dialog.querySelector('#skin-upload-form,.skin-detail'))closeDialog();remoteRows=[];selected=null;++loadVersion;if(main.querySelector('.skins-heading')||location.hash==='#/minhas-skins')render(profile,publicAuthor);if(next)void remote.favoriteIds().then(result=>{if(userKey!==next||version!==favoriteVersion)return;data.favorites=new Set([...data.favorites].filter(id=>id.startsWith('base-')).concat(result.ids));if(main.querySelector('#skin-results'))results();}).catch(()=>{});},
+      const version=favoriteVersion;if(dialog.querySelector('#skin-upload-form,.skin-detail,[data-minecraft-import]'))closeDialog();remoteRows=[];selected=null;++loadVersion;if(main.querySelector('.skins-heading')||location.hash==='#/minhas-skins')render(profile,publicAuthor);if(next)void remote.favoriteIds().then(result=>{if(userKey!==next||version!==favoriteVersion)return;data.favorites=new Set([...data.favorites].filter(id=>id.startsWith('base-')).concat(result.ids));if(main.querySelector('#skin-results'))results();}).catch(()=>{});},
     publishFromEditor: (skin) => uploadDialog(null, skin),
   };
 }
