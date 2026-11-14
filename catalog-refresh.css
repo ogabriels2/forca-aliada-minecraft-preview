@@ -1,5 +1,6 @@
 /* One action family, neutral browsing surfaces, and a restrained warm editorial accent. */
-body:is([data-surface="discovery"], [data-surface="server"]) {
+body:is([data-surface="discovery"], [data-surface="server"]),
+.creator-profile {
   --finder-ground: #f7f8f6;
   --finder-panel: #fff;
   --finder-ink: #202524;
