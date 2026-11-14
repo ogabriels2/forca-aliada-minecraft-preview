@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=reports-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=library-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -66,8 +66,15 @@ try {
   if (Array.isArray(visits))
     recentlyViewed = [...new Set(visits.filter((id) => typeof id === "string" && id.length <= 80))].slice(0, 8);
 } catch {}
+let guestRecent = recentlyViewed;
+let libraryOwner = null;
+let libraryWrites = Promise.resolve();
+const pendingFavorites = new Set();
+const isRealServer = id => id === "forca-aliada" || /^[a-f0-9-]{36}$/i.test(id);
 function setRecentServers(ids) {
   recentlyViewed = ids;
+  if (libraryOwner) return;
+  guestRecent = ids;
   try {
     if (ids.length) localStorage.setItem(recentStorageKey, JSON.stringify(ids));
     else localStorage.removeItem(recentStorageKey);
@@ -127,6 +134,74 @@ function toast(text) {
   n.hidden = false;
   toastTimer = setTimeout(() => (n.hidden = true), 3200);
 }
+const guestFavorites = state.favorites;
+let libraryLoad = 0;
+let libraryReady = false;
+let currentLibraryView = "";
+function updateLibraryUI() {
+  if (document.querySelector("#results")) updateResults();
+  if (activeServer) {
+    for (const button of main.querySelectorAll('[data-action="favorite"]')) {
+      const saved = state.favorites.has(button.dataset.id);
+      button.setAttribute("aria-pressed", String(saved));
+      const label = saved ? "Remover dos favoritos" : "Guardar nos favoritos";
+      button.setAttribute("aria-label", label);
+      button.title = label;
+    }
+  }
+}
+async function loadLibrary() {
+  const identity = directory?.me?.id ?? null;
+  const request = ++libraryLoad;
+  if (identity !== libraryOwner) {
+    libraryOwner = identity;
+    libraryWrites = Promise.resolve();
+    currentLibraryView = "";
+    libraryReady = false;
+    state.favorites = identity ? new Set() : guestFavorites;
+    setRecentServers(identity ? [] : guestRecent);
+    updateLibraryUI();
+  }
+  if (!identity) return;
+  try {
+    const result = await directory.library();
+    if (request !== libraryLoad || libraryOwner !== identity) return;
+    state.favorites = new Set(result.favorites);
+    setRecentServers(result.recent);
+    libraryReady = true;
+    for (const id of result.recent) if (id !== "forca-aliada") void directory.loadPublic(id);
+    updateLibraryUI();
+    if (activeServer?.id && location.hash.startsWith("#/servidor/")) rememberServer(activeServer.id);
+  } catch {
+    if (request === libraryLoad && (state.filters.favorites || state.filters.recent))
+      toast("Não foi possível sincronizar sua biblioteca. Tente abrir a seção novamente.");
+  }
+}
+function changeLibrary(action, after, onError, settle) {
+  const identity = libraryOwner;
+  const task = libraryWrites.then(async () => {
+    if (identity !== libraryOwner) return;
+    await directory.changeLibrary(action);
+    if (identity === libraryOwner) after();
+  });
+  libraryWrites = task.catch(error => {
+    if (identity === libraryOwner) {
+      onError?.();
+      toast(error.message || "Não foi possível atualizar sua biblioteca.");
+    }
+  }).finally(settle);
+}
+function rememberServer(id) {
+  if (libraryOwner && (!libraryReady || !isRealServer(id))) return;
+  if (!libraryOwner && !directory?.ready) return;
+  const next = [id, ...recentlyViewed.filter(value => value !== id)].slice(0, 8);
+  if (!libraryOwner) { setRecentServers(next); return; }
+  if (currentLibraryView === id) return;
+  currentLibraryView = id;
+  changeLibrary({action:"view",id}, () => {
+    setRecentServers([id, ...recentlyViewed.filter(value => value !== id)].slice(0,8));
+  }, () => { if (currentLibraryView === id) currentLibraryView = ""; });
+}
 function persist({remote=true}={}) {
   clearTimeout(saveTimer);
   try {
@@ -137,7 +212,7 @@ function persist({remote=true}={}) {
         publication: state.publication,
         created: state.created,
         wizard: state.wizard,
-        favorites: [...state.favorites],
+        favorites: [...guestFavorites],
       }),
     );
     state.storageError = false;
@@ -1231,7 +1306,7 @@ function renderPage(id) {
     paintIcons();
     return;
   }
-  if(/^[a-f0-9-]{36}$/i.test(id))setRecentServers([id,...recentlyViewed.filter(entry=>entry!==id)].slice(0,8));
+  if (!ownPage() && id !== "minha-pagina") rememberServer(id);
   document.title=`${activeServer.name} · Servidores de Minecraft · Força Aliada`;
   const displayServer = withServerAvailability(activeServer);
   main.innerHTML =
@@ -1623,6 +1698,7 @@ function route({ focus = true } = {}) {
   skinStudio.dispose();
   minecraftConnections.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
+  if (!path.startsWith("/servidor/")) currentLibraryView = "";
   const params = new URLSearchParams(query);
   const toolsMenu = document.querySelector(".tools-menu");
   if (toolsMenu) toolsMenu.open = false;
@@ -1678,8 +1754,6 @@ function route({ focus = true } = {}) {
     const edition = params.get("edition");
     state.selectedEdition = ["Java", "Bedrock"].includes(edition) ? edition : undefined;
     renderPage(id);
-    if (SERVERS.some((server) => server.id === id) || (id === "minha-pagina" && state.publication?.visibility === "listed"))
-      setRecentServers([id, ...recentlyViewed.filter((entry) => entry !== id)].slice(0, 8));
     document.title = `${activeServer?.name || "Servidor"} · Servidores de Minecraft · Prévia`;
   } else if (path === "/editor") {
     if (state.created) {
@@ -1845,14 +1919,25 @@ document.addEventListener("click", (e) => {
   } else if (a === "favorites") {
     delete state.filters.recent;
     state.filters.favorites = state.filters.favorites ? "" : true;
+    if (libraryOwner && !libraryReady && state.filters.favorites) void loadLibrary();
     updateResults();
     animateCatalogResults();
   } else if (a === "recent") {
     delete state.filters.favorites;
     state.filters.recent = state.filters.recent ? "" : true;
+    if (libraryOwner && !libraryReady && state.filters.recent) void loadLibrary();
     updateResults();
     animateCatalogResults();
   } else if (a === "clear-recent") {
+    if (libraryOwner) {
+      changeLibrary({action:"clear-history"}, () => {
+        setRecentServers([]);
+        updateLibraryUI();
+        focusCatalogHeading();
+        toast("Histórico apagado da sua conta.");
+      });
+      return;
+    }
     setRecentServers([]);
     updateResults();
     focusCatalogHeading();
@@ -1904,6 +1989,21 @@ document.addEventListener("click", (e) => {
   } else if (a === "favorite") {
     const id = b.dataset.id;
     const saved = !state.favorites.has(id);
+    if (libraryOwner) {
+      if (!isRealServer(id)) { toast("A biblioteca da conta guarda servidores publicados."); return; }
+      if (!libraryReady) { void loadLibrary(); return; }
+      const pending = `${libraryOwner}:${id}`;
+      if (pendingFavorites.has(pending)) return;
+      pendingFavorites.add(pending);
+      b.disabled = true;
+      const settle = () => { pendingFavorites.delete(pending); b.disabled = false; };
+      changeLibrary({action:"favorite",id,favorite:saved}, () => {
+        if (saved) state.favorites.add(id); else state.favorites.delete(id);
+        updateLibraryUI();
+        toast(saved ? "Servidor guardado na sua conta." : "Servidor removido dos favoritos.");
+      }, null, settle);
+      return;
+    }
     if (saved) state.favorites.add(id);
     else state.favorites.delete(id);
     persist();
@@ -2381,7 +2481,7 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();},
+  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},
   catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},

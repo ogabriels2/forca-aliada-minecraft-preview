@@ -1,4 +1,4 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=account-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=library-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
 
@@ -179,7 +179,7 @@ export function connectDirectory(ui){
     loadingPages.add(id);publicPages.set(id,{status:'loading',checkedAt:Date.now()});
     try{remember(await api.publicPage(id));}
     catch(error){publicPages.set(id,{status:error.status===404?'missing':'error',checkedAt:Date.now(),error});if(error.status===404)ui.removePublic(id);}
-    finally{loadingPages.delete(id);if(location.hash.split('?')[0]==='#/servidor/'+id)ui.renderPage(id);else if(state.filters.favorites||state.filters.recent)ui.catalogChanged();}
+    finally{loadingPages.delete(id);if(location.hash.split('?')[0]==='#/servidor/'+id)ui.renderPage(id);else if(state.filters.favorites||state.filters.recent||ui.savedIds({recent:true}).includes(id))ui.catalogChanged();}
   }
   const mediaLinks=new Map();
   async function mediaLink(path){
@@ -251,6 +251,7 @@ export function connectDirectory(ui){
   return {
     get me(){return me;},get canLinkAccount(){return Boolean(me&&linkAvailable);},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
     publicState:id=>publicPages.get(id),loadPublic,reviewRoute,
+    library:api.library,changeLibrary:api.changeLibrary,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
       const caps=await api.capabilities().catch(()=>({media:false}));

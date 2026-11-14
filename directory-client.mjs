@@ -29,6 +29,8 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     own:()=>request(`${BASE}/drafts`),
     draft:id=>request(`${BASE}/drafts/${id}`),
     publicPage:id=>request(`${BASE}/servers/${id}`),
+    library:()=>request(`${BASE}/library`),
+    changeLibrary:body=>request(`${BASE}/library`,{method:'POST',body}),
     create:key=>request(`${BASE}/drafts`,{method:'POST',headers:{'Idempotency-Key':key}}),
     save:(id,revision,body)=>request(`${BASE}/drafts/${id}`,{method:'PATCH',headers:{'If-Match':String(revision)},body}),
     claim:id=>request(`${BASE}/drafts/${id}/claims`,{method:'POST'}),
