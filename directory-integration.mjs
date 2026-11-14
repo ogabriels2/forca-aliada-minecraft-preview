@@ -1,4 +1,4 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=library-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=reviews-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
 

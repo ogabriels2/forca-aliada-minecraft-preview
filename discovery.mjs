@@ -83,7 +83,7 @@ export function serverCard(d, { esc, icon, cover, favorite, serverHref, edition 
           ${d.access === "whitelist" ? `<span class="card-access" title="Entrada com aprovação">${icon("lock")}<span class="sr-only">Entrada com aprovação</span></span>` : ""}
         </span>
         ${cardAvailability(d, edition, esc, icon)}
-        ${d.demoRating ? `<span class="card-demo-rating" aria-label="Nota simulada: ${d.demoRating.score.toFixed(1)} de 5"><span aria-hidden="true">★</span> ${d.demoRating.score.toFixed(1).replace(".", ",")}</span>` : ""}
+        ${d.rating?.count ? `<span class="card-demo-rating" aria-label="${Number(d.rating.score).toFixed(1)} de 5 · ${d.rating.count} avaliações"><span aria-hidden="true">★</span> ${Number(d.rating.score).toLocaleString("pt-BR")} <small>(${d.rating.count})</small></span>` : d.example && d.demoRating ? `<span class="card-demo-rating" aria-label="Nota simulada: ${d.demoRating.score.toFixed(1)} de 5"><span aria-hidden="true">★</span> ${d.demoRating.score.toFixed(1).replace(".", ",")}</span>` : ""}
         <span class="card-mode">${esc(d.mode)}</span>
       </div>
     </div>
@@ -132,6 +132,8 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
   const byId = new Map(servers.map((server) => [server.id, server]));
   const history = recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
   const published = servers.filter(server=>server.directory);
+  const reviewed = published.filter(server=>server.rating?.count>=3).sort((a,b)=>
+    Number(b.rating.score)-Number(a.rating.score)||b.rating.count-a.rating.count);
   const rated = servers.filter((server) => server.demoRating);
   const trending = [...rated].sort((a, b) => b.demoTrend - a.demoTrend);
   const topRated = [...rated].sort((a, b) =>
@@ -145,7 +147,7 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
     { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
     { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
     ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),
-    { name: "Mais bem avaliados", note: "Notas simuladas nesta prévia", matches: topRated },
+    { name: "Mais bem avaliados", note: reviewed.length ? "Notas dos jogadores · pelo menos 3 avaliações" : "Notas simuladas nesta prévia", matches: reviewed.length?reviewed:topRated },
   ];
   for (const name of GAMEPLAY) {
     if (MODES.includes(name)) continue;

@@ -1543,6 +1543,70 @@ a {
   color: #355b46;
   font-weight: 700;
 }
+.server-reviews {
+  max-width: 960px;
+  padding-block: 28px;
+}
+.server-reviews [data-review-form] {
+  margin-block: 20px;
+  padding: 20px;
+  border: 1px solid #dbe4dd;
+  border-radius: 14px;
+  background: #fff;
+}
+.review-stars {
+  border: 0;
+  padding: 8px 0;
+  display: flex;
+  gap: 6px;
+}
+.review-stars label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  min-height: 44px;
+  border-radius: 8px;
+  background: #f2f4f1;
+  color: #67736b;
+  font-size: 26px;
+  position: relative;
+}
+.review-stars input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.review-stars label:has(input:checked),
+.review-stars label:has(~ label input:checked),
+.review-stars label:hover {
+  color: #96600d;
+  background: #fff0bd;
+}
+.review-stars label:has(input:focus-visible) {
+  outline: 2px solid #267344;
+  outline-offset: 2px;
+}
+.server-review {
+  padding-block: 18px;
+  border-top: 1px solid #dbe4dd;
+}
+.server-review > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.server-review > div > span { color: #96600d; }
+.review-stars-empty { color: #778077; }
+.server-review p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-block: 10px;
+}
+.server-review small { color: #667168; }
 .wardrobe-catalog .profile-piece > span {
   margin-top: auto;
 }

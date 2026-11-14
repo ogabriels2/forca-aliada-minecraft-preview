@@ -1,5 +1,6 @@
-import {connectDirectory} from "./directory-integration.mjs?v=library-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=reviews-20261113";
 let directory=null;
+import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
   serverCard,
@@ -8,7 +9,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=library-20261113";
+} from "./discovery.mjs?v=reviews-20261113";
 import { createSkinLibrary } from "./skins.mjs?v=moderation-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
@@ -1323,7 +1324,8 @@ function renderPage(id) {
     activeServer.id === "forca-aliada"
       ? officialPage(displayServer, { icon, connection, gallery: mediaGallery })
       : `<div class="container page-controls"><nav class="page-breadcrumb" aria-label="Caminho"><a href="#/">Servidores</a>${icon("chevron-right")}<span>${esc(activeServer.name)}</span></nav>${!ownPage() ? '<button class="text-link" data-action="create">Criar uma página como esta</button>' : ""}</div>${ownPage() ? ownerBar() : ""}${serverDocument(displayServer)}`;
-  if (displayServer.demoRating) main.insertAdjacentHTML("beforeend", previewReview(displayServer));
+  if (displayServer.demoRating && displayServer.example) main.insertAdjacentHTML("beforeend", previewReview(displayServer));
+  if (/^[a-f0-9-]{36}$/i.test(id) && !ownPage()) serverReviews.render(id);
   if (activeServer.id === "forca-aliada") bindOfficialStories(main);
   paintIcons();
   updateSaveStatus();
@@ -1705,6 +1707,7 @@ function route({ focus = true } = {}) {
   disposeWardrobe?.();
   disposeWardrobe = null;
   skinLibrary.dispose();
+  serverReviews.dispose();
   skinStudio.dispose();
   minecraftConnections.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
@@ -2446,6 +2449,7 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("pagehide", persist);
 document.addEventListener("visibilitychange", refreshServerStatuses);
 let editorSeed = null;
+const serverReviews=createServerReviews({main,esc,icon,paintIcons,getUser:()=>directory?.me,signIn:()=>directory.login(),toast,onSummary:(id,rating)=>{const server=SERVERS.find(row=>row.id===id);if(server)server.rating=rating;}});
 const creationModeration = createCreationModeration({main,dialog,esc,icon,paintIcons,openDialog,closeDialog,toast,getUser:()=>directory?.me,signIn:()=>directory.login()});
 const skinLibrary = createSkinLibrary({
   main,
@@ -2491,14 +2495,14 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
+  accountChanged:()=>{if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},
   catalogChanged:()=>{if(document.querySelector("#results")){updateResults();void refreshServerStatuses();}},
   renderSurface:html=>{activeServer=null;main.innerHTML=html;paintIcons();},
   renderReview:(page,id,top,bottom)=>{activeServer={...safeDraft(page),id,example:false,official:false};main.innerHTML=top+serverDocument(withServerAvailability(activeServer))+bottom;paintIcons();void refreshServerStatuses();},
   removePublic:id=>{const index=SERVERS.findIndex(s=>s.id===id&&s.directory);if(index>=0)SERVERS.splice(index,1);},
-  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
+  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true,rating:value.rating};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
 });
 void directory.init();
 route({ focus: false });
