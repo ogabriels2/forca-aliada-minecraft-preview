@@ -1,4 +1,4 @@
-import { createCreationsClient } from "./creations-client.mjs?v=appeals-20261113";
+import { createCreationsClient } from "./creations-client.mjs?v=moderation-20261113";
 
 const reasons = {
   rights: "Uso sem autorização",
@@ -46,6 +46,22 @@ export function createCreationModeration({ main, dialog, esc, icon, paintIcons, 
     });
   }
 
+  async function reportHistory() {
+    openDialog('<h2 id="dialog-title">Minhas denúncias</h2><div data-report-history role="status">Carregando…</div>');
+    const content = dialog.querySelector("[data-report-history]");
+    const identity = getUser()?.id;
+    const active = () => content.isConnected && dialog.open && getUser()?.id === identity;
+    const labels = {pending:"Em análise",closed:"Encerrada",hidden:"Criação ocultada",restored:"Criação restaurada"};
+    try {
+      const { rows } = await api.myReports();
+      if (!active()) return;
+      content.removeAttribute("role");
+      content.innerHTML = rows.length ? `<ul class="creation-report-history">${rows.map(row => `<li><strong>${esc(row.name)}</strong><span>${reasons[row.reason] || "Outro motivo"}</span><small>${labels[row.status] || "Em análise"}</small></li>`).join("")}</ul>` : "<p>Você ainda não enviou denúncias.</p>";
+    } catch (failure) {
+      if (active()) content.textContent = failure.message;
+    }
+  }
+
   async function queue(appeals = false) {
     const request = ++generation;
     const shell = document.createElement("section");
@@ -60,7 +76,8 @@ export function createCreationModeration({ main, dialog, esc, icon, paintIcons, 
       if (!active()) return;
       body.removeAttribute("role");
       body.innerHTML = rows.length ? rows.map(row => `<article class="notice creation-review">
-        <h2>${esc(row.name)}</h2><p>${row.kind === "part" ? "Peça" : "Skin"} de ${esc(row.publisher)}</p>
+        <h2>${esc(row.name)}</h2><p>${row.kind === "part" ? "Peça" : "Skin"} de ${esc(row.publisher)}${!appeals ? ` · versão ${row.reportedRevision}` : ""}</p>
+        ${!appeals && row.openReports > 1 ? `<p>${row.openReports} denúncias em aberto sobre esta versão. Ao ocultá-la, elas recebem o mesmo desfecho.</p>` : ""}
         <p><strong>${reasons[row.reason] || "Outro motivo"}</strong>${row.detail ? ` · ${esc(row.detail)}` : ""}</p>
         ${appeals ? `<p><strong>Decisão anterior</strong> · ${esc(row.previousNote || "")}</p><p><strong>Contestação do autor</strong> · ${esc(row.message)}</p><img width="128" alt="Textura da criação ocultada" src="data:image/png;base64,${esc(row.texture)}">` : row.canHide ? `<a class="text-link" href="${api.textureUrl(row)}" target="_blank" rel="noopener">Conferir PNG da versão denunciada</a>` : "<p>A versão denunciada já mudou ou saiu do catálogo.</p>"}
         <form data-review-id="${esc(row.id)}"><label class="field"><span>${appeals ? "Resposta ao autor" : "Motivo da decisão (interno)"}</span><textarea name="note" maxlength="500" rows="2" required></textarea></label>
@@ -149,5 +166,5 @@ export function createCreationModeration({ main, dialog, esc, icon, paintIcons, 
     });
     await load();
   }
-  return { report, queue, ownDecisions };
+  return { report, queue, ownDecisions, reportHistory };
 }

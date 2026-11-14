@@ -17,6 +17,7 @@ export function createCreationsClient({origin='https://forca-aliada-minecraft-be
     get:id=>request('/items/'+encodeURIComponent(id)),
     report:(item,reason,detail)=>request('/items/'+encodeURIComponent(item.id)+'/report',{method:'POST',body:{reason,detail,revision:item.revision}}),
     reports:()=>request('/moderation'),
+    myReports:()=>request('/reports/mine'),
     myModeration:()=>request('/moderation/mine'),
     appeal:(id,message)=>request('/appeals/'+encodeURIComponent(id),{method:'POST',body:{message}}),
     appeals:()=>request('/appeals'),

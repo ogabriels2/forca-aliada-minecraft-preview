@@ -9,10 +9,10 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs?v=appeals-20261113";
+import { createSkinLibrary } from "./skins.mjs?v=moderation-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
-import { createCreationModeration } from "./creation-moderation.mjs?v=appeals-20261113";
+import { createCreationModeration } from "./creation-moderation.mjs?v=moderation-20261113";
 import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
@@ -2351,6 +2351,7 @@ const skinLibrary = createSkinLibrary({
   signIn:()=>directory.login(),
   report: creationModeration.report,
   ownDecisions: creationModeration.ownDecisions,
+  reportHistory: creationModeration.reportHistory,
   editSkin: (skin) => {
     editorSeed = skin;
     if (dialog.open) closeDialog();

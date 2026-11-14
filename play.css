@@ -1527,6 +1527,22 @@ a {
 .creation-review form {
   margin-top: 12px;
 }
+.creation-report-history {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.creation-report-history li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid #dbe4dd;
+  overflow-wrap: anywhere;
+}
+.creation-report-history small {
+  color: #355b46;
+  font-weight: 700;
+}
 .wardrobe-catalog .profile-piece > span {
   margin-top: auto;
 }
