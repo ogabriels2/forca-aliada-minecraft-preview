@@ -1,6 +1,6 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=community-20261114';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=catalog-20261114';
 import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=insights-20261113';
-import {createPublicCatalog} from './directory-catalog.mjs?v=status-20261113';
+import {createPublicCatalog} from './directory-catalog.mjs?v=catalog-20261114';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=community-20261114';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
@@ -30,6 +30,18 @@ export function connectDirectory(ui){
   let reviewRequest=0,reviewing=null,continueAfterLogin=false;const reviewNotes=new Map();
   function remember(value){ui.addPublic(value);publicPages.set(value.id,{status:'ready',checkedAt:Date.now()});}
   const catalog=createPublicCatalog({client:api,remember,onChange:()=>ui.catalogChanged()});
+  let trendingIds=[],trendingCheckedAt=0,trendingLoading=false;
+  async function refreshTrending(){
+    if(trendingLoading||Date.now()-trendingCheckedAt<120_000)return;
+    trendingLoading=true;
+    try{
+      const {rows}=await api.trending();
+      for(const row of rows) remember(row);
+      trendingIds=rows.map(row=>row.id);
+      ui.catalogChanged();
+    }catch{return;}
+    finally{trendingLoading=false;trendingCheckedAt=Date.now();}
+  }
   const writer=createDraftWriter({client:api,onState:(value,problem)=>{status=value;error=problem||null;ui.updateSaveStatus();}});
   const state=ui.state;
   const stateNames={draft:'Rascunho',pending:'Em revisão',published:'Publicada',rejected:'Ajustes solicitados',suspended:'Suspensa'};
@@ -325,6 +337,8 @@ export function connectDirectory(ui){
     serverStatus:api.status,
     insights:api.insights,activity:api.activity,
     profile:api.profile,profileServers:api.profileServers,rememberPublic:remember,
+    searchPublic:(filters,signal)=>api.list({...filters,limit:5},signal),
+    get trendingIds(){return trendingIds;},refreshTrending,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
       const caps=await api.capabilities().catch(()=>({media:false}));

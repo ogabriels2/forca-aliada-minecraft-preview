@@ -128,13 +128,11 @@ function managerDiscovery(icon) {
   </section>`;
 }
 
-export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }) {
-  const byId = new Map(servers.map((server) => [server.id, server]));
-  const history = recentlyViewed.map((id) => byId.get(id)).filter(Boolean);
+export function catalogShelves(servers, card, { esc, icon, history = [], demo = false, liveTrending = [] }) {
   const published = servers.filter(server=>server.directory);
   const reviewed = published.filter(server=>server.rating?.count>=3).sort((a,b)=>
     Number(b.rating.score)-Number(a.rating.score)||b.rating.count-a.rating.count);
-  const rated = servers.filter((server) => server.demoRating);
+  const rated = demo ? servers.filter((server) => server.demoRating) : [];
   const trending = [...rated].sort((a, b) => b.demoTrend - a.demoTrend);
   const topRated = [...rated].sort((a, b) =>
     b.demoRating.score - a.demoRating.score || b.demoRating.count - a.demoRating.count);
@@ -144,8 +142,8 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
   const groups = [
     { name: "Seu histórico", query: { recent: true }, matches: history },
     { name: "Publicados na Força Aliada", note: "Páginas criadas e revisadas na plataforma", matches: published.length>=3?published:[] },
-    { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: recommendations },
-    { name: "Em alta", note: "Popularidade simulada nesta prévia", matches: trending },
+    { name: "Recomendados para explorar", note: "Uma seleção de estilos para começar", matches: servers.length >= 4 ? recommendations : [] },
+    { name: "Em alta", note: liveTrending.length ? "Endereços mais copiados nos últimos 7 dias" : "Popularidade simulada nesta prévia", matches: liveTrending.length ? liveTrending : trending },
     ...MODES.map((name) => ({ name, query: { mode: name }, matches: servers.filter((server) => server.mode === name) })),
     { name: "Mais bem avaliados", query: reviewed.length ? {sort:"rating"} : undefined, note: reviewed.length ? "Notas dos jogadores · pelo menos 3 avaliações" : "Notas simuladas nesta prévia", matches: reviewed.length?reviewed:topRated },
   ];
@@ -168,11 +166,11 @@ export function catalogShelves(servers, card, { esc, icon, recentlyViewed = [] }
         <div class="shelf-track">${matches.slice(0, shelfLimit).map(card).join("")}</div>
         <button type="button" disabled data-action="scroll-shelf" data-direction="-1" aria-label="Anterior em ${esc(name)}">${icon("arrow-left")}</button><button type="button" disabled data-action="scroll-shelf" data-direction="1" aria-label="Próximo em ${esc(name)}">${icon("arrow-right")}</button>
       </div>
-    </section>${index === 2 ? communityDiscovery(icon) : ""}${index === 6 ? managerDiscovery(icon) : ""}`;
+    </section>${demo && index === 2 ? communityDiscovery(icon) : ""}${index === 6 ? managerDiscovery(icon) : ""}`;
   }).join("");
 }
 
-export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
+export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent, demo = false }) {
   const browsing = !Object.entries(f).some(([k, v]) => k !== "sort" && v);
   const view = (action, label, pressed) =>
     `<button type="button" class="chip" data-action="${action}" aria-pressed="${Boolean(pressed)}">${label}</button>`;
@@ -223,7 +221,7 @@ export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent }) {
         <button class="text-link filter-reset" data-action="clear-panel-filters">Limpar filtros</button>
         <button class="button filter-done" data-action="finish-filters"><span data-filter-done>Ver servidores</span></button>
       </div>
-    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><button type="button" class="text-link" data-action="clear-recent" hidden>Limpar histórico</button></div><p data-directory-catalog-status role="status" aria-live="polite"></p><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div><p class="catalog-footnote">${icon("alert-circle")} Os servidores marcados como exemplo não aceitam conexões.</p></section>
+    </div><div class="active-filters" id="active-filters"></div><div class="catalog-section-heading"><h2><span data-catalog-title>Explore por categoria</span><small data-result-count role="status" aria-live="polite" aria-atomic="true"></small></h2><button type="button" class="text-link" data-action="clear-recent" hidden>Limpar histórico</button></div><p data-directory-catalog-status role="status" aria-live="polite"></p><div class="results-grid" id="results"></div><div class="catalog-more" hidden><button class="button secondary" data-action="more-results">Mostrar mais servidores</button></div>${demo ? `<p class="catalog-footnote">${icon("alert-circle")} Os servidores marcados como exemplo não aceitam conexões.</p>` : ""}</section>
   <section class="container discovery" id="discovery" ${browsing ? "" : "hidden"} aria-label="Servidor em destaque editorial"><div class="featured" id="featured">${featured}</div></section>
   <section class="container player-studio"><div class="player-studio-copy"><h2>Biblioteca de skins</h2><p>Baixe uma skin pronta ou pinte a sua no editor 3D.</p><a class="text-link" href="#/skins">Explorar skins e editor ${icon("arrow-right")}</a></div><a class="player-studio-art" href="#/skins/editor" aria-label="Abrir o editor de skins"><img src="./assets/skins/showcase-explorer.png" alt="" width="144" height="192" loading="lazy"><img src="./assets/skins/showcase-ocean.png" alt="" width="174" height="232" loading="lazy"><img src="./assets/skins/showcase-plum.png" alt="" width="144" height="192" loading="lazy"><span>${icon("brush")} Editor de skins</span></a></section>
   <section class="join-platform"><div class="container"><div><h2>Tem um servidor?</h2><p>Monte uma página com o endereço, as regras e as fotos do seu mundo.</p><a class="text-link publisher-manager" href="https://forcaaliada.com/manager">Precisa criar um servidor? Conheça o Manager ${icon("arrow-right")}</a></div><button class="button" data-action="create">Criar página grátis ${icon("arrow-right")}</button></div></section>`;

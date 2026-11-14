@@ -29,6 +29,7 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     mediaAccess:path=>request(path+'/access'),
     removeMedia:id=>request(`${BASE}/media/${id}`,{method:'DELETE'}),
     list:(params={},signal)=>request(`${BASE}/servers?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==''&&v!==undefined))}`,{signal}),
+    trending:()=>request(`${BASE}/trending`,{authenticated:false}),
     own:()=>request(`${BASE}/drafts`),
     draft:id=>request(`${BASE}/drafts/${id}`),
     archive:(id,revision,archived)=>request(`${BASE}/drafts/${id}/archive`,{method:'POST',headers:{'If-Match':String(revision)},body:{archived}}),

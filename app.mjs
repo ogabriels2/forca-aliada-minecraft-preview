@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=community-20261114";
+import {connectDirectory} from "./directory-integration.mjs?v=catalog-20261114";
 let directory=null;
 import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
@@ -14,7 +14,7 @@ import {
   featuredPhotoLabel,
   catalogMarkup,
   catalogShelves,
-} from "./discovery.mjs?v=status-20261113";
+} from "./discovery.mjs?v=catalog-20261114";
 import { createSkinLibrary } from "./skins.mjs?v=profiles-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
@@ -405,7 +405,11 @@ function themeStyle(d) {
   const t = THEMES[d.theme] || THEMES.forest;
   return `--server-accent:${t.accent};--server-ground:${t.ground};--server-ink:${t.ink}`;
 }
-const SERVERS = previewCatalog(BASE_SERVERS);
+const demoCatalog = ['ogabriels2.github.io', 'localhost', '127.0.0.1'].includes(location.hostname)
+  && new URLSearchParams(location.search).get('demo') === '1';
+const SERVERS = demoCatalog ? previewCatalog(BASE_SERVERS) : BASE_SERVERS.filter(server => !server.example);
+document.body.dataset.demoCatalog = String(demoCatalog);
+if (demoCatalog) document.querySelector('.prototype-note').textContent = 'Catálogo de demonstração · inclui exemplos';
 
 function cover(d, { card = false } = {}) {
   const sampleScene = d.example && ({ redwood: "build", "la-isla": "explore" }[d.id]);
@@ -645,7 +649,7 @@ async function refreshServerStatuses() {
   if (!/^https?:$/.test(location.protocol) || document.hidden) return;
   refreshLiveAvailabilityUI();
   const servers = document.querySelector("#results")
-    ? [...SERVERS, ...(state.publication ? [state.publication] : [])]
+    ? availableServers()
     : activeServer ? [activeServer] : creatorProfile.servers();
   await Promise.all(servers.filter((server) => publicServerAddress(server)).map(refreshServerSample));
 }
@@ -655,7 +659,7 @@ function availableServers() {
   if(directory){
     const allowed=directory.catalog.ids,saved=state.filters.favorites||state.filters.recent;
     const live=servers.filter(server=>server.directory&&(saved||allowed.has(server.id)));
-    const house=live.some(server=>server.address==='forca-aliada.play.forcaaliada.com');
+    const house=!saved&&live.some(server=>server.address==='forca-aliada.play.forcaaliada.com');
     return [...live,...servers.filter(server=>!server.directory&&!(house&&server.id==='forca-aliada'))];
   }
   return state.publication?.visibility === "listed"
@@ -696,9 +700,11 @@ function renderCatalog(limit = CATALOG_BATCH) {
     featured: featured(),
     extra: state.extra,
     hasRecent: recentlyViewed.length > 0,
+    demo: demoCatalog,
   });
   updateResults();
   paintIcons();
+  if (!Object.keys(state.filters).length) void directory?.refreshTrending();
 }
 function filterKey() {
   return JSON.stringify(Object.entries(state.filters).filter(([, value]) => value));
@@ -713,25 +719,33 @@ function catalogResults(filters) {
   }
   return matching;
 }
+let suggestionTimer, suggestionRequest;
 function closeSearchPreview() {
+  clearTimeout(suggestionTimer);
+  suggestionRequest?.abort();
   const preview = document.querySelector("#server-search-preview");
   if (!preview) return;
   preview.hidden = true;
   document.querySelector("#server-search-status").textContent = "";
 }
 function updateSearchPreview(input) {
-  const query = input.value.trim();
+  const query = input.value.trim().slice(0, 160);
+  clearTimeout(suggestionTimer);
+  suggestionRequest?.abort();
   if (!query) {
     closeSearchPreview();
     return;
   }
 
   const filters = { ...state.filters, q: query };
-  const matches = catalogResults(filters);
+  const local = catalogResults(filters);
   const preview = document.querySelector("#server-search-preview");
-  const visible = matches.slice(0, 5);
-  preview.innerHTML = visible.length
-    ? `<strong class="search-preview-heading">Servidores encontrados</strong>
+  const draw = (matches, { pending = false, failed = false } = {}) => {
+    const status = document.querySelector("#server-search-status");
+    if (!preview.isConnected || !status || input.value.trim().slice(0, 160) !== query) return;
+    const visible = matches.slice(0, 5);
+    preview.innerHTML = visible.length
+      ? `<strong class="search-preview-heading">${pending ? "Sugestões" : "Servidores encontrados"}</strong>
        <ul class="search-preview-results">${visible.map((server) => `
          <li><a href="${esc(serverHref(server, filters))}">
            <span class="search-preview-icon">${icon("world")}</span>
@@ -740,12 +754,28 @@ function updateSearchPreview(input) {
            </span>
            ${icon("arrow-right")}
          </a></li>`).join("")}</ul>
-       <button type="submit" class="search-preview-submit">Ver ${matches.length === 1 ? "1 resultado" : `todos os ${matches.length} resultados`} ${icon("arrow-right")}</button>`
-    : '<div class="search-preview-empty"><strong>Nenhum servidor encontrado</strong><small>Tente outro nome ou endereço, ou ajuste os filtros.</small></div>';
-  preview.hidden = false;
-  paintIcons(preview);
-  document.querySelector("#server-search-status").textContent =
-    matches.length === 1 ? "1 servidor encontrado." : `${matches.length} servidores encontrados.`;
+       <button type="submit" class="search-preview-submit">Ver resultados ${icon("arrow-right")}</button>`
+      : `<div class="search-preview-empty"><strong>${pending ? "Buscando servidores…" : failed ? "Sugestões indisponíveis" : "Nenhum servidor encontrado"}</strong><small>${pending ? "" : failed ? "Pressione Enter para buscar no catálogo." : "Tente outro nome ou endereço, ou ajuste os filtros."}</small></div>`;
+    preview.hidden = false;
+    paintIcons(preview);
+    status.textContent = pending ? "Buscando servidores." : failed ? "Sugestões indisponíveis." : `${visible.length} ${visible.length === 1 ? "sugestão" : "sugestões"}.`;
+  };
+  // Saved lists and live-status filters use the locally measured set.
+  if (!directory || filters.favorites || filters.recent || filters.status || /\b(?:on-?line|off-?line)\b/i.test(query)) return draw(local);
+  const controller = new AbortController();
+  suggestionRequest = controller;
+  draw(local, { pending: true });
+  suggestionTimer = setTimeout(async () => {
+    try {
+      const { rows } = await directory.searchPublic({ q: query, edition: catalogEdition(filters), category: filters.mode, feature: filters.feature, language: filters.language, access: filters.access }, controller.signal);
+      if (controller.signal.aborted || !preview.isConnected || preview.hidden || preview.contains(document.activeElement)) return;
+      const remote = rows.map(server => ({ ...server, directory: true }));
+      const seen = new Set(remote.map(server => server.address.toLowerCase()));
+      draw([...remote, ...local.filter(server => !seen.has(server.address.toLowerCase()))]);
+    } catch {
+      if (!controller.signal.aborted && !preview.hidden && !preview.contains(document.activeElement)) draw(local, { failed: true });
+    }
+  }, 220);
 }
 function focusCatalogHeading() {
   const heading = document.querySelector("#catalog-results h2");
@@ -837,6 +867,8 @@ function updateResults() {
   const savedEmpty = state.filters.favorites && !state.favorites.size;
   const recentEmpty = state.filters.recent && !recentlyViewed.length;
   const checkingAvailability = !found.length && state.filters.status && pendingServerSamples.size > 0;
+  const loadingCatalog = !found.length && !state.filters.favorites && !state.filters.recent && directory?.catalog.loading;
+  const failedCatalog = !found.length && !state.filters.favorites && !state.filters.recent && directory?.catalog.error;
   const relaxedFilter = !found.length && !savedEmpty && !recentEmpty
     ? ["edition", "language", "mode", "feature", "access", "status"].find((key) => {
         if (!state.filters[key]) return false;
@@ -869,12 +901,14 @@ function updateResults() {
   editorial?.remove();
   results.classList.toggle("results-shelves", browsing && found.length > 0);
   results.innerHTML = found.length
-    ? browsing ? catalogShelves(found, card, { esc, icon, recentlyViewed }) : found.slice(0, catalogLimit).map(card).join("")
+    ? browsing ? catalogShelves(found, card, { esc, icon, demo: demoCatalog,
+        history: recentlyViewed.map(id => SERVERS.find(server => server.id === id)).filter(Boolean),
+        liveTrending: (directory?.trendingIds || []).map(id => SERVERS.find(server => server.id === id)).filter(Boolean) }) : found.slice(0, catalogLimit).map(card).join("")
     : `<div class="empty">
         ${icon("search")}
-        <h3>${checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : recentEmpty ? "Nenhum servidor visitado ainda." : state.filters.status === "online" && !state.filters.q ? "Nenhum servidor confirmado online." : "Nenhum servidor encontrado."}</h3>
-        <p>${checkingAvailability ? "Os resultados aparecerão quando a consulta terminar." : savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : recentEmpty ? "Os servidores que você abrir aparecem aqui." : "Remova um filtro ou tente outro nome."}</p>
-        <button class="button secondary" data-action="clear-filters">Explorar todos</button>
+        <h3>${loadingCatalog ? "Buscando servidores…" : failedCatalog ? "Não foi possível carregar os servidores." : checkingAvailability ? "Consultando a disponibilidade…" : savedEmpty ? "Nenhum servidor salvo ainda." : recentEmpty ? "Nenhum servidor visitado ainda." : state.filters.status === "online" && !state.filters.q ? "Nenhum servidor confirmado online." : "Nenhum servidor encontrado."}</h3>
+        <p>${loadingCatalog || failedCatalog ? "" : checkingAvailability ? "Os resultados aparecerão quando a consulta terminar." : savedEmpty ? "Toque no coração de um servidor para guardá-lo aqui." : recentEmpty ? "Os servidores que você abrir aparecem aqui." : "Remova um filtro ou tente outro nome."}</p>
+        ${loadingCatalog ? "" : failedCatalog ? '<button class="button secondary" data-directory="retry-catalog">Tentar novamente</button>' : '<button class="button secondary" data-action="clear-filters">Explorar todos</button>'}
         ${relaxedFilter ? `<button class="text-link" data-action="remove-filter" data-key="${relaxedFilter}">Remover filtro de ${labels[relaxedFilter].toLocaleLowerCase("pt-BR")}</button>` : ""}
       </div>`;
   if (editorial) {
@@ -888,7 +922,7 @@ function updateResults() {
   more.querySelector('button').textContent=directory?.catalog.loading?'Carregando…':remoteMore?'Carregar mais servidores publicados':'Mostrar mais servidores';
   const remoteStatus=document.querySelector('[data-directory-catalog-status]');
   if(remoteStatus){
-    remoteStatus.innerHTML=directory?.catalog.error?'Não foi possível atualizar os servidores publicados. <button class="text-link" data-directory="retry-catalog">Tentar novamente</button>':directory?.catalog.loading?'Consultando servidores publicados…':'';
+    remoteStatus.innerHTML=found.length&&directory?.catalog.error?'Não foi possível atualizar os servidores publicados. <button class="text-link" data-directory="retry-catalog">Tentar novamente</button>':found.length&&directory?.catalog.loading?'Consultando servidores publicados…':'';
   }
   document.querySelector("[data-catalog-title]").textContent =
     state.filters.favorites ? "Seus favoritos"
@@ -898,7 +932,7 @@ function updateResults() {
       : state.filters.edition ? `Servidores para ${state.filters.edition}`
       : "Explore por categoria";
   const count = document.querySelector("[data-result-count]");
-  const countText = checkingAvailability ? "Consultando…" : `${found.length} ${label}`;
+  const countText = checkingAvailability || loadingCatalog ? "Consultando…" : failedCatalog ? "" : `${found.length}${remoteMore ? "+" : ""} ${label}`;
   if (count.textContent !== countText) count.textContent = countText;
   const filterDone = document.querySelector("[data-filter-done]");
   if (filterDone)
@@ -2031,6 +2065,7 @@ document.addEventListener("click", (e) => {
   } else if (a === "clear-filters") {
     state.filters = {};
     updateResults();
+    void directory?.refreshTrending();
     if (b.closest("#catalog-results")) focusCatalogHeading();
     else document.querySelector("#server-search")?.focus();
   } else if (a === "remove-filter") {
