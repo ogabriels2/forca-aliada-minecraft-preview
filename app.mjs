@@ -9,10 +9,10 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs?v=reports-20261113";
+import { createSkinLibrary } from "./skins.mjs?v=appeals-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
-import { createCreationModeration } from "./creation-moderation.mjs?v=reports-20261113";
+import { createCreationModeration } from "./creation-moderation.mjs?v=appeals-20261113";
 import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
@@ -1640,11 +1640,12 @@ function route({ focus = true } = {}) {
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
-  } else if (path === "/revisoes/criacoes") {
+  } else if (path === "/revisoes/criacoes" || path === "/revisoes/criacoes/contestacoes") {
     activeServer = null;
     if (dialog.open) closeDialog();
-    void creationModeration.queue();
-    document.title = "Denúncias de skins e roupas · Força Aliada";
+    const appeals = path.endsWith("/contestacoes");
+    void creationModeration.queue(appeals);
+    document.title = (appeals ? "Contestações" : "Denúncias") + " de skins e roupas · Força Aliada";
   } else if (path === "/revisoes" || path.startsWith("/revisoes/")) {
     void directory?.reviewRoute(path.startsWith("/revisoes/")?path.slice(10):'');
     document.title="Revisão de páginas · Força Aliada";
@@ -2349,6 +2350,7 @@ const skinLibrary = createSkinLibrary({
   getUser:()=>directory?.me,
   signIn:()=>directory.login(),
   report: creationModeration.report,
+  ownDecisions: creationModeration.ownDecisions,
   editSkin: (skin) => {
     editorSeed = skin;
     if (dialog.open) closeDialog();

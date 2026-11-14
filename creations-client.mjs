@@ -17,7 +17,11 @@ export function createCreationsClient({origin='https://forca-aliada-minecraft-be
     get:id=>request('/items/'+encodeURIComponent(id)),
     report:(item,reason,detail)=>request('/items/'+encodeURIComponent(item.id)+'/report',{method:'POST',body:{reason,detail,revision:item.revision}}),
     reports:()=>request('/moderation'),
-    reviewReport:(report,decision,note)=>request('/moderation/'+encodeURIComponent(report.id),{method:'POST',body:{decision,note,revision:report.revision}}),
+    myModeration:()=>request('/moderation/mine'),
+    appeal:(id,message)=>request('/appeals/'+encodeURIComponent(id),{method:'POST',body:{message}}),
+    appeals:()=>request('/appeals'),
+    reviewAppeal:(row,decision,note)=>request('/appeals/'+encodeURIComponent(row.id)+'/review',{method:'POST',body:{decision,note,revision:row.revision}}),
+    reviewReport:(report,decision,note,authorNotice)=>request('/moderation/'+encodeURIComponent(report.id),{method:'POST',body:{decision,note,authorNotice,revision:report.revision}}),
     textureUrl:report=>origin+ROOT+'/items/'+encodeURIComponent(report.creationId)+'/texture.png?v='+encodeURIComponent(report.revision),
     save:async(entry,kind='skin')=>{const token=readToken(),form=new FormData();const {image,...metadata}=entry;form.append('metadata',JSON.stringify({...metadata,kind}));if(entry.image?.startsWith('data:image/png;base64,')){const blob=await fetch(entry.image).then(r=>r.blob());form.append('file',blob,'creation.png');}
       const updating=Boolean(entry.revision);return request('/items'+(updating?'/'+entry.id:''),{method:updating?'PATCH':'POST',body:form,token,headers:updating?{'If-Match':String(entry.revision)}:{'Idempotency-Key':entry.creationKey}});},

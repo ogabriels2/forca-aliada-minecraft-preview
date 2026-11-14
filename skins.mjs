@@ -29,6 +29,7 @@ export function createSkinLibrary({
   signIn=()=>{},
   manageConnections=()=>{},
   report=()=>{},
+  ownDecisions=()=>{},
 }) {
   const remote=createCreationsClient(),profileParts=new Map();
   let favoriteVersion=0;
@@ -137,6 +138,7 @@ export function createSkinLibrary({
         paintIcons,
       });
     if (own||publicAuthor) void renderProfileParts();
+    if (own) void ownDecisions(main.querySelector(".skins-catalog"));
     paintIcons(main);
   }
   async function renderProfileParts() {
