@@ -171,7 +171,7 @@ export function catalogShelves(servers, card, { esc, icon, history = [], demo = 
 }
 
 export function catalogMarkup(f, { esc, icon, featured, extra, hasRecent, demo = false }) {
-  const browsing = !Object.entries(f).some(([k, v]) => k !== "sort" && v);
+  const browsing = !Object.values(f).some(Boolean);
   const view = (action, label, pressed) =>
     `<button type="button" class="chip" data-action="${action}" aria-pressed="${Boolean(pressed)}">${label}</button>`;
   const categories = (items, all) => [["", all], ...items.map((name) => [name, name])];

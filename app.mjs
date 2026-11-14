@@ -891,7 +891,7 @@ function updateResults() {
       : key === "sort" ? ({ name: "Nome de A a Z", online: "Online primeiro", players: "Mais jogadores online", rating: "Mais bem avaliados" }[value] || value)
       : key === "status" ? ({ online: "Online", offline: "Offline", unknown: "Sem confirmação" }[value] || value)
       : key === "language" ? ({ English: "Inglês", Español: "Espanhol" }[value] || value) : value;
-  const browsing = !Object.entries(state.filters).some(([key, value]) => key !== "sort" && value);
+  const browsing = !Object.values(state.filters).some(Boolean);
   // Search and saved lists are task-focused; secondary discovery stays on the home view.
   document.querySelectorAll(".player-studio, .join-platform").forEach((section) => {
     section.hidden = !browsing;
