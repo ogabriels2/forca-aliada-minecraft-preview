@@ -1,7 +1,8 @@
-import {connectDirectory} from "./directory-integration.mjs?v=insights-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=profiles-20261113";
 let directory=null;
 import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
+import {createCreatorProfile} from "./creator-profile.mjs?v=profiles-20261113";
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -12,7 +13,7 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=status-20261113";
-import { createSkinLibrary } from "./skins.mjs?v=moderation-20261113";
+import { createSkinLibrary } from "./skins.mjs?v=profiles-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
 import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
 import { createCreationModeration } from "./creation-moderation.mjs?v=moderation-20261113";
@@ -142,6 +143,7 @@ let libraryLoad = 0;
 let libraryReady = false;
 let currentLibraryView = "";
 function updateLibraryUI() {
+  creatorProfile.refreshServers();
   if (document.querySelector("#results")) updateResults();
   for (const button of main.querySelectorAll('[data-action="favorite"]')) {
     if (libraryOwner && isRealServer(button.dataset.id)) {
@@ -555,6 +557,7 @@ async function publishedServerStatus(server){
 
 function refreshLiveAvailabilityUI() {
   updateConnectionAvailability();
+  creatorProfile.refreshServers();
   if (state.wizard && dialogMode === "wizard") {
     const draft = state.wizard.draft;
     const avatar = withServerAvailability(draft).avatar;
@@ -641,7 +644,7 @@ async function refreshServerStatuses() {
   refreshLiveAvailabilityUI();
   const servers = document.querySelector("#results")
     ? [...SERVERS, ...(state.publication ? [state.publication] : [])]
-    : activeServer ? [activeServer] : [];
+    : activeServer ? [activeServer] : creatorProfile.servers();
   await Promise.all(servers.filter((server) => publicServerAddress(server)).map(refreshServerSample));
 }
 
@@ -1364,6 +1367,9 @@ function renderPage(id) {
   if (displayServer.demoRating && displayServer.example) main.insertAdjacentHTML("beforeend", previewReview(displayServer));
   if (/^[a-f0-9-]{36}$/i.test(id) && !ownPage()) serverReviews.render(id);
   if (activeServer.id === "forca-aliada") bindOfficialStories(main);
+  if(activeServer.publisherUsername){
+    main.querySelector('.server-meta')?.insertAdjacentHTML('beforeend',`<a class="text-link server-publisher" href="#/perfil/${encodeURIComponent(activeServer.publisherUsername)}">Publicado por ${esc(activeServer.publisherUsername)}</a>`);
+  }
   paintIcons();
   updateSaveStatus();
   serverActivity.view(displayServer);
@@ -1728,6 +1734,8 @@ function updateHeader() {
     }
     const pages=document.createElement('button');pages.type='button';pages.className='fa-site-user-item';pages.dataset.directory='pages';
     pages.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 9v12"/></svg><span>Minhas páginas</span>';menu.prepend(pages);
+    const publicProfile=document.createElement('a');publicProfile.className='fa-site-user-item';publicProfile.href='#/perfil/'+encodeURIComponent(directory.me.username);publicProfile.innerHTML=icon('user')+'<span>Perfil Minecraft</span>';menu.prepend(publicProfile);
+
     if(['owner','full'].includes(directory.me?.role)){
       const review=document.createElement('button');review.type='button';review.className='fa-site-user-item';review.dataset.directory='moderation';
       review.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Revisar páginas</span>';menu.append(review);
@@ -1752,6 +1760,7 @@ function route({ focus = true } = {}) {
   skinStudio.dispose();
   minecraftConnections.dispose();
   pageInsights.dispose();
+  creatorProfile.dispose();
   const [path, query = ""] = (location.hash.slice(1) || "/").split("?");
   if (!path.startsWith("/servidor/")) currentLibraryView = "";
   const params = new URLSearchParams(query);
@@ -1804,6 +1813,11 @@ function route({ focus = true } = {}) {
     document.title = "Editor de skins · Força Aliada · Protótipo";
   } else if(path.startsWith("/skins/")&&path!=="/skins/editor"){
     skinLibrary.render(false);void skinLibrary.open(path.slice(7));
+  } else if(/^\/perfil\/[^/]+$/.test(path)){
+    activeServer=null;
+    if(dialog.open)closeDialog();
+    let name;try{name=decodeURIComponent(path.split('/')[2]);}catch{name='';}
+    void creatorProfile.render(name);
   } else if (path === "/minhas-skins" || /^\/perfil\/[^/]+\/skins$/.test(path) || path === "/skins") {
     activeServer = null;
     const own=path==="/minhas-skins"||path==="/perfil/demonstracao/skins";
@@ -2060,7 +2074,13 @@ document.addEventListener("click", (e) => {
       if (pendingFavorites.has(pending)) return;
       pendingFavorites.add(pending);
       b.disabled = true;
-      const settle = () => { pendingFavorites.delete(pending); b.disabled = false; };
+      const settle = () => {
+        pendingFavorites.delete(pending);b.disabled=false;
+        for(const button of main.querySelectorAll('[data-action="favorite"]')){
+          if(button.dataset.id!==id)continue;
+          button.disabled=Boolean(libraryOwner&&(!libraryReady||pendingFavorites.has(`${libraryOwner}:${id}`)));
+        }
+      };
       changeLibrary({action:"favorite",id,favorite:saved}, () => {
         if (saved) state.favorites.add(id); else state.favorites.delete(id);
         updateLibraryUI();
@@ -2071,7 +2091,9 @@ document.addEventListener("click", (e) => {
     if (saved) state.favorites.add(id);
     else state.favorites.delete(id);
     persist();
-    if (activeServer) {
+    if (creatorProfile.active()) {
+      creatorProfile.refreshServers();
+    } else if (activeServer) {
       b.setAttribute("aria-pressed", String(saved));
       const label = saved ? "Remover dos favoritos" : "Guardar nos favoritos";
       b.setAttribute("aria-label", label);
@@ -2553,10 +2575,11 @@ directory=connectDirectory({
   renderSurface:html=>{activeServer=null;main.innerHTML=html;paintIcons();},
   renderReview:(page,id,top,bottom)=>{activeServer={...safeDraft(page),id,example:false,official:false};main.innerHTML=top+serverDocument(withServerAvailability(activeServer))+bottom;paintIcons();void refreshServerStatuses();},
   removePublic:id=>{const index=SERVERS.findIndex(s=>s.id===id&&s.directory);if(index>=0)SERVERS.splice(index,1);},
-  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true,rating:value.rating};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
+  addPublic:value=>{const d={...safeDraft(value),id:value.id,example:false,official:false,directory:true,rating:value.rating,publisherUsername:value.publisherUsername};const index=SERVERS.findIndex(s=>s.id===d.id);if(index<0)SERVERS.unshift(d);else SERVERS[index]=d;},
 });
 const pageInsights=createPageInsights({api:directory,main,esc,icon,paintIcons,getUser:()=>directory.me,signIn:()=>directory.login()});
 const serverActivity=createServerActivity(directory);
+const creatorProfile=createCreatorProfile({api:directory,main,esc,icon,paintIcons,card:d=>serverCard(withServerAvailability(d),{esc,icon,cover,favorite:state.favorites.has(d.id),serverHref:server=>'#/servidor/'+encodeURIComponent(server.id)}),refreshStatuses:refreshServerStatuses});
 void directory.init();
 route({ focus: false });
 if (/^https?:$/.test(location.protocol)) {

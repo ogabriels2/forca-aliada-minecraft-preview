@@ -30,6 +30,8 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     draft:id=>request(`${BASE}/drafts/${id}`),
     archive:(id,revision,archived)=>request(`${BASE}/drafts/${id}/archive`,{method:'POST',headers:{'If-Match':String(revision)},body:{archived}}),
     insights:id=>request(`${BASE}/drafts/${id}/insights`),
+    profile:name=>request(`${BASE}/profiles/${encodeURIComponent(name)}`),
+    profileServers:(name,offset=0)=>request(`${BASE}/profiles/${encodeURIComponent(name)}/servers?offset=${offset}`),
     activity:(id,body)=>request(`${BASE}/servers/${id}/activity`,{method:'POST',body}),
     publicPage:id=>request(`${BASE}/servers/${id}`),
     status:id=>request(`${BASE}/servers/${id}/status`),

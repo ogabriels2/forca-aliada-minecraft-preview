@@ -1660,6 +1660,32 @@ a {
 .insight-table-wrap { overflow-x: auto; margin-top: 12px; }
 .insight-table-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .insight-table-wrap th,.insight-table-wrap td { padding: 10px; text-align: left; border-bottom: 1px solid #dde5df; white-space: nowrap; }
+.creator-profile { padding-block: 32px 48px; }
+.creator-profile-header { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; padding-block: 20px 28px; }
+.creator-profile-header > div { flex: 1; min-width: min(220px,100%); }
+.creator-profile-header h1 { font-size: clamp(1.9rem,4vw,3rem); line-height: 1.12; overflow-wrap: anywhere; }
+.creator-profile-header p { font-size: 14px; color: #5c6a60; margin-top: 6px; overflow-wrap: anywhere; }
+.creator-profile-header > div > span { display: block; color: #5c6a60; font-size: 13px; margin-top: 8px; }
+.creator-profile-avatar { width: 88px; height: 88px; flex: none; border-radius: 24px; background: #e5eede; color: #365d40; font-weight: 750; font-size: 32px; display: grid; place-items: center; position: relative; overflow: hidden; }
+.creator-profile-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.creator-profile-own { padding: 14px 18px; background: #fff6df; border-radius: 10px; font-size: 13px; margin-bottom: 24px; }
+.creator-profile-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.creator-profile-tabs .chip > span { font-size: 12px; opacity: .8; margin-left: 6px; }
+.creator-profile-tabs .chip[aria-pressed="true"] { background: #223d2d; color: #fff; }
+.creator-profile [data-profile-content] { min-height: 240px; }
+.creator-servers { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,280px),1fr)); gap: 18px; }
+.creator-profile .profile-piece { width: 100%; max-width: none; height: 100%; }
+.creator-profile-more { margin-top: 24px; }
+.creator-profile [data-profile-feedback]:empty { display: none; }
+.creator-profile [data-profile-feedback] { margin-bottom: 16px; font-size: 13px; }
+.creator-profile [data-profile-feedback] input { display: block; max-width: 100%; width: 100%; margin-top: 8px; }
+.server-publisher { margin-left: auto; font-size: 13px; }
+@media (max-width:600px) {
+  .creator-profile-header { gap: 14px; }
+  .creator-profile-header > button { width: 100%; justify-content: center; }
+  .creator-profile-avatar { width: 72px; height: 72px; border-radius: 20px; }
+  .server-publisher { margin-left: 0; width: 100%; }
+}
 @media (hover:hover) {
   .owned-page { transition: border-color 150ms ease-out,box-shadow 150ms ease-out; }
   .owned-page:hover { border-color: #a1b7a8; box-shadow: 0 5px 20px #1632220c; }

@@ -1,4 +1,4 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=insights-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=profiles-20261113';
 import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=insights-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs?v=status-20261113';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
@@ -315,6 +315,7 @@ export function connectDirectory(ui){
     library:api.library,changeLibrary:api.changeLibrary,
     serverStatus:api.status,
     insights:api.insights,activity:api.activity,
+    profile:api.profile,profileServers:api.profileServers,rememberPublic:remember,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
       const caps=await api.capabilities().catch(()=>({media:false}));
@@ -363,7 +364,7 @@ export function connectDirectory(ui){
       }
       void refreshAccountStatus();
       void catalog.sync(state.filters,{immediate:true});
-      if(location.hash.startsWith('#/revisoes')||location.hash.startsWith('#/minhas-paginas'))ui.renderCurrent();
+      if(location.hash.startsWith('#/revisoes')||location.hash.startsWith('#/minhas-paginas')||location.hash.startsWith('#/perfil/'))ui.renderCurrent();
       if(location.hash.startsWith('#/servidor/minha-pagina'))ui.renderPage('minha-pagina');
     },
   };
