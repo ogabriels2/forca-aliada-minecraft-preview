@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=reviews-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=pages-20261113";
 let directory=null;
 import {createServerReviews} from "./server-reviews.mjs?v=reviews-20261113";
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
@@ -1300,6 +1300,10 @@ function previewReview(server) {
 }
 
 function renderPage(id) {
+  if(id==='minha-pagina'&&directory&&(!directory.ready||!directory.me||!directory.record)){
+    main.innerHTML='<section class="container empty"><h1>Suas páginas</h1><p>Abra suas páginas salvas para continuar.</p><a class="button" href="#/minhas-paginas">Minhas páginas</a></section>';
+    return;
+  }
   if(directory&&/^[a-f0-9-]{36}$/i.test(id)){
     const status=directory.publicState(id);
     if(!status||Date.now()-status.checkedAt>=60_000){void directory.loadPublic(id);main.innerHTML='<section class="container empty" role="status"><p>Carregando página do servidor…</p></section>';return;}
@@ -1729,6 +1733,10 @@ function route({ focus = true } = {}) {
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
+  } else if(path==='/minhas-paginas'||path.startsWith('/minhas-paginas/')){
+    activeServer=null;
+    void directory?.pagesRoute(path==='/minhas-paginas'?'':path.slice('/minhas-paginas/'.length),params.has('assistente'));
+    document.title='Minhas páginas · Força Aliada';
   } else if (path === "/revisoes/criacoes" || path === "/revisoes/criacoes/contestacoes") {
     activeServer = null;
     if (dialog.open) closeDialog();
@@ -2200,12 +2208,12 @@ document.addEventListener("click", (e) => {
     else refreshPage();
     toast("Conta de demonstração conectada.");
   } else if (a === "reset") {
-    if(directory){void directory.start();return;}
+    if(directory){void directory.showPages();return;}
     openDialog(
       '<h2 id="dialog-title">Recomeçar esta demonstração?</h2><p>O rascunho e a publicação local serão removidos. Seus favoritos permanecem.</p><div class="dialog-actions"><button class="button secondary" data-action="close-dialog">Manter página</button><button class="button" data-action="confirm-reset">Recomeçar</button></div>',
     );
   } else if (a === "confirm-reset") {
-    if(directory){void directory.start();return;}
+    if(directory){void directory.showPages();return;}
     state.draft = initialDraft();
     state.publication = null;
     state.created = false;
@@ -2490,7 +2498,7 @@ const skinStudio = createSkinStudio({
 });
 const minecraftConnections=createMinecraftConnections({main,getUser:()=>directory?.me,signIn:()=>directory.login(),esc,icon,paintIcons,toast,openDialog,closeDialog});
 directory=connectDirectory({
-  state,esc,icon,safeDraft,initialDraft,openDialog,closeDialog,toast,renderWizard,renderPage,updateHeader,updateSaveStatus,
+  state,esc,icon,mediaSource,safeDraft,initialDraft,openDialog,closeDialog,toast,renderWizard,renderPage,updateHeader,updateSaveStatus,
   cacheOnly:()=>persist({remote:false}),
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,

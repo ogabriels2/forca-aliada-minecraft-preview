@@ -28,6 +28,7 @@ export function createDirectoryClient({fetcher=fetch,origin='',readToken=()=>{tr
     list:(params={},signal)=>request(`${BASE}/servers?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==''&&v!==undefined))}`,{signal}),
     own:()=>request(`${BASE}/drafts`),
     draft:id=>request(`${BASE}/drafts/${id}`),
+    archive:(id,revision,archived)=>request(`${BASE}/drafts/${id}/archive`,{method:'POST',headers:{'If-Match':String(revision)},body:{archived}}),
     publicPage:id=>request(`${BASE}/servers/${id}`),
     reviews:(id,offset=0)=>request(`${BASE}/servers/${id}/reviews?offset=${offset}`),
     saveReview:(id,body,revision)=>request(`${BASE}/servers/${id}/reviews/mine`,{method:'PUT',headers:{'If-Match':String(revision)},body}),

@@ -49,8 +49,6 @@ function navLink(href,label,glyph,active=false) {
 }
 function renderNav() {
   const hash=location.hash || '#/', query=new URLSearchParams(hash.split('?')[1] || '');
-  let saved={}; try { saved=JSON.parse(localStorage.getItem('fa-minecraft-product-v1') || '{}'); } catch {}
-  const own = loggedIn() && Boolean(saved.created || saved.publication);
   nav.innerHTML=`<div class="ps-panel-heading"><strong>Seu Minecraft</strong><button class="ps-icon-button" data-shell="close-nav" aria-label="Recolher menu">${icon('x')}</button></div>
     <nav class="ps-drawer-products" aria-label="Produtos da Força Aliada">${document.querySelector('.ecosystem-nav').innerHTML}</nav>
     <nav aria-label="Explorar e criar">
@@ -60,7 +58,7 @@ function renderNav() {
       ${navLink('#/?favorites=true','Favoritos','heart',query.has('favorites'))}
       ${navLink('#/?recent=true','Histórico','clock',query.has('recent'))}</div>
       <div class="ps-nav-group"><span>Criar e publicar</span>
-      ${own ? navLink('#/servidor/minha-pagina','Minha página','layout',hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página" aria-label="Criar página">${icon('plus')}<span>Criar página</span></button>`}
+      ${loggedIn() ? navLink('#/minhas-paginas','Minhas páginas','layout',hash.startsWith('#/minhas-paginas')||hash.startsWith('#/servidor/minha-pagina')) : `<button class="ps-nav-link" data-action="create" title="Criar página" aria-label="Criar página">${icon('plus')}<span>Criar página</span></button>`}
       ${navLink('#/perfil/demonstracao/skins','Minhas skins','folder',hash.includes('/perfil/'))}</div>
       <div class="ps-nav-group"><span>Ferramentas</span>
       ${navLink('#/skins/editor','Editor de skins','brush',hash==='#/skins/editor')}
@@ -193,5 +191,6 @@ social.addEventListener('error', event => {
 window.addEventListener('resize',()=>{if(innerWidth!==previousWidth&&drawer.open)closeDrawer();previousWidth=innerWidth;syncLayout();alignPanels();});
 window.addEventListener('scroll',alignPanels,{passive:true});
 new MutationObserver(()=>{renderNav();renderSocial();syncLayout();}).observe(document.querySelector('#account-area'),{childList:true});
+document.addEventListener('fa:auth-menu-rendered',()=>{renderNav();renderSocial();syncLayout();});
 new MutationObserver(syncLayout).observe(document.body,{attributes:true,attributeFilter:['data-surface']});
 renderNav();renderSocial();syncLayout();alignPanels();

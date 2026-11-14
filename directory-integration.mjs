@@ -1,4 +1,5 @@
-import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=reviews-20261113';
+import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=pages-20261113';
+import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=pages-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=account-20261113';
 
@@ -38,6 +39,7 @@ export function connectDirectory(ui){
     setupComplete=value.draft.setupComplete===true;
     state.created=true;state.wizard=wizard?{draft:structuredClone(state.draft),step:value.draft.wizardStep||0,maxStep:value.draft.wizardMaxStep??value.draft.wizardStep??0}:null;
     state.account=Boolean(me);ui.updateHeader();ui.updateSaveStatus();
+    try{if(me)sessionStorage.setItem('fa_directory_page:'+me.id,value.id);}catch{}
     // Only cache the account currently signed in. Do not import legacy demo
     // pages into another account or send them to the API automatically.
     ui.cacheOnly();
@@ -104,14 +106,63 @@ export function connectDirectory(ui){
     if(!me)return login({continueCreation:true});
     if(busy)return;busy=true;
     try{
-      await flush();const {rows}=await api.own();
-      if(!rows.length)return await newDraft();
-      ui.openDialog(`<h2 id="dialog-title">Suas páginas</h2><p>Continue de onde parou ou crie a página de outro servidor.</p><div class="module-list">${rows.map(row=>`<div><button class="button secondary" data-directory="${row.draft.setupComplete?'open':'resume'}" data-id="${row.id}"><span>${ui.esc(row.draft.name||'Rascunho sem nome')}</span> · ${ui.esc(stateNames[row.state])} ${ui.icon('arrow-right')}</button>${row.draft.setupComplete?`<button class="text-link" data-directory="resume" data-id="${row.id}" aria-label="Reabrir assistente de ${ui.esc(row.draft.name)}">${ui.icon('pencil')} Assistente de criação</button>`:''}</div>`).join('')}</div><div class="dialog-actions"><button class="button" data-directory="new">Criar outra página ${ui.icon('plus')}</button></div>${error?'<button class="text-link" data-directory="reload">Reabrir versão salva na conta</button>':''}`);
-    }catch(e){report(e);}finally{busy=false;}
+      await newDraft();
+    }catch(e){
+      if(e.code==='PAGE_LIMIT'){location.hash='/minhas-paginas';}
+      report(e);
+    }finally{busy=false;}
+  }
+  let pagesRequest=0;
+  async function pagesRoute(id='',wizard=false){
+    const request=++pagesRequest,identity=me?.id,expected=location.hash;
+    if(!ready){ui.renderSurface('<section class="container empty" role="status">Carregando sua conta…</section>');return;}
+    if(!me){
+      ui.renderSurface('<section class="container empty"><h1>Minhas páginas</h1><p>Entre para continuar criando e gerenciar as páginas dos seus servidores.</p><button class="button" type="button" data-directory="login">Entrar na conta</button></section>');
+      return;
+    }
+    try{
+      await flush();
+      if(id){
+        if(!/^[a-f0-9-]{36}$/i.test(id))throw new Error('Página não encontrada.');
+        const value=await api.draft(id);
+        if(request!==pagesRequest||me?.id!==identity||location.hash!==expected)return;
+        claim=null;accept(value,{wizard});
+        if(wizard||!value.draft.setupComplete){
+          if(!state.wizard)state.wizard={draft:structuredClone(state.draft),step:value.draft.wizardStep||0,maxStep:value.draft.wizardMaxStep||0};
+          ui.renderPage('minha-pagina');
+          ui.renderWizard();
+        }else{
+          if(document.querySelector('#dialog[open]'))ui.closeDialog();
+          ui.renderPage('minha-pagina');
+        }
+        return;
+      }
+      ui.renderSurface('<section class="container empty" role="status">Carregando suas páginas…</section>');
+      const {rows}=await api.own();
+      if(request!==pagesRequest||me?.id!==identity||location.hash.split('?')[0]!=='#/minhas-paginas')return;
+      ui.renderSurface(ownPagesMarkup(rows,ui));
+      bindOwnPages(document.querySelector('.owned-pages'));
+    }catch(e){
+      if(request!==pagesRequest||me?.id!==identity||location.hash!==expected)return;
+      ui.renderSurface('<section class="container empty"><h1>Não foi possível abrir suas páginas.</h1><p>'+ui.esc(e.message)+'</p><button class="button secondary" type="button" data-directory="retry-owned">Tentar novamente</button><a class="text-link" href="#/minhas-paginas">Voltar para Minhas páginas</a></section>');
+    }
   }
   async function newDraft(){
+    const identity=me?.id;
+    if(!identity)return login({continueCreation:true});
+    await flush();
+    if(me?.id!==identity)return;
     creationKey||=crypto.randomUUID();const value=await api.create(creationKey);creationKey=null;
+    if(me?.id!==identity)return;
     accept(value,{wizard:true});ui.renderWizard();
+  }
+  async function showPages(){
+    try{
+      await flush();
+      if(document.querySelector('#dialog[open]'))ui.closeDialog();
+      location.hash='/minhas-paginas';
+      await pagesRoute();
+    }catch(e){report(e);}
   }
   async function finish(data){
     if(data)state.wizard.draft=data;
@@ -147,7 +198,7 @@ export function connectDirectory(ui){
     }catch(e){report(e);}finally{busy=false;}
   }
   function lock(value){
-    if(value){(document.querySelector('.directory-review-decision')||document.querySelector('#dialog-content'))?.querySelectorAll('button,input,select,textarea').forEach(el=>{if(!lockedControls.has(el))lockedControls.set(el,el.disabled);el.disabled=true;});}
+    if(value){(document.querySelector('.owned-pages')||document.querySelector('.directory-review-decision')||document.querySelector('#dialog-content'))?.querySelectorAll('button,input,select,textarea').forEach(el=>{if(!lockedControls.has(el))lockedControls.set(el,el.disabled);el.disabled=true;});}
     else{for(const [el,disabled] of lockedControls)if(el.isConnected)el.disabled=disabled;lockedControls.clear();}
   }
   function showError(e){const el=document.querySelector('[data-directory-error]');if(el){el.hidden=false;el.textContent=e.message;}}
@@ -204,7 +255,7 @@ export function connectDirectory(ui){
     const data=Object.fromEntries(new FormData(event.target));busy=true;lock(true);
     try{
       const response=await api.login(data);if(!response.token)throw new Error('Este acesso exige uma etapa adicional. Use a conta de teste fornecida.');
-      mediaLinks.clear();sessionStorage.setItem(key,response.token);me=await api.me();state.account=true;const {rows}=await api.own();if(rows.length)accept(rows[0]);ui.updateHeader();ui.accountChanged();ui.closeDialog();busy=false;if(continueAfterLogin)await start();else ui.renderCurrent();continueAfterLogin=false;
+      mediaLinks.clear();sessionStorage.setItem(key,response.token);me=await api.me();state.account=true;const {rows}=await api.own();const selected=rows.find(row=>row.id===sessionStorage.getItem('fa_directory_page:'+me.id)&&!row.archivedAt)||rows.find(row=>!row.archivedAt);if(selected)accept(selected);ui.updateHeader();ui.accountChanged();ui.closeDialog();busy=false;if(continueAfterLogin)await start();else ui.renderCurrent();continueAfterLogin=false;
       void refreshAccountStatus();
     }catch(e){showError(new Error(e.status===401?'Usuário ou senha incorretos.':e.message));}finally{busy=false;lock(false);}
   });
@@ -213,10 +264,20 @@ export function connectDirectory(ui){
     event.preventDefault();busy=true;lock(true);
     try{
       const action=button.dataset.directory;
-      if(action==='new')await newDraft();
+      if(action==='new'){await newDraft();}
+      if(action==='retry-owned'){busy=false;await pagesRoute(location.hash.split('?')[0]==='#/minhas-paginas'?'':location.hash.split('?')[0].slice('#/minhas-paginas/'.length),new URLSearchParams(location.hash.split('?')[1]||'').has('assistente'));}
+      if(action==='copy-page'){const link=new URL(location.href);link.hash='/servidor/'+button.dataset.id;await navigator.clipboard.writeText(link.href);ui.toast('Link copiado.');}
+      if(action==='archive-page'||action==='restore-page'){
+        await flush();
+        const revision=record?.id===button.dataset.id?record.revision:Number(button.dataset.revision);
+        const value=await api.archive(button.dataset.id,revision,action==='archive-page');
+        if(record?.id===value.id){record=null;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();}
+        busy=false;await pagesRoute();ui.toast(action==='archive-page'?'Rascunho arquivado. Você pode restaurá-lo nesta lista.':'Rascunho restaurado.');
+      }
       if(action==='resume'){await flush();claim=null;accept(await api.draft(button.dataset.id),{wizard:true});ui.renderWizard();}
       if(action==='open'){await flush();claim=null;accept(await api.draft(button.dataset.id));ui.closeDialog();location.hash='/servidor/minha-pagina';ui.renderPage('minha-pagina');}
-      if(action==='pages'){busy=false;await start();}
+      if(action==='publication-page'){await flush();claim=null;accept(await api.draft(button.dataset.id));history.replaceState(null,'','#/minhas-paginas/'+record.id);ui.renderPage('minha-pagina');verification();}
+      if(action==='pages'){await flush();if(document.querySelector('#dialog[open]'))ui.closeDialog();location.hash='/minhas-paginas';busy=false;await pagesRoute();}
       if(action==='claim'){claim=await api.claim(record.id);verification();}
       if(action==='copy-claim'){await navigator.clipboard.writeText(claim.token);ui.toast('Código copiado.');}
       if(action==='share'){const link=new URL(location.href);link.hash='/servidor/'+record.id;await navigator.clipboard.writeText(link.href);ui.toast('Link da página copiado.');}
@@ -250,7 +311,7 @@ export function connectDirectory(ui){
   window.addEventListener('beforeunload',event=>{if(pendingSnapshot||writer.dirty||(record&&state.saving)){event.preventDefault();event.returnValue='';}});
   return {
     get me(){return me;},get canLinkAccount(){return Boolean(me&&linkAvailable);},get hasError(){return Boolean(error);},get record(){return record;},get ready(){return ready;},publicationAction,saveLabel,start,newDraft,finish,publish,login,schedule,
-    publicState:id=>publicPages.get(id),loadPublic,reviewRoute,
+    publicState:id=>publicPages.get(id),loadPublic,reviewRoute,pagesRoute,showPages,
     library:api.library,changeLibrary:api.changeLibrary,
     get catalog(){return catalog.state;},syncCatalog:filters=>{catalog.sync(filters);if(filters.favorites||filters.recent)for(const id of ui.savedIds(filters).filter(id=>/^[a-f0-9-]{36}$/i.test(id)))void loadPublic(id);},morePublic:()=>catalog.more(),
     async upload(input){
@@ -271,6 +332,7 @@ export function connectDirectory(ui){
       }catch(e){report(e);}finally{imageStatus='';input.value='';ui.setImageBusy(false);lock(false);ui.refreshMedia(target);ui.updateSaveStatus();}
     },
     async logout(){
+      if(busy){ui.toast('Aguarde a operação da página terminar antes de sair.');return;}
       try{await flush();await api.logout();}catch(e){report(e);if(pendingSnapshot)return;}
       mediaLinks.clear();sessionStorage.removeItem(key);me=null;record=null;state.account=false;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();ui.accountChanged();ui.renderCurrent();
       linkAvailable=false;void refreshAccountStatus();
@@ -284,7 +346,7 @@ export function connectDirectory(ui){
           state.account=true;
           try{
             const {rows}=await api.own();
-            if(rows.length)accept(rows[0]);
+            const selected=rows.find(row=>row.id===sessionStorage.getItem('fa_directory_page:'+me.id)&&!row.archivedAt)||rows.find(row=>!row.archivedAt);if(selected)accept(selected);
           }catch(e){report(e);}
         }else{
           state.account=false;
@@ -299,7 +361,7 @@ export function connectDirectory(ui){
       }
       void refreshAccountStatus();
       void catalog.sync(state.filters,{immediate:true});
-      if(location.hash.startsWith('#/revisoes'))ui.renderCurrent();
+      if(location.hash.startsWith('#/revisoes')||location.hash.startsWith('#/minhas-paginas'))ui.renderCurrent();
       if(location.hash.startsWith('#/servidor/minha-pagina'))ui.renderPage('minha-pagina');
     },
   };

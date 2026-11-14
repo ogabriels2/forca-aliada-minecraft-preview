@@ -1607,6 +1607,44 @@ a {
   margin-block: 10px;
 }
 .server-review small { color: #667168; }
+.owned-pages { padding-block: 32px 48px; }
+.owned-pages-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.owned-pages-heading h1 { font-size: clamp(2rem,4vw,3.1rem); line-height: 1.1; }
+.owned-pages-heading p { margin-top: 10px; max-width: 55ch; color: #56635b; }
+.owned-pages-toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 16px; }
+.owned-pages-toolbar .skin-search { flex: 1 1 240px; }
+.owned-pages-toolbar .catalog-views { display: flex; flex-wrap: wrap; gap: 6px; }
+.owned-pages [data-owned-count] { color: #56635b; font-size: 13px; margin-bottom: 18px; }
+.owned-pages-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,300px),1fr)); gap: 20px; }
+.owned-page { border: 1px solid #dce3de; background: white; border-radius: 16px; overflow: hidden; min-width: 0; }
+.owned-page-cover { height: 136px; background: #e3eee5; position: relative; display: grid; place-items: center; }
+.owned-page-cover img { width: 100%; height: 100%; object-fit: cover; }
+.owned-page-cover > span > .icon { width: 44px; height: 44px; color: #658d73; }
+.owned-page-status { position: absolute; top: 12px; left: 12px; border-radius: 6px; padding: 5px 9px; font-size: 12px; font-weight: 750; color: #293930; background: #fff; box-shadow: 0 1px 5px #0001; }
+.owned-page-status[data-status="published"] { background: #d6f4df; color: #176739; }
+.owned-page-status[data-status="pending"] { background: #e0ebff; color: #2a4d83; }
+.owned-page-status[data-status="rejected"] { background: #fff0ce; color: #74511b; }
+.owned-page-status[data-status="suspended"] { background: #ffe3df; color: #893a31; }
+.owned-page-body { padding: 20px; }
+.owned-page-body h2 { font-size: 21px; overflow-wrap: anywhere; }
+.owned-page-address { color: #68766b; font-size: 13px; margin-top: 6px; overflow-wrap: anywhere; }
+.owned-page-progress { margin-block: 14px; font-size: 14px; }
+.owned-page-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-block: 18px; }
+.owned-page-actions .button { width: 100%; justify-content: center; }
+.owned-page-actions .text-link { font-size: 13px; min-height: 34px; }
+.owned-page-body > small { font-size: 11px; color: #667269; }
+.owned-page-note { padding: 12px; background: #fff6e1; border-radius: 8px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (hover:hover) {
+  .owned-page { transition: border-color 150ms ease-out,box-shadow 150ms ease-out; }
+  .owned-page:hover { border-color: #a1b7a8; box-shadow: 0 5px 20px #1632220c; }
+}
 .wardrobe-catalog .profile-piece > span {
   margin-top: auto;
 }
