@@ -3,7 +3,7 @@ import { CATEGORIES, PART_TYPES, SAMPLE_PARTS, safePart } from "./skin-parts.mjs
 import { drawSkinFront, imagePixels } from "./skin-viewer.mjs";
 import { overlay } from "./skin-pixels.mjs?v=microsoft-20261113";
 
-export function renderWardrobeCatalog(main, { esc, icon, paintIcons }) {
+export function renderWardrobeCatalog(main, { esc, icon, paintIcons, report, getUser }) {
   const remote = createCreationsClient();
   main.innerHTML = `<section class="container profile-parts wardrobe-catalog" aria-labelledby="wardrobe-title">
     <a class="text-link" href="#/skins">${icon("arrow-left")} Catálogo de skins</a>
@@ -55,6 +55,15 @@ export function renderWardrobeCatalog(main, { esc, icon, paintIcons }) {
         <strong>${esc(part.name)}</strong><small>${esc(detail)} · ${variant}</small>
         <small>${esc(part.creator)}</small><span>Experimentar ${icon("arrow-right")}</span>
       </a>`;
+      if (!part.sample && String(part.publisher) !== String(getUser()?.id)) {
+        const button = document.createElement("button");
+        button.className = "text-link wardrobe-report";
+        button.type = "button";
+        button.textContent = "Denunciar";
+        button.setAttribute("aria-label", "Denunciar " + part.name);
+        button.addEventListener("click", () => report(part));
+        card.append(button);
+      }
       grid.append(card);
       void draw(card.querySelector("canvas"), part);
     }
@@ -83,7 +92,7 @@ export function renderWardrobeCatalog(main, { esc, icon, paintIcons }) {
       if (request.signal.aborted || !section.isConnected) return;
       const parts = result.rows.map(row => {
         const part = safePart(row);
-        return part && { ...part, type: row.type, creator: row.publisherName || row.publisherUsername || "Comunidade" };
+        return part && { ...part, type: row.type, revision: row.revision, publisher: row.publisher, creator: row.publisherName || row.publisherUsername || "Comunidade" };
       }).filter(Boolean);
       append(parts);
       nextOffset = result.nextOffset;

@@ -1,4 +1,4 @@
-import {connectDirectory} from "./directory-integration.mjs?v=account-20261113";
+import {connectDirectory} from "./directory-integration.mjs?v=reports-20261113";
 let directory=null;
 import { previewCatalog } from "./catalog-preview.mjs?v=discovery-shelves";
 import {
@@ -9,9 +9,10 @@ import {
   catalogMarkup,
   catalogShelves,
 } from "./discovery.mjs?v=publication-20261113b";
-import { createSkinLibrary } from "./skins.mjs?v=wardrobe-20261113";
+import { createSkinLibrary } from "./skins.mjs?v=reports-20261113";
 import { createSkinStudio } from "./skin-studio.mjs?v=wardrobe-20261113";
-import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=wardrobe-20261113";
+import { renderWardrobeCatalog } from "./wardrobe-catalog.mjs?v=reports-20261113";
+import { createCreationModeration } from "./creation-moderation.mjs?v=reports-20261113";
 import {createMinecraftConnections} from './minecraft-connections.mjs?v=microsoft-20261113';
 import { officialPage, bindOfficialStories } from "./official.mjs";
 import {
@@ -1639,6 +1640,11 @@ function route({ focus = true } = {}) {
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
     document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
+  } else if (path === "/revisoes/criacoes") {
+    activeServer = null;
+    if (dialog.open) closeDialog();
+    void creationModeration.queue();
+    document.title = "Denúncias de skins e roupas · Força Aliada";
   } else if (path === "/revisoes" || path.startsWith("/revisoes/")) {
     void directory?.reviewRoute(path.startsWith("/revisoes/")?path.slice(10):'');
     document.title="Revisão de páginas · Força Aliada";
@@ -1648,7 +1654,7 @@ function route({ focus = true } = {}) {
   } else if (path === "/skins/roupas") {
     activeServer = null;
     if (dialog.open) closeDialog();
-    disposeWardrobe = renderWardrobeCatalog(main, { esc, icon, paintIcons });
+    disposeWardrobe = renderWardrobeCatalog(main, { esc, icon, paintIcons, report: creationModeration.report, getUser: () => directory?.me });
     document.title = "Roupas para skins de Minecraft · Força Aliada";
   } else if (path === "/skins/editor") {
     activeServer = null;
@@ -2329,6 +2335,7 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("pagehide", persist);
 document.addEventListener("visibilitychange", refreshServerStatuses);
 let editorSeed = null;
+const creationModeration = createCreationModeration({main,dialog,esc,icon,paintIcons,openDialog,closeDialog,toast,getUser:()=>directory?.me,signIn:()=>directory.login()});
 const skinLibrary = createSkinLibrary({
   main,
   dialog,
@@ -2341,6 +2348,7 @@ const skinLibrary = createSkinLibrary({
   account: () => state.account,
   getUser:()=>directory?.me,
   signIn:()=>directory.login(),
+  report: creationModeration.report,
   editSkin: (skin) => {
     editorSeed = skin;
     if (dialog.open) closeDialog();

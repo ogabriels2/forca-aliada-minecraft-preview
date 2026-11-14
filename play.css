@@ -1513,6 +1513,20 @@ a {
   max-width: none;
   text-align: center;
 }
+.wardrobe-catalog .profile-piece-container {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+.wardrobe-report {
+  justify-self: center;
+  min-height: 36px;
+}
+.creation-review {
+  margin-block: 16px;
+}
+.creation-review form {
+  margin-top: 12px;
+}
 .wardrobe-catalog .profile-piece > span {
   margin-top: auto;
 }
