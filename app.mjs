@@ -1,4 +1,5 @@
-import {connectDirectory} from "./directory-integration.mjs?v=catalog-20261114";
+import {connectDirectory} from "./directory-integration.mjs?v=site-20261114";
+import {minecraftEnvironment,prepareMinecraftPage} from './minecraft-environment.mjs';
 let directory=null;
 import {createPageInsights} from "./page-insights.mjs?v=insights-20261113";
 import {createServerActivity} from "./server-activity.mjs?v=insights-20261113";
@@ -47,6 +48,9 @@ if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const main = document.querySelector("#main"),
   dialog = document.querySelector("#dialog");
+const onMainSite=minecraftEnvironment(location).site;
+const catalogTitle=onMainSite?'Servidores de Minecraft · Força Aliada':'Servidores de Minecraft · Força Aliada · Prévia';
+prepareMinecraftPage(location,history,document);
 main.addEventListener("error", (event) => {
   if (event.target.matches?.(".card-server-icon img")) event.target.remove();
 }, true);
@@ -1816,7 +1820,7 @@ function route({ focus = true } = {}) {
     catalogReturn = history.state?.catalogReturn;
     state.extra = Boolean(catalogReturn?.extra);
     renderCatalog(catalogReturn?.limit);
-    document.title = "Servidores de Minecraft · Força Aliada · Protótipo";
+    document.title = catalogTitle;
   } else if(/^\/minhas-paginas\/[a-f0-9-]{36}\/estatisticas$/i.test(path)){
     activeServer=null;
     if(dialog.open)closeDialog();
@@ -1847,7 +1851,7 @@ function route({ focus = true } = {}) {
     activeServer = null;
     skinStudio.render(editorSeed, params.get("part"), params.get("criar") === "peca");
     editorSeed = null;
-    document.title = "Editor de skins · Força Aliada · Protótipo";
+    document.title = "Editor de skins · Força Aliada";
   } else if(path.startsWith("/skins/")&&path!=="/skins/editor"){
     skinLibrary.render(false);void skinLibrary.open(path.slice(7));
   } else if(/^\/perfil\/[^/]+$/.test(path)){
@@ -1860,7 +1864,7 @@ function route({ focus = true } = {}) {
     const own=path==="/minhas-skins"||path==="/perfil/demonstracao/skins";
     let author="";try{author=!own&&path.startsWith("/perfil/")?decodeURIComponent(path.split("/")[2]):"";}catch{main.innerHTML='<section class="container empty"><h1>Perfil não encontrado.</h1><a href="#/skins">Voltar às skins</a></section>';return;}
     skinLibrary.render(own,author);
-    document.title = `${own ? "Minhas skins" : author ? "Skins de "+author : "Skins de Minecraft"} · Força Aliada · Protótipo`;
+    document.title = `${own ? "Minhas skins" : author ? "Skins de "+author : "Skins de Minecraft"} · Força Aliada`;
   } else if (path.startsWith("/servidor/")) {
     let id = "";
     try {
@@ -1869,7 +1873,7 @@ function route({ focus = true } = {}) {
     const edition = params.get("edition");
     state.selectedEdition = ["Java", "Bedrock"].includes(edition) ? edition : undefined;
     renderPage(id);
-    document.title = `${activeServer?.name || "Servidor"} · Servidores de Minecraft · Prévia`;
+    document.title = `${activeServer?.name || "Servidor"} · ${catalogTitle}`;
   } else if (path === "/editor") {
     if (state.created) {
       history.replaceState(null, "", "#/servidor/minha-pagina");
@@ -2606,7 +2610,7 @@ directory=connectDirectory({
   renderCurrent:()=>route({focus:false}),
   setImageBusy:value=>imageBusy=value,
   refreshMedia:target=>{if(dialogMode==='wizard'){renderWizard();if(target==='gallery'){const section=dialog.querySelector('details.optional-setup');if(section)section.open=true;}}else{refreshPage();mediaDialog(target);}},
-  accountChanged:()=>{communityConnection.bind(directory?.me,{load:directory.community,connect:()=>directory.connectCommunity(),read:directory.readCommunity,disconnect:directory.disconnectCommunity});if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
+  accountChanged:()=>{if(!onMainSite)communityConnection.bind(directory?.me,{load:directory.community,connect:()=>directory.connectCommunity(),read:directory.readCommunity,disconnect:directory.disconnectCommunity});if(activeServer&&/^[a-f0-9-]{36}$/i.test(activeServer.id)){main.querySelector(".server-reviews")?.remove();serverReviews.render(activeServer.id);}skinLibrary.accountChanged();skinStudio.accountChanged?.();minecraftConnections.accountChanged();void loadLibrary();},
   communityAvailabilityChanged:value=>communityConnection.setAvailable(value),
   savedIds:filters=>filters.favorites?[...state.favorites]:recentlyViewed,
   refreshOwner:()=>{if(ownPage())refreshPage();},

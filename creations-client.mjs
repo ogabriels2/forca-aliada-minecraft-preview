@@ -1,8 +1,9 @@
+import {BETA_ORIGIN,minecraftEnvironment} from './minecraft-environment.mjs';
 const ROOT='/api/minecraft/creations';
-export function createCreationsClient({origin='https://forca-aliada-minecraft-beta.onrender.com',readToken=()=>sessionStorage.getItem('fa_directory_beta_token')||''}={}){
-  if(origin&&!['https://forca-aliada-minecraft-beta.onrender.com'].includes(origin))throw Error('Origem de criações inválida.');
+export function createCreationsClient({origin=minecraftEnvironment(location).origin,readToken=()=>origin?sessionStorage.getItem('fa_directory_beta_token')||'':''}={}){
+  if(origin&&origin!==BETA_ORIGIN)throw Error('Origem de criações inválida.');
   async function request(path,{method='GET',body,headers={},signal,token=readToken()}={}){
-    let response;try{response=await fetch(origin+ROOT+path,{method,credentials:origin?'omit':'same-origin',cache:'no-store',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(25000)]):AbortSignal.timeout(25000),headers:{Accept:'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(body&&!(body instanceof FormData)?{'Content-Type':'application/json'}:{}),...headers},...(body?{body:body instanceof FormData?body:JSON.stringify(body)}:{})});}
+    let response;try{response=await fetch(origin+ROOT+path,{method,credentials:origin?'omit':'same-origin',cache:'no-store',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(25000)]):AbortSignal.timeout(25000),headers:{Accept:'application/json','X-FA-Client':'minecraft-directory',...(token?{Authorization:'Bearer '+token}:{}),...(body&&!(body instanceof FormData)?{'Content-Type':'application/json'}:{}),...headers},...(body?{body:body instanceof FormData?body:JSON.stringify(body)}:{})});}
     catch{throw Error('Não foi possível conectar às criações. Tente novamente.');}
     const data=await response.json().catch(()=>({error:'O serviço não respondeu como esperado.'}));
     if(!response.ok)throw Object.assign(new Error(data.error),{code:data.code,status:response.status});return data;

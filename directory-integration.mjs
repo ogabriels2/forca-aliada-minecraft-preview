@@ -2,12 +2,15 @@ import {createDirectoryClient,createDraftWriter} from './directory-client.mjs?v=
 import {ownPagesMarkup,bindOwnPages} from './own-pages.mjs?v=insights-20261113';
 import {createPublicCatalog} from './directory-catalog.mjs?v=catalog-20261114';
 import {createForcaAliadaLogin} from './forca-aliada-login.mjs?v=community-20261114';
+import {CATALOG_PATH,minecraftEnvironment,serverShareUrl} from './minecraft-environment.mjs';
 
 // Persistence adapter for the existing prototype. Rendering stays in app.mjs:
 // this module uses its original wizard, page editor, account and dialog styles.
 export function connectDirectory(ui){
   const key='fa_directory_beta_token';
-  const api=createDirectoryClient({origin:'https://forca-aliada-minecraft-beta.onrender.com',readToken:()=>sessionStorage.getItem(key)||''});
+  const createAfterLoginKey='fa_minecraft_create_after_login';
+  const {site,origin}=minecraftEnvironment(location);
+  const api=createDirectoryClient({origin,readToken:()=>site?'':sessionStorage.getItem(key)||''});
   const centralLogin=createForcaAliadaLogin({api});
   let centralEnabled=false,linkAvailable=false,communityAvailable=false;
   let accountStatusVersion=0,accountStatusLoaded=false,accountStatusRequest;
@@ -98,6 +101,13 @@ export function connectDirectory(ui){
     return 'Rascunho salvo na sua conta';
   }
   function login({continueCreation=false}={}){
+    if(site){
+      if(continueCreation)sessionStorage.setItem(createAfterLoginKey,'1');
+      else sessionStorage.removeItem(createAfterLoginKey);
+      const next=location.pathname+location.search+location.hash;
+      location.assign('/login?next='+encodeURIComponent(next));
+      return;
+    }
     continueAfterLogin=continueCreation;
     if(!accountStatusLoaded){
       ui.openDialog('<h2 id="dialog-title">Entrar na prévia</h2><p data-account-login-loading role="status">Consultando as opções de acesso…</p><button class="text-link" type="button" data-directory="test-login">Usar um acesso de teste</button>');
@@ -280,7 +290,7 @@ export function connectDirectory(ui){
       const action=button.dataset.directory;
       if(action==='new'){await newDraft();}
       if(action==='retry-owned'){busy=false;await pagesRoute(location.hash.split('?')[0]==='#/minhas-paginas'?'':location.hash.split('?')[0].slice('#/minhas-paginas/'.length),new URLSearchParams(location.hash.split('?')[1]||'').has('assistente'));}
-      if(action==='copy-page'){const link=new URL(location.href);link.hash='/servidor/'+button.dataset.id;await navigator.clipboard.writeText(link.href);ui.toast('Link copiado.');}
+      if(action==='copy-page'){await navigator.clipboard.writeText(serverShareUrl(location,button.dataset.id));ui.toast('Link copiado.');}
       if(action==='archive-page'||action==='restore-page'){
         await flush();
         const revision=record?.id===button.dataset.id?record.revision:Number(button.dataset.revision);
@@ -294,7 +304,7 @@ export function connectDirectory(ui){
       if(action==='pages'){await flush();if(document.querySelector('#dialog[open]'))ui.closeDialog();location.hash='/minhas-paginas';busy=false;await pagesRoute();}
       if(action==='claim'){claim=await api.claim(record.id);verification();}
       if(action==='copy-claim'){await navigator.clipboard.writeText(claim.token);ui.toast('Código copiado.');}
-      if(action==='share'){const link=new URL(location.href);link.hash='/servidor/'+record.id;await navigator.clipboard.writeText(link.href);ui.toast('Link da página copiado.');}
+      if(action==='share'){await navigator.clipboard.writeText(serverShareUrl(location,record.id));ui.toast('Link da página copiado.');}
       if(action==='verify'){record=await api.verify(record.id,claim);writer.use(record);verification();}
       if(action==='submit'){record=await api.submit(record.id,record.revision);writer.use(record);verification();}
       if(action==='moderation')location.hash='/revisoes';
@@ -329,6 +339,7 @@ export function connectDirectory(ui){
     library:api.library,changeLibrary:api.changeLibrary,
     community:api.community,readCommunity:api.readCommunity,disconnectCommunity:api.disconnectCommunity,
     async connectCommunity(){
+      if(site){location.assign('/community');return;}
       await refreshAccountStatus();
       if(!communityAvailable)throw new Error('A conexão do Community ainda não está disponível nesta prévia.');
       await flush();
@@ -359,15 +370,20 @@ export function connectDirectory(ui){
     },
     async logout(){
       if(busy){ui.toast('Aguarde a operação da página terminar antes de sair.');return;}
+      if(site){
+        try{await flush();location.assign('/logout?next='+encodeURIComponent(CATALOG_PATH+'/'));}
+        catch(e){report(e);}
+        return;
+      }
       try{await flush();await api.logout();}catch(e){report(e);if(pendingSnapshot)return;}
       mediaLinks.clear();sessionStorage.removeItem(key);me=null;record=null;state.account=false;state.created=false;state.wizard=null;state.publication=null;state.draft=ui.initialDraft();ui.cacheOnly();ui.updateHeader();ui.accountChanged();ui.renderCurrent();
       linkAvailable=false;void refreshAccountStatus();
     },
     async init(){
-      const completed=await centralLogin.complete(location.hash,()=>api.me());
+      const completed=site?null:await centralLogin.complete(location.hash,()=>api.me());
       if(completed?.token)sessionStorage.setItem(key,completed.token);
       try{
-        if(sessionStorage.getItem(key)){
+        if(site||sessionStorage.getItem(key)){
           me=await api.me();
           state.account=true;
           try{
@@ -378,14 +394,20 @@ export function connectDirectory(ui){
           state.account=false;
         }
       }
-      catch(e){me=null;state.account=false;if(e.status===401)sessionStorage.removeItem(key);else ui.toast('Sua conta está temporariamente indisponível. Você pode continuar explorando.');}
+      catch(e){me=null;state.account=false;if(e.status===401){if(!site)sessionStorage.removeItem(key);}else ui.toast('Sua conta está temporariamente indisponível. Você pode continuar explorando.');}
       finally{ready=true;ui.updateHeader();ui.accountChanged();}
       if(completed){
         ui.renderCurrent();
         if(completed.error)ui.toast(completed.error);
         else if(completed.token&&me){ui.toast('Você entrou com sua conta Força Aliada.');if(completed.createPage)void start();}
       }
-      void refreshAccountStatus();
+      if(site){
+        ui.communityAvailabilityChanged?.(false);
+        if(me&&sessionStorage.getItem(createAfterLoginKey)){
+          sessionStorage.removeItem(createAfterLoginKey);
+          void start();
+        }
+      }else void refreshAccountStatus();
       void catalog.sync(state.filters,{immediate:true});
       if(location.hash.startsWith('#/revisoes')||location.hash.startsWith('#/minhas-paginas')||location.hash.startsWith('#/perfil/'))ui.renderCurrent();
       if(location.hash.startsWith('#/servidor/minha-pagina'))ui.renderPage('minha-pagina');

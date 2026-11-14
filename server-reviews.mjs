@@ -1,7 +1,9 @@
 import {createDirectoryClient} from './directory-client.mjs?v=reviews-20261113';
+import {minecraftEnvironment} from './minecraft-environment.mjs';
 
 export function createServerReviews({main,esc,icon,paintIcons,getUser,signIn,toast,onSummary}){
-  const api=createDirectoryClient({origin:'https://forca-aliada-minecraft-beta.onrender.com',readToken:()=>sessionStorage.getItem('fa_directory_beta_token')||''});
+  const {origin}=minecraftEnvironment(location);
+  const api=createDirectoryClient({origin,readToken:()=>origin?sessionStorage.getItem('fa_directory_beta_token')||'':''});
   let generation=0;
   function render(id){
     const request=++generation,identity=getUser()?.id;
