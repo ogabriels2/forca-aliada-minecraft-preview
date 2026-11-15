@@ -1,0 +1,75 @@
+/* Shared account component. Scoped to avoid changing product application menus. */
+[data-fa-account] {display:flex;align-items:center;gap:12px;min-width:0}
+[data-fa-account] .fa-account-menu{position:relative;font-family:Manrope,Inter,system-ui,sans-serif;line-height:1.4;color:#e9edef}
+[data-fa-account] .fa-site-user-toggle{display:flex;align-items:center;gap:9px;min-height:40px;max-width:192px;padding:5px 10px 5px 5px;border:1px solid transparent;border-radius:10px;background:transparent;color:#f3f6f5;font:inherit;font-size:13px;font-weight:650;cursor:pointer;transition:background .16s ease}
+[data-fa-account] .fa-site-user-toggle:hover,[data-fa-account] .fa-site-user-toggle[aria-expanded=true]{background:#303a40}
+[data-fa-account] .fa-site-user-toggle:active{background:#182026}
+[data-fa-account] .fa-site-user-toggle>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+[data-fa-account] .fa-site-user-toggle>img{width:28px;height:28px;object-fit:cover;border-radius:7px;flex:none;background:#344148}
+[data-fa-account] .fa-site-user-toggle>svg{width:13px;height:13px;flex:none;transition:transform .18s ease}
+[data-fa-account] .fa-site-user-toggle[aria-expanded=true]>svg{transform:rotate(180deg)}
+[data-fa-account] .fa-site-user-dropdown{position:absolute;z-index:130;inset:auto 0 auto auto;top:calc(100% + 12px);width:296px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 100px);overflow:auto;padding:10px;border:0;border-radius:14px;background:#fff;color:#1b2730;box-shadow:0 16px 48px #09131930;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-5px);transform-origin:top right;transition:opacity .16s ease,transform .16s ease,visibility .16s}
+[data-fa-account] .fa-site-user-dropdown.is-open{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+[data-fa-account] .fa-site-user-head{display:flex;gap:12px;align-items:center;padding:10px 8px 14px;color:inherit;text-decoration:none;border-radius:8px;min-width:0}
+
+[data-fa-account] .fa-site-user-head img{width:44px;height:44px;border-radius:11px;object-fit:cover;flex:none;background:#edf1ef}
+[data-fa-account] .fa-site-user-head>span{display:grid;min-width:0;gap:3px}
+[data-fa-account] .fa-site-user-head strong{font-size:14px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1b2730}
+[data-fa-account] .fa-site-user-head small{font-size:11px;font-weight:450;color:#52616b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-fa-account] .fa-site-user-item{display:flex;align-items:center;gap:11px;width:100%;min-height:40px;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:#27353d;text-decoration:none;font:inherit;font-size:13px;font-weight:550;text-align:left;cursor:pointer;transition:background .14s ease,color .14s ease}
+[data-fa-account] .fa-site-user-item:hover{background:#edf3f0;color:#17472b}
+[data-fa-account] .fa-site-user-item svg{width:17px;height:17px;flex:none;color:#61716d}
+[data-fa-account] .fa-site-user-item[hidden]{display:none}
+[data-fa-account] .fa-site-user-divider{height:1px;margin:7px 0;background:#e4e9e7;border:0}
+[data-fa-account] .fa-site-user-item.is-danger{color:#a7332b}
+[data-fa-account] .fa-site-user-item.is-danger svg{color:currentColor}
+[data-fa-account] .fa-site-user-item.is-danger:hover{background:#fff0ed}
+[data-fa-account] :is(a,button):focus-visible{outline:2px solid #397e54;outline-offset:3px}
+[data-fa-account] .fa-account-login{display:inline-flex;align-items:center;gap:8px}
+[data-fa-account] .fa-account-login svg{width:17px;height:17px}
+@media(max-width:600px){[data-fa-account] .fa-site-user-toggle{max-width:140px;min-height:40px}[data-fa-account] .fa-site-user-toggle>span{max-width:70px}[data-fa-account] .fa-site-user-dropdown{position:fixed;top:var(--fa-account-top,76px);right:12px;max-height:calc(100dvh - 96px);width:min(320px,calc(100vw - 24px))}}
+@media(max-width:420px){.mp-unified-header [data-fa-account] .fa-site-user-toggle{padding-right:5px;gap:4px}.mp-unified-header [data-fa-account] .fa-site-user-toggle>span{display:none}}
+@media(prefers-reduced-motion:reduce){[data-fa-account] *,[data-fa-account] *::before{transition:none!important;animation:none!important}}
+
+@media(max-width:600px){
+  .manager-product #auth-container[data-fa-account]{display:flex}
+  .manager-product .fa-site-actions:has(.fa-account-menu) .mp-header-console{display:none}
+  [data-fa-account] .fa-site-user-toggle{max-width:42px;padding:5px;gap:0}
+  [data-fa-account] .fa-site-user-toggle>span,[data-fa-account] .fa-site-user-toggle>svg{display:none}
+}
+
+/* The component's light surface must remain legible inside a dark page theme. */
+#auth-container[data-fa-account] .fa-site-user-head strong{color:#1b2730!important}
+
+
+#auth-container[data-fa-account] .fa-site-user-toggle>img,
+#auth-container[data-fa-account] .fa-site-user-head img{border-radius:50%}
+#auth-container[data-fa-account] .fa-account-menu[data-membership=active] .fa-site-user-toggle>img{outline:1.5px solid #e3bd55;outline-offset:2px}
+#auth-container[data-fa-account] .fa-account-menu[data-membership=active] .fa-site-user-head img{outline:2px solid #c79b35;outline-offset:3px}
+#auth-container[data-fa-account] .fa-site-user-head{gap:15px}
+[data-fa-account] .fa-account-identity-line{display:flex;align-items:center;gap:8px;min-width:0}
+[data-fa-account] .fa-account-identity-line>strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto}
+[data-fa-account] .fa-account-member-badge{flex:none;display:inline-flex;align-items:center;justify-content:center;position:relative;isolation:isolate;overflow:hidden;max-width:100px;padding:3px 8px;border-radius:5px;background:linear-gradient(115deg,#f3d778 0%,#e1af32 42%,#f4d77a 70%,#d8a029 100%);box-shadow:inset 0 1px #fff4bd}
+[data-fa-account] .fa-account-member-badge[hidden]{display:none}
+#auth-container[data-fa-account] .fa-account-member-badge>strong{font-size:11px;font-weight:800;line-height:1.3;color:#352506!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-fa-account] .fa-account-member-badge[data-tone=attention]{background:#f4d6a4;box-shadow:none}
+[data-fa-account] .fa-account-member-badge::after{content:"";position:absolute;inset:-30% -15%;pointer-events:none;background:linear-gradient(105deg,transparent 38%,#fff9dd80 50%,transparent 62%);transform:translateX(-130%)}
+[data-fa-account] .fa-account-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+[data-fa-account] [data-fa-account-billing]>span{display:grid;gap:2px}
+[data-fa-account] [data-account-billing-status]{font-size:11px;color:#586960;font-weight:450}
+[data-fa-account] [data-account-billing-status][hidden]{display:none}
+[data-fa-account] .fa-account-login{min-height:40px;padding:8px 12px;border:1px solid #708177;border-radius:8px;background:transparent;color:inherit;font:650 13px/1.4 Manrope,system-ui,sans-serif;text-decoration:none;transition:background .16s ease}
+[data-fa-account] .fa-account-login:hover{background:#8b9baa20}
+@media(prefers-reduced-motion:no-preference){
+ [data-fa-account] .fa-account-menu[data-membership=active] .fa-site-user-toggle:hover img{outline-color:#f2d579}
+ [data-fa-account] .fa-site-user-dropdown.is-open .fa-account-member-badge:is([data-tone=active],[data-tone=ending]):hover::after{animation:fa-member-sheen .65s cubic-bezier(.23,1,.32,1) both}
+}
+@keyframes fa-member-sheen{to{transform:translateX(130%)}}
+
+/* Team keeps the same membership shape, with its own deeper violet material. */
+[data-fa-account] .fa-account-member-badge[data-tier=team]{background:linear-gradient(115deg,#8259ba 0%,#61369e 42%,#7850b1 70%,#512986 100%);box-shadow:inset 0 1px #b798df}
+#auth-container[data-fa-account] .fa-account-member-badge[data-tier=team]>strong{color:#fff!important}
+#auth-container[data-fa-account] .fa-account-menu[data-membership=active][data-tier=team] .fa-site-user-toggle>img{outline-color:#b398e1}
+#auth-container[data-fa-account] .fa-account-menu[data-membership=active][data-tier=team] .fa-site-user-head img{outline-color:#7952b0}
+[data-fa-account] .fa-account-member-badge[data-tier=team][data-tone=attention]{background:#e8ddf5;box-shadow:none}
+#auth-container[data-fa-account] .fa-account-member-badge[data-tier=team][data-tone=attention]>strong{color:#593681!important}

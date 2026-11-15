@@ -1,0 +1,540 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T19:33:09.151672Z",
+  "title": "Design System: Força Aliada — home pública v2",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "tonalRamp": [
+          "oklch(15% 0.0033 240.78)",
+          "oklch(26% 0.0082 240.78)",
+          "oklch(38% 0.0123 240.78)",
+          "oklch(50% 0.0164 240.78)",
+          "oklch(62% 0.0164 240.78)",
+          "oklch(74% 0.0131 240.78)",
+          "oklch(86% 0.0074 240.78)",
+          "oklch(95% 0.0025 240.78)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Texto secundário",
+        "tonalRamp": [
+          "oklch(15% 0.0035 186.14)",
+          "oklch(26% 0.0088 186.14)",
+          "oklch(38% 0.0132 186.14)",
+          "oklch(50% 0.0175 186.14)",
+          "oklch(62% 0.0175 186.14)",
+          "oklch(74% 0.0140 186.14)",
+          "oklch(86% 0.0079 186.14)",
+          "oklch(95% 0.0026 186.14)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "tonalRamp": [
+          "oklch(15% 0.0008 121.56)",
+          "oklch(26% 0.0020 121.56)",
+          "oklch(38% 0.0031 121.56)",
+          "oklch(50% 0.0041 121.56)",
+          "oklch(62% 0.0041 121.56)",
+          "oklch(74% 0.0033 121.56)",
+          "oklch(86% 0.0018 121.56)",
+          "oklch(95% 0.0006 121.56)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Branco",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(50% 0.0000 89.88)",
+          "oklch(62% 0.0000 89.88)",
+          "oklch(74% 0.0000 89.88)",
+          "oklch(86% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Grafite",
+        "tonalRamp": [
+          "oklch(15% 0.0027 243.53)",
+          "oklch(26% 0.0067 243.53)",
+          "oklch(38% 0.0100 243.53)",
+          "oklch(50% 0.0133 243.53)",
+          "oklch(62% 0.0133 243.53)",
+          "oklch(74% 0.0107 243.53)",
+          "oklch(86% 0.0060 243.53)",
+          "oklch(95% 0.0020 243.53)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Linha suave",
+        "tonalRamp": [
+          "oklch(15% 0.0021 145.49)",
+          "oklch(26% 0.0052 145.49)",
+          "oklch(38% 0.0078 145.49)",
+          "oklch(50% 0.0103 145.49)",
+          "oklch(62% 0.0103 145.49)",
+          "oklch(74% 0.0083 145.49)",
+          "oklch(86% 0.0047 145.49)",
+          "oklch(95% 0.0016 145.49)"
+        ]
+      },
+      "green": {
+        "role": "primary",
+        "displayName": "Verde de ação",
+        "tonalRamp": [
+          "oklch(15% 0.0345 151.58)",
+          "oklch(26% 0.0862 151.58)",
+          "oklch(38% 0.1293 151.58)",
+          "oklch(50% 0.1724 151.58)",
+          "oklch(62% 0.1724 151.58)",
+          "oklch(74% 0.1379 151.58)",
+          "oklch(86% 0.0776 151.58)",
+          "oklch(95% 0.0259 151.58)"
+        ]
+      },
+      "green-ink": {
+        "role": "primary",
+        "displayName": "Verde de leitura",
+        "tonalRamp": [
+          "oklch(15% 0.0201 153.36)",
+          "oklch(26% 0.0502 153.36)",
+          "oklch(38% 0.0754 153.36)",
+          "oklch(50% 0.1005 153.36)",
+          "oklch(62% 0.1005 153.36)",
+          "oklch(74% 0.0804 153.36)",
+          "oklch(86% 0.0452 153.36)",
+          "oklch(95% 0.0151 153.36)"
+        ]
+      },
+      "mint": {
+        "role": "primary",
+        "displayName": "Menta",
+        "tonalRamp": [
+          "oklch(15% 0.0045 151.64)",
+          "oklch(26% 0.0113 151.64)",
+          "oklch(38% 0.0169 151.64)",
+          "oklch(50% 0.0225 151.64)",
+          "oklch(62% 0.0225 151.64)",
+          "oklch(74% 0.0180 151.64)",
+          "oklch(86% 0.0101 151.64)",
+          "oklch(95% 0.0034 151.64)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Dourado de comunidade",
+        "tonalRamp": [
+          "oklch(15% 0.0264 86.42)",
+          "oklch(26% 0.0660 86.42)",
+          "oklch(38% 0.0991 86.42)",
+          "oklch(50% 0.1321 86.42)",
+          "oklch(62% 0.1321 86.42)",
+          "oklch(74% 0.1057 86.42)",
+          "oklch(86% 0.0594 86.42)",
+          "oklch(95% 0.0198 86.42)"
+        ]
+      },
+      "sky": {
+        "role": "secondary",
+        "displayName": "Azul de descoberta",
+        "tonalRamp": [
+          "oklch(15% 0.0037 242.97)",
+          "oklch(26% 0.0093 242.97)",
+          "oklch(38% 0.0140 242.97)",
+          "oklch(50% 0.0187 242.97)",
+          "oklch(62% 0.0187 242.97)",
+          "oklch(74% 0.0149 242.97)",
+          "oklch(86% 0.0084 242.97)",
+          "oklch(95% 0.0028 242.97)"
+        ]
+      },
+      "action-ink": {
+        "role": "primary",
+        "displayName": "Texto da ação",
+        "tonalRamp": [
+          "oklch(15% 0.0086 156.44)",
+          "oklch(26% 0.0215 156.44)",
+          "oklch(38% 0.0323 156.44)",
+          "oklch(50% 0.0431 156.44)",
+          "oklch(62% 0.0431 156.44)",
+          "oklch(74% 0.0345 156.44)",
+          "oklch(86% 0.0194 156.44)",
+          "oklch(95% 0.0065 156.44)"
+        ]
+      },
+      "action-hover": {
+        "role": "primary",
+        "displayName": "Verde em aproximação",
+        "tonalRamp": [
+          "oklch(15% 0.0319 152.88)",
+          "oklch(26% 0.0798 152.88)",
+          "oklch(38% 0.1198 152.88)",
+          "oklch(50% 0.1597 152.88)",
+          "oklch(62% 0.1597 152.88)",
+          "oklch(74% 0.1277 152.88)",
+          "oklch(86% 0.0719 152.88)",
+          "oklch(95% 0.0240 152.88)"
+        ]
+      },
+      "light-button": {
+        "role": "neutral",
+        "displayName": "Botão claro",
+        "tonalRamp": [
+          "oklch(15% 0.0013 115.70)",
+          "oklch(26% 0.0033 115.70)",
+          "oklch(38% 0.0050 115.70)",
+          "oklch(50% 0.0067 115.70)",
+          "oklch(62% 0.0067 115.70)",
+          "oklch(74% 0.0053 115.70)",
+          "oklch(86% 0.0030 115.70)",
+          "oklch(95% 0.0010 115.70)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "Texto do botão claro",
+        "tonalRamp": [
+          "oklch(15% 0.0043 158.71)",
+          "oklch(26% 0.0108 158.71)",
+          "oklch(38% 0.0161 158.71)",
+          "oklch(50% 0.0215 158.71)",
+          "oklch(62% 0.0215 158.71)",
+          "oklch(74% 0.0172 158.71)",
+          "oklch(86% 0.0097 158.71)",
+          "oklch(95% 0.0032 158.71)"
+        ]
+      },
+      "light-hover": {
+        "role": "neutral",
+        "displayName": "Botão claro em aproximação",
+        "tonalRamp": [
+          "oklch(15% 0.0050 152.88)",
+          "oklch(26% 0.0124 152.88)",
+          "oklch(38% 0.0187 152.88)",
+          "oklch(50% 0.0249 152.88)",
+          "oklch(62% 0.0249 152.88)",
+          "oklch(74% 0.0199 152.88)",
+          "oklch(86% 0.0112 152.88)",
+          "oklch(95% 0.0037 152.88)"
+        ]
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Azul de foco",
+        "tonalRamp": [
+          "oklch(15% 0.0270 246.24)",
+          "oklch(26% 0.0675 246.24)",
+          "oklch(38% 0.1013 246.24)",
+          "oklch(50% 0.1350 246.24)",
+          "oklch(62% 0.1350 246.24)",
+          "oklch(74% 0.1080 246.24)",
+          "oklch(86% 0.0608 246.24)",
+          "oklch(95% 0.0203 246.24)"
+        ]
+      },
+      "community-surface": {
+        "role": "secondary",
+        "displayName": "Superfície de comunidade",
+        "tonalRamp": [
+          "oklch(15% 0.0140 91.23)",
+          "oklch(26% 0.0350 91.23)",
+          "oklch(38% 0.0525 91.23)",
+          "oklch(50% 0.0700 91.23)",
+          "oklch(62% 0.0700 91.23)",
+          "oklch(74% 0.0560 91.23)",
+          "oklch(86% 0.0315 91.23)",
+          "oklch(95% 0.0105 91.23)"
+        ]
+      },
+      "community-ink": {
+        "role": "secondary",
+        "displayName": "Texto da comunidade",
+        "tonalRamp": [
+          "oklch(15% 0.0138 80.83)",
+          "oklch(26% 0.0345 80.83)",
+          "oklch(38% 0.0517 80.83)",
+          "oklch(50% 0.0690 80.83)",
+          "oklch(62% 0.0690 80.83)",
+          "oklch(74% 0.0552 80.83)",
+          "oklch(86% 0.0310 80.83)",
+          "oklch(95% 0.0103 80.83)"
+        ]
+      },
+      "team-surface": {
+        "role": "tertiary",
+        "displayName": "Violeta Team claro",
+        "tonalRamp": [
+          "oklch(15% 0.0131 298.68)",
+          "oklch(26% 0.0328 298.68)",
+          "oklch(38% 0.0492 298.68)",
+          "oklch(50% 0.0656 298.68)",
+          "oklch(62% 0.0656 298.68)",
+          "oklch(74% 0.0525 298.68)",
+          "oklch(86% 0.0295 298.68)",
+          "oklch(95% 0.0098 298.68)"
+        ]
+      },
+      "team-ink": {
+        "role": "tertiary",
+        "displayName": "Violeta Team escuro",
+        "tonalRamp": [
+          "oklch(15% 0.0331 296.21)",
+          "oklch(26% 0.0828 296.21)",
+          "oklch(38% 0.1241 296.21)",
+          "oklch(50% 0.1655 296.21)",
+          "oklch(62% 0.1655 296.21)",
+          "oklch(74% 0.1324 296.21)",
+          "oklch(86% 0.0745 296.21)",
+          "oklch(95% 0.0248 296.21)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "display",
+        "purpose": "Título principal de abertura."
+      },
+      "headline": {
+        "displayName": "headline",
+        "purpose": "Base de títulos de seção."
+      },
+      "title": {
+        "displayName": "title",
+        "purpose": "Base de títulos de módulos."
+      },
+      "body": {
+        "displayName": "body",
+        "purpose": "Leitura principal."
+      },
+      "lead": {
+        "displayName": "lead",
+        "purpose": "Proposta de abertura em telas amplas."
+      },
+      "label": {
+        "displayName": "label",
+        "purpose": "Chamada principal."
+      },
+      "navigation": {
+        "displayName": "navigation",
+        "purpose": "Links de navegação."
+      },
+      "link": {
+        "displayName": "link",
+        "purpose": "Links de texto sem caixa."
+      }
+    },
+    "shadows": [
+      {
+        "name": "preview",
+        "value": "0 20px 52px #07160f2e",
+        "purpose": "Prévia sobre o panorama."
+      },
+      {
+        "name": "primary-hover",
+        "value": "0 7px 18px #1028171c",
+        "purpose": "Chamada verde em hover."
+      },
+      {
+        "name": "routine-selected",
+        "value": "0 7px 20px #214a2810",
+        "purpose": "Rotina selecionada."
+      },
+      {
+        "name": "shared-account",
+        "value": "0 16px 48px #09131930",
+        "purpose": "Dropdown do componente compartilhado."
+      },
+      {
+        "name": "photo-dialog",
+        "value": "0 24px 80px #0005",
+        "purpose": "Imagem ampliada."
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 28px #0002",
+        "purpose": "Aviso temporário."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Curva da home."
+      },
+      {
+        "name": "content-enter",
+        "value": "440ms",
+        "purpose": "Entrada de conteúdo escolhido; 45ms de atraso na segunda peça."
+      },
+      {
+        "name": "world-framing",
+        "value": "1.2s",
+        "purpose": "Enquadramento do panorama."
+      },
+      {
+        "name": "control",
+        "value": "200ms",
+        "purpose": "Fundo, movimento e sombra dos botões."
+      },
+      {
+        "name": "arrow",
+        "value": "250ms",
+        "purpose": "Setas dos botões e links."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Desliga animações e transições; preserva conteúdo e estados."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      },
+      {
+        "name": "compact-max",
+        "value": "1200px"
+      },
+      {
+        "name": "mobile-navigation-max",
+        "value": "980px"
+      },
+      {
+        "name": "single-column-max",
+        "value": "640px"
+      },
+      {
+        "name": "shared-account-max",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Chamada principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação verde usada para conhecer ou escolher um plano.",
+      "html": "<a class=\"ds-button ds-primary\" href=\"#assinatura\">Conhecer planos <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></a>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:22px;min-height:50px;padding:13px 23px;border-radius:8px;font-size:14px;font-weight:800;line-height:1.6;border:0;text-decoration:none;cursor:pointer;white-space:nowrap;font-family:Manrope,system-ui,sans-serif;transition:background .2s,transform .2s var(--ease,cubic-bezier(.16,1,.3,1)),box-shadow .2s}.ds-button:hover{transform:translateY(-2px)}.ds-button:active{transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}.ds-button svg{width:19px;height:19px;flex:none;transition:transform .25s var(--ease,cubic-bezier(.16,1,.3,1))}.ds-button:hover svg{transform:translateX(3px)}.ds-button:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button,.ds-button svg{transition:none}.ds-button:hover{transform:none}}.ds-primary{background:var(--green,#43cd75);color:#112b1c}.ds-primary:hover{background:#60dd8d;box-shadow:0 7px 18px #1028171c}"
+    },
+    {
+      "name": "Chamada clara",
+      "kind": "button",
+      "refersTo": "button-light",
+      "description": "Ação contextual sobre fotografia ou superfície grafite.",
+      "html": "<a class=\"ds-button ds-light\" href=\"https://forcaaliada.com/manager\">Conhecer o Manager <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></a>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:22px;min-height:50px;padding:13px 23px;border-radius:8px;font-size:14px;font-weight:800;line-height:1.6;border:0;text-decoration:none;cursor:pointer;white-space:nowrap;font-family:Manrope,system-ui,sans-serif;transition:background .2s,transform .2s var(--ease,cubic-bezier(.16,1,.3,1)),box-shadow .2s}.ds-button:hover{transform:translateY(-2px)}.ds-button:active{transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}.ds-button svg{width:19px;height:19px;flex:none;transition:transform .25s var(--ease,cubic-bezier(.16,1,.3,1))}.ds-button:hover svg{transform:translateX(3px)}.ds-button:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button,.ds-button svg{transition:none}.ds-button:hover{transform:none}}.ds-light{background:#f9faf5;color:#17231c}.ds-light:hover{background:#e3f4e7}"
+    },
+    {
+      "name": "Link de continuidade",
+      "kind": "button",
+      "refersTo": "text-link",
+      "description": "Ação secundária sem caixa, acompanhada de seta.",
+      "html": "<a class=\"ds-link\" href=\"https://forcaaliada.com/minecraft\">Explorar Minecraft <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></a>",
+      "css": ".ds-link{display:inline-flex;align-items:center;gap:14px;font-size:14px;font-weight:750;line-height:1.6;min-height:40px;color:var(--ink,#182026);text-decoration:none;text-underline-offset:4px;font-family:Manrope,system-ui,sans-serif;}.ds-link svg{width:18px;height:18px;transition:transform .25s var(--ease,cubic-bezier(.16,1,.3,1))}.ds-link:hover{text-decoration:underline}.ds-link:hover svg{transform:translateX(4px)}.ds-link:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-link svg{transition:none}}"
+    },
+    {
+      "name": "Busca de servidores",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Campo branco com foco no conjunto e ação azul.",
+      "html": "<div class=\"ds-search\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m16 16 5 5\"/></svg><input type=\"search\" aria-label=\"Buscar servidores\" placeholder=\"Nome, estilo de jogo…\"><button type=\"button\" aria-label=\"Buscar\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></button></div>",
+      "css": ".ds-search{display:flex;align-items:center;gap:10px;background:var(--white,#fff);border-radius:8px;padding:4px 5px 4px 13px;font-family:Manrope,system-ui,sans-serif;}.ds-search>svg{width:17px;height:17px;color:#5b7588}.ds-search input{font-family:Manrope,system-ui,sans-serif;background:transparent;border:0;outline:none;min-width:0;width:100%;font-size:13px;line-height:1.6;padding:6px 0;color:var(--ink,#182026);caret-color:var(--green-ink,#176237)}.ds-search input::placeholder{color:#5a6c77;opacity:1}.ds-search:focus-within{box-shadow:0 0 0 2px #477ba1}.ds-search input:focus-visible{outline:none}.ds-search button{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:5px;background:#244f71;color:#fff;flex:none;cursor:pointer}.ds-search button svg{width:21px;height:21px}.ds-search button:hover{background:#173e5d}.ds-search button:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}"
+    },
+    {
+      "name": "Navegação principal",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Amostra dos links desktop; o menu móvel e a conta reutilizam o comportamento da aplicação.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Produtos\"><a href=\"https://forcaaliada.com/manager\">Manager</a><a href=\"https://forcaaliada.com/community\">Community</a><a href=\"https://forcaaliada.com/minecraft\">Minecraft</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:29px;background:var(--night,#151b20);font-family:Manrope,system-ui,sans-serif;}.ds-nav a{position:relative;padding-block:26px;font-size:13px;font-weight:650;line-height:1.6;color:#dce4df;text-decoration:none;transition:color .18s}.ds-nav a:after{content:\"\";position:absolute;bottom:19px;left:0;right:0;height:2px;transform:scaleX(0);transform-origin:left;background:var(--green,#43cd75);transition:transform .25s var(--ease,cubic-bezier(.16,1,.3,1))}.ds-nav a:hover{color:#fff}.ds-nav a:hover:after{transform:scaleX(1)}.ds-nav a:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-nav a,.ds-nav a:after{transition:none}}"
+    },
+    {
+      "name": "Identificação Team",
+      "kind": "chip",
+      "refersTo": "badge-team",
+      "description": "Selo funcional do plano, sem representar verificação de servidor.",
+      "html": "<span class=\"ds-badge\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z\"/></svg> Força Aliada Team</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:800;line-height:1.6;background:#ded0ff;color:#4f238f;font-family:Manrope,system-ui,sans-serif;}.ds-badge svg{width:14px;height:14px}"
+    },
+    {
+      "name": "Plano Pro",
+      "kind": "card",
+      "refersTo": "plan-card",
+      "description": "Superfície clara de assinatura sobre a seção grafite; exemplo estático do período mensal.",
+      "html": "<section class=\"ds-plan\" aria-label=\"Força Aliada Pro\"><span class=\"ds-pro\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z\"/></svg> Força Aliada Pro</span><p>Para seu servidor e uma equipe pequena.</p><div class=\"ds-price\"><span>R$ <strong>29,90</strong><small>/mês</small></span><small>Cobrança mensal. Cancele quando precisar.</small></div><div class=\"ds-capacity\"><span><strong>2</strong> servidores</span><span><strong>3</strong> pessoas na equipe</span></div><a class=\"ds-button ds-primary\" href=\"https://forcaaliada.com/assinatura?checkout=pro&amp;interval=monthly\">Escolher Pro <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></a></section>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:22px;min-height:50px;padding:13px 23px;border-radius:8px;font-size:14px;font-weight:800;line-height:1.6;border:0;text-decoration:none;cursor:pointer;white-space:nowrap;font-family:Manrope,system-ui,sans-serif;transition:background .2s,transform .2s var(--ease,cubic-bezier(.16,1,.3,1)),box-shadow .2s}.ds-button:hover{transform:translateY(-2px)}.ds-button:active{transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}.ds-button svg{width:19px;height:19px;flex:none;transition:transform .25s var(--ease,cubic-bezier(.16,1,.3,1))}.ds-button:hover svg{transform:translateX(3px)}.ds-button:disabled{cursor:not-allowed;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-button,.ds-button svg{transition:none}.ds-button:hover{transform:none}}.ds-primary{background:var(--green,#43cd75);color:#112b1c}.ds-primary:hover{background:#60dd8d;box-shadow:0 7px 18px #1028171c}.ds-plan{background:#f5f6f0;color:#182c20;border-radius:var(--radius,16px);padding:26px;font-family:Manrope,system-ui,sans-serif;line-height:1.6}.ds-pro{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:800;background:linear-gradient(115deg,#f0b934,#f9d56b 55%,#ebba3f);color:#503603}.ds-pro svg{width:14px;height:14px}.ds-plan p{font-size:12px;color:#53604f;margin:9px 0 0}.ds-price{margin:20px 0 15px}.ds-price>span{display:block;font-size:18px;font-weight:650;line-height:1.1}.ds-price strong{font-size:52px;letter-spacing:-.04em;font-weight:800;font-variant-numeric:tabular-nums}.ds-price small{font-size:12px;font-weight:500}.ds-price>small{display:block;color:#53604f;margin-top:9px}.ds-capacity{display:flex;gap:22px;font-size:12px;margin:13px 0 20px}.ds-capacity strong{font-weight:800}.ds-plan>.ds-button{display:flex}@media(max-width:640px){.ds-plan{padding:25px}.ds-price strong{font-size:48px}}"
+    },
+    {
+      "name": "Perspectivas do panorama",
+      "kind": "custom",
+      "refersTo": "product-tab",
+      "description": "Estados visualmente extraídos do seletor; a troca de painel e o teclado pertencem a home.js.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"Perspectivas dos produtos\"><button type=\"button\" role=\"tab\" aria-selected=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M8 21h8m-4-5v5\"/></svg><span><strong>Manager</strong><small>Seu servidor no PC</small></span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></button><button type=\"button\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z\"/></svg><span><strong>Minecraft</strong><small>Encontre onde jogar</small></span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></button><button type=\"button\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2V11.5A8.5 8.5 0 0 1 10.5 3h2a8.5 8.5 0 0 1 8.5 8.5Z\"/><path d=\"M7 10h10M7 14h6\"/></svg><span><strong>Community</strong><small>A conversa continua</small></span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></button></div>",
+      "css": ".ds-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#354039}.ds-tabs button{display:flex;align-items:center;gap:15px;border:0;padding:19px 28px;background:#202925;color:#dfe8e1;text-align:left;position:relative;cursor:pointer;font-family:Manrope,system-ui,sans-serif;line-height:1.6;transition:background .25s,color .25s}.ds-tabs button:after{content:\"\";position:absolute;bottom:0;left:0;right:0;height:4px;background:transparent;transition:background .3s}.ds-tabs button[aria-selected=true]{background:var(--mint,#e1f0e4);color:#173723}.ds-tabs button[aria-selected=true]:after{background:var(--green,#43cd75)}.ds-tabs button:not([aria-selected=true]):hover{background:#35473c}.ds-tabs button>span{flex:1}.ds-tabs strong{display:block;font-size:17px;font-weight:800}.ds-tabs small{font-size:12px;display:block}.ds-tabs svg{width:21px;height:21px;flex:none}.ds-tabs button>svg:last-child{opacity:.35;transform:rotate(-45deg);transition:transform .3s var(--ease,cubic-bezier(.16,1,.3,1)),opacity .3s}.ds-tabs button[aria-selected=true]>svg:last-child{opacity:1;transform:none}.ds-tabs button:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;outline-offset:-7px;z-index:2}@media(max-width:980px){.ds-tabs button{padding:16px;gap:10px}.ds-tabs button>svg:last-child{display:none}.ds-tabs strong{font-size:15px}.ds-tabs small{font-size:11px}}@media(max-width:640px){.ds-tabs button{padding:12px 5px;flex-direction:column;gap:6px;text-align:center}.ds-tabs strong{font-size:12px}.ds-tabs small{display:none}.ds-tabs button:after{height:3px}.ds-tabs button:focus-visible{outline-offset:-4px}}@media(prefers-reduced-motion:reduce){.ds-tabs button,.ds-tabs button:after,.ds-tabs button>svg:last-child{transition:none}}"
+    },
+    {
+      "name": "Rotina selecionada",
+      "kind": "button",
+      "refersTo": "routine-step",
+      "description": "Linha branca sobre menta com rótulo, detalhe e confirmação.",
+      "html": "<button class=\"ds-routine\" type=\"button\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2\"/></svg><span>Backup automático<small>Uma rotina a menos para lembrar</small></span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg></button>",
+      "css": ".ds-routine{display:flex;align-items:center;gap:10px;padding:13px 10px;margin:3px 0;border:0;border-radius:8px;width:100%;text-align:left;background:transparent;color:#274632;cursor:pointer;font-family:Manrope,system-ui,sans-serif;line-height:1.6;transition:background .2s,transform .2s}.ds-routine:hover{background:#d1e7d6}.ds-routine[aria-pressed=true]{background:var(--white,#fff);box-shadow:0 7px 20px #214a2810}.ds-routine>span{flex:1;font-size:11px;font-weight:800}.ds-routine small{display:block;font-size:11px;font-weight:500;margin-top:2px}.ds-routine svg{width:17px;height:17px;flex:none}.ds-routine>svg:last-child{width:15px;height:15px}.ds-routine:focus-visible{outline:3px solid var(--focus,#318bd1);outline-offset:4px;}@media(max-width:640px){.ds-routine>span{font-size:12px}}@media(prefers-reduced-motion:reduce){.ds-routine{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Panorama com perspectivas",
+    "overview": "Uma identidade jovem, clara e calorosa, construída com imagens próprias, tipografia firme e controles que convidam ao uso. O mundo real da comunidade aproxima software e pessoas: fotografias amplas convivem com recortes reconhecíveis dos produtos, sem transformar a marca em uma apresentação corporativa.\n\nO papel claro dá espaço à leitura; o grafite organiza navegação e áreas de maior concentração. Verde, azul e dourado distinguem ações e contextos. A densidade é baixa nos títulos e maior nos controles e demonstrações. O movimento responde à escolha da pessoa e preserva a compreensão quando reduzido.",
+    "keyCharacteristics": [
+      "Manrope de forte presença nos títulos e leitura direta nos controles.",
+      "Imagens próprias com recortes horizontais e interfaces demonstrativas identificadas.",
+      "Ação verde, descoberta azul e convivência dourada sobre bases claras e grafite.",
+      "Superfícies arredondadas, controles compactos e sombras reservadas a sobreposições.",
+      "Interação manual, foco visível e adaptação real ao espaço disponível."
+    ],
+    "rules": [
+      {
+        "name": "The Cor com função Rule",
+        "body": "Verde orienta a ação; azul e dourado identificam contextos; violeta identifica Team. A cor acompanha um rótulo ou estado explícito e nunca é a única informação.",
+        "section": "colors"
+      },
+      {
+        "name": "The Uma família, várias escalas Rule",
+        "body": "A mesma Manrope sustenta títulos e controles; o peso 800 e o espaçamento negativo distinguem os títulos, enquanto os parágrafos mantêm ritmo aberto.",
+        "section": "typography"
+      },
+      {
+        "name": "The Profundidade localizada Rule",
+        "body": "O fundo e os módulos de conteúdo permanecem planos; a sombra evidencia uma prévia sobreposta, um controle selecionado ou uma camada temporária.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** usar imagens próprias e identificar recortes com conteúdo demonstrativo.",
+      "**Do** preservar as funções de verde, azul, dourado e violeta junto a rótulos claros.",
+      "**Do** manter Manrope, títulos firmes e controles com texto legível.",
+      "**Do** reutilizar o componente compartilhado de conta sem redesenhá-lo.",
+      "**Do** preservar foco visível, operação por teclado e compreensão sem movimento.",
+      "**Do** manter espaços entre palavras quando uma quebra editorial deixa de aparecer no celular."
+    ],
+    "donts": [
+      "**Don't** transformar o panorama manual em carrossel automático.",
+      "**Don't** acrescentar prefixos ornamentais acima dos títulos ou substituir SVG por glifos de texto.",
+      "**Don't** espalhar sombras sobre os módulos que o sistema apresenta como planos.",
+      "**Don't** tratar o selo de assinatura e a identificação de servidor oficial como o mesmo sinal.",
+      "**Don't** transformar as notas compactas em padrão para o texto principal."
+    ]
+  }
+}
