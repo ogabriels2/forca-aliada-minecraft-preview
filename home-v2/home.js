@@ -41,39 +41,6 @@
   });
   matchMedia('(min-width: 981px)').addEventListener('change', e => { if (e.matches) closeMenu(); });
 
-  const productTabs = $$('[data-product]');
-  function selectProduct(name, focus = false) {
-    const active = productTabs.find(tab => tab.dataset.product === name);
-    if (!active) return;
-    const wasActive = active.getAttribute('aria-selected') === 'true';
-    productTabs.forEach(tab => {
-      const selected = tab === active;
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      $('#' + tab.getAttribute('aria-controls')).hidden = !selected;
-    });
-    $('.product-showcase').dataset.view = name;
-    if (!wasActive) {
-      const panel = $('#' + active.getAttribute('aria-controls'));
-      enter($('.stage-copy', panel), 12);
-      enter(panel.lastElementChild, 23, 45);
-    }
-    if (focus) active.focus({preventScroll: true});
-  }
-  productTabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => selectProduct(tab.dataset.product));
-    tab.addEventListener('keydown', e => {
-      let next = index;
-      if (e.key === 'ArrowRight') next = (index + 1) % productTabs.length;
-      else if (e.key === 'ArrowLeft') next = (index + productTabs.length - 1) % productTabs.length;
-      else if (e.key === 'Home') next = 0;
-      else if (e.key === 'End') next = productTabs.length - 1;
-      else return;
-      e.preventDefault();
-      selectProduct(productTabs[next].dataset.product, true);
-    });
-  });
-
   const routineDetails = {
     backup: 'Escolha quando fazer o backup. O Manager cuida da rotina enquanto o computador está ligado.',
     remote: 'Abra o console no navegador para acompanhar jogadores, arquivos e terminal, mesmo longe do PC que hospeda o mundo.',
@@ -129,15 +96,16 @@
     }
   }));
   const photoDialog = $('#photo-dialog');
-  const photoOpen = $('.photo-open');
-  photoOpen.addEventListener('click', () => {
+  let photoOpen;
+  $$('.photo-open').forEach(button=>button.addEventListener('click', () => {
+    photoOpen=button;
     $('#photo-large').src = photoOpen.dataset.image;
     $('#photo-large').alt = photoOpen.dataset.caption;
     $('#photo-caption').textContent = photoOpen.dataset.caption;
     photoDialog.showModal();
     document.body.style.overflow = 'hidden';
     enter(photoDialog, 16);
-  });
+  }));
   function closePhoto() { document.body.style.overflow = ''; photoDialog.close(); }
   $('.photo-close').addEventListener('click', closePhoto);
   photoDialog.addEventListener('cancel', () => { document.body.style.overflow = ''; });
@@ -146,7 +114,7 @@
     const box = photoDialog.getBoundingClientRect();
     if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) closePhoto();
   });
-  photoDialog.addEventListener('close', () => {document.body.style.overflow = ''; photoOpen.focus({preventScroll: true});});
+  photoDialog.addEventListener('close', () => {document.body.style.overflow = ''; photoOpen?.focus({preventScroll: true});});
   $$('.faq-list details').forEach(detail => detail.addEventListener('toggle', () => {
     if (detail.open) enter($('p', detail), 6);
   }));
@@ -177,10 +145,6 @@
     const session = member ? {username: 'Conta exemplo', displayName: 'Conta de demonstração', avatarUrl: new URL('media/avatar-demo.svg', location.href).href} : null;
     window.FAAccountMenu?.mount($('#account'), session, {onLogout: () => persona('guest')});
     window.FAAccountMenu?.setPlan(member ? {name: 'Força Aliada Pro', tone: 'active', status: 'Assinatura ativa'} : {kind: 'free'});
-    const primary = $('#hero-primary');
-    primary.href = member ? 'https://console.forcaaliada.com' : '#assinatura';
-    primary.innerHTML = `${member ? 'Abrir console' : 'Conhecer planos'} <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg>`;
-    $('.hero-note').textContent = member ? 'Conta e assinatura demonstrativas. Nenhum dado real é acessado nesta prévia.' : 'Explorar e participar é grátis. O Manager faz parte da assinatura.';
     $$('[data-plan-link]').forEach(link => {
       if (member) {
         link.dataset.originalHref = link.href;
@@ -194,6 +158,7 @@
       }
     });
     document.body.dataset.persona = member ? 'member' : 'guest';
+    document.dispatchEvent(new CustomEvent('home:persona', {detail:{member}}));
   }
   $('#preview-persona').addEventListener('change', e => persona(e.target.value));
   persona('guest');

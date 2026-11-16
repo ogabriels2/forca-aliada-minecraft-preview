@@ -60,7 +60,7 @@ As práticas observadas não provam aumento de conversão para a Força Aliada. 
 - **Nomes desconhecidos precisam de contexto.** “Manager” ganha “Seu servidor no PC”; “Minecraft”, “Encontre onde jogar”; “Community”, “A conversa continua”. Familiaridade anterior ajuda marcas conhecidas, mas não pode ser presumida aqui. [NN/g: information scent](https://www.nngroup.com/articles/information-scent/).
 - **Mostrar a amplitude sem esgotar o catálogo.** Os três usos aparecem cedo e os recursos secundários vêm depois. A pesquisa Baymard é de comércio eletrônico; usamos a conclusão qualitativa sobre percepção de escopo, não transplantamos seus percentuais ou previsões de venda. [Baymard: amplitude na home](https://baymard.com/research-articles/inferring-product-catalog-from-homepage).
 - **Detalhes sob demanda.** Opções avançadas e dúvidas ficam em seus produtos ou em perguntas expansíveis; condições essenciais do preço e do PC ligado permanecem visíveis. [NN/g: divulgação progressiva](https://www.nngroup.com/articles/progressive-disclosure/).
-- **Movimento controlado.** A pessoa troca as perspectivas. Não há carrossel automático, sequestro de rolagem ou texto sumindo durante a leitura. [NN/g: problemas de carrosséis automáticos](https://www.nngroup.com/articles/auto-forwarding/).
+- **Movimento controlado.** Na revisão cinematográfica, a câmera se move suavemente e pequenos exemplos de uso se alternam; ambos têm pausa. A demonstração também para durante interação. A proposta e os botões principais permanecem estáveis; não há sequestro de rolagem. A orientação sobre [carrosséis automáticos do NN/g](https://www.nngroup.com/articles/auto-forwarding/) informa essa separação entre mensagem essencial e animação auxiliar.
 
 ## O que mudou em relação à conversa com Claude
 
@@ -70,8 +70,8 @@ Depois das respostas do usuário, o destino padrão de login passou a ser o cat�
 
 ## Arquitetura da experiência
 
-1. **Primeiro contato:** proposta curta, entrada, assinatura e acesso gratuito. Um panorama com demonstrações selecionáveis dos três produtos.
-2. **Primeira ação:** conhecer o aplicativo ou buscar servidores diretamente; acessar Community e ferramentas sem uma etapa intermediária obrigatória.
+1. **Primeiro contato:** proposta curta, criação de conta e exploração gratuita. Cena própria em 3D com exemplos de descoberta, skins e convivência; a distinção entre gratuito e assinatura permanece visível.
+2. **Primeira ação:** explorar a plataforma ou buscar servidores diretamente; acessar o editor e Community sem uma etapa intermediária obrigatória. O Manager vem depois, com contexto comercial próprio.
 3. **Decisão comercial:** benefícios distribuídos pelos produtos, Pro em destaque e Team para maior capacidade. Anual informa o total cobrado e o equivalente mensal.
 4. **Confiança:** mundo real próprio, explicação breve da relação com a empresa, suporte e condições acessíveis.
 5. **Dúvidas:** respostas curtas às diferenças entre gratuito/pago, hospedagem local e conta compartilhada.
@@ -86,7 +86,7 @@ Para produção: usar os serviços existentes de catálogo e recomendação, res
 
 ## Engenharia e limites desta entrega
 
-Protótipo estático, sem coleta de dados ou chamadas autenticadas, com fonte local, imagens existentes da Força Aliada, ícones SVG e animações leves. O menu de conta é o componente compartilhado do Manager, com adaptação de caminhos para a prévia. Funciona por teclado e respeita movimento reduzido. Conteúdo e links principais continuam disponíveis sem JavaScript.
+Protótipo estático, sem coleta de dados ou chamadas autenticadas, com fonte local, imagens e arquitetura próprias da Força Aliada, ícones SVG, demonstrações animadas e 3D opcional carregado separadamente. O menu de conta é o componente compartilhado do Manager, com adaptação de caminhos para a prévia. Funciona por teclado e respeita movimento reduzido. Conteúdo e links principais continuam disponíveis sem JavaScript; as imagens equivalentes preservam a apresentação sem WebGL. Recursos e limites de desempenho estão em `HERO-3D.md`.
 
 Simulados e identificados: sessão/assinatura de exemplo, aplicativo e publicação ilustrativa. Preços refletem a página pública no momento da pesquisa. Não há pagamento, novo backend, alteração de sessão real nem redirecionamento global ativado.
 
@@ -97,6 +97,20 @@ Antes de substituir a home: aprovar direção e texto; conectar sessão e preço
 Em um teste com pessoas que não conhecem a marca, pedir que identifiquem o que a Força Aliada faz, o que é gratuito, onde o servidor roda e o que a assinatura acrescenta. Depois pedir três tarefas: encontrar onde jogar, conhecer o Manager e entender o plano anual. Observar hesitações, destino incorreto e expectativa errada, não apenas “gostou da cor?”.
 
 Quando houver tráfego suficiente, acompanhar primeira ação útil, acessos ao Manager/catálogo/Community, contratação concluída e retorno. Segmentar por origem, dispositivo e visitante/usuário, com consentimento. Não otimizar somente cliques em planos se isso aumentar abandono ou confusão. Sem volume suficiente, usar entrevistas e testes moderados em vez de declarar vencedor de A/B com amostra pequena.
+
+## Abertura imersiva e revisão de produto — 16/11/2026
+
+A plataforma para quem joga lidera: descoberta por interesses, recomendações, skins/editor, amigos e conversa. A criação de conta abre o caminho integrado; a alternativa de explorar continua pública. Manager aparece depois, com interface reconhecível, funções e condição de assinatura. Community é apresentado como rede social, não apenas como chat. O servidor próprio é uma nota de uso real e o cenário autoral, não um produto promovido como central.
+
+Foram inspecionadas as páginas de [Riot Games](https://www.riotgames.com/pt-br), [Roblox](https://www.roblox.com/), [Hostinger](https://www.hostinger.com/br) e [Apple MacBook Pro](https://www.apple.com/macbook-pro/). A leitura foi de hierarquia e comportamento, não de imitação de estilos: Riot usa uma campanha visual ampla; Roblox aproxima a entrada/cadastro da primeira experiência; Hostinger mantém a ação comercial clara sobre uma composição expressiva; Apple dá escala ao objeto demonstrado. Essas observações não provam aumento de conversão para a Força Aliada.
+
+As referências de composição também incluíram a curadoria por estilos/tipos do [SiteInspire](https://www.siteinspire.com/), a categoria [3D do Awwwards](https://www.awwwards.com/websites/3d/) e o trabalho interativo da [Lusion](https://lusion.co/). O método foi comparar primeira leitura, escala do objeto, espaço para texto, utilidade do movimento e custo de execução. Um site premiado não é automaticamente adequado a uma plataforma jovem ou a aparelhos modestos.
+
+O movimento segue a orientação de propósito e consistência do [Fluent 2](https://fluent2.microsoft.design/motion) e inclui pausa conforme a explicação de [Pause, Stop, Hide do W3C](https://www.w3.org/WAI/WCAG20/Understanding/pause-stop-hide.html). A escolha técnica combina [Three.js](https://threejs.org/docs/pages/WebGLRenderer.html) e GSAP local; foram consultadas as orientações oficiais de [GSAP para agentes](https://github.com/greensock/gsap-skills), instaladas para esta implementação.
+
+O cenário vem da cópia do mundo próprio, com geometria simplificada, cores de materiais e câmeras reais. Não é vídeo gerado por IA, nem uma captura do jogo com shaders. A seleção abrange as duas cidades e oferece vistas aéreas e de rua. Imagens equivalentes carregam antes da cena e cobrem a indisponibilidade de 3D. Texto, cadastro e navegação continuam independentes da renderização.
+
+A revisão completa está em `REVISAO.md`: elimina a seção grande que voltava a promover o servidor, torna o editor tangível com um personagem interativo, mostra o Manager em vez de representá-lo apenas com ícones e distingue benefícios pagos de acesso gratuito. Empresa, suporte e contato permanecem acessíveis para imprensa, criadores e parceiros; números de público, testemunhos ou vínculos comerciais não foram inventados.
 
 ## Recursos de design
 

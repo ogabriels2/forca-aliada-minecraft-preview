@@ -1,6 +1,6 @@
 ---
 name: "Força Aliada — home pública v2"
-description: "Panorama com perspectivas: criar, jogar e compartilhar em uma identidade clara e calorosa."
+description: "Mundo próprio, produtos em uso: uma identidade clara e calorosa para jogar, criar e compartilhar."
 colors:
   ink: "#182026"
   muted: "#52605e"
@@ -12,23 +12,25 @@ colors:
   green-ink: "#176237"
   mint: "#e1f0e4"
   gold: "#f0c45b"
-  sky: "#e1edf7"
   action-ink: "#112b1c"
   action-hover: "#60dd8d"
-  light-button: "#f9faf5"
-  light-ink: "#17231c"
-  light-hover: "#e3f4e7"
   focus: "#318bd1"
-  community-surface: "#f3e1ad"
-  community-ink: "#513a0a"
   team-surface: "#ded0ff"
   team-ink: "#4f238f"
+  discovery-blue: "#acd7f7"
+  hero-accent: "#c2f2b8"
+  scene-panel: "#11231cf7"
+  skin-surface: "#f2e7c8"
+  skin-ink: "#352d1c"
+  skin-ocean: "#3875a5"
+  skin-plum: "#805381"
+  skin-explorer: "#537b44"
 typography:
   display:
     fontFamily: "Manrope, system-ui, sans-serif"
-    fontSize: "clamp(44px,5.9vw,84px)"
+    fontSize: "clamp(58px,5.9vw,84px)"
     fontWeight: 800
-    lineHeight: 1.04
+    lineHeight: 1.02
     letterSpacing: "-.035em"
   headline:
     fontFamily: "Manrope, system-ui, sans-serif"
@@ -70,8 +72,10 @@ typography:
 rounded:
   tag: "4px"
   badge: "5px"
+  interest: "6px"
   compact: "7px"
   control: "8px"
+  field: "10px"
   preview: "12px"
   surface: "16px"
 spacing:
@@ -81,7 +85,7 @@ spacing:
   medium: "24px"
   large: "32px"
   gutter: "48px"
-  section: "80px"
+  section: "72px"
 components:
   button-primary:
     backgroundColor: "{colors.green}"
@@ -91,20 +95,17 @@ components:
     padding: "13px 23px"
   button-primary-hover:
     backgroundColor: "{colors.action-hover}"
-  button-light:
-    backgroundColor: "{colors.light-button}"
-    textColor: "{colors.light-ink}"
-    typography: "{typography.label}"
+  button-hero:
+    backgroundColor: "{colors.green}"
+    textColor: "{colors.action-ink}"
     rounded: "{rounded.control}"
-    padding: "13px 23px"
-  button-light-hover:
-    backgroundColor: "{colors.light-hover}"
+    padding: "16px 24px"
   text-link:
     typography: "{typography.link}"
   search-field:
     backgroundColor: "{colors.white}"
-    rounded: "{rounded.control}"
-    padding: "4px 5px 4px 13px"
+    rounded: "{rounded.field}"
+    padding: "7px 7px 7px 15px"
   navigation:
     backgroundColor: "{colors.night}"
     typography: "{typography.navigation}"
@@ -118,18 +119,29 @@ components:
     textColor: "#182c20"
     rounded: "{rounded.surface}"
     padding: "26px"
-  product-tab:
-    backgroundColor: "#202925"
-    textColor: "#dfe8e1"
-    padding: "19px 28px"
-  product-tab-manager-selected:
-    backgroundColor: "{colors.mint}"
-    textColor: "#173723"
+  scene-control:
+    backgroundColor: "#172b23cc"
+    textColor: "{colors.white}"
+    rounded: "{rounded.compact}"
+    padding: "10px 12px"
+  scene-story:
+    backgroundColor: "{colors.scene-panel}"
+    rounded: "{rounded.preview}"
+    padding: "18px 20px 12px"
+  skin-feature:
+    backgroundColor: "{colors.skin-surface}"
+    textColor: "{colors.skin-ink}"
+    rounded: "{rounded.surface}"
+    padding: "30px 28px 28px 12px"
+  skin-swatch:
+    textColor: "{colors.white}"
+    width: "38px"
+    height: "38px"
   routine-step:
     backgroundColor: "transparent"
     textColor: "#274632"
     rounded: "{rounded.control}"
-    padding: "13px 10px"
+    padding: "14px 17px"
   routine-step-selected:
     backgroundColor: "{colors.white}"
 ---
@@ -138,158 +150,159 @@ components:
 
 ## Overview
 
-**Creative North Star: "Panorama com perspectivas"**
+**Creative North Star: "Mundo próprio, produtos em uso"**
 
-Uma identidade jovem, clara e calorosa, construída com imagens próprias, tipografia firme e controles que convidam ao uso. O mundo real da comunidade aproxima software e pessoas: fotografias amplas convivem com recortes reconhecíveis dos produtos, sem transformar a marca em uma apresentação corporativa.
+Uma identidade jovem, clara e calorosa, construída com matéria visual própria, tipografia firme e controles que convidam ao uso. Grandes recortes do mundo e demonstrações reconhecíveis aproximam software e pessoas. A geometria em blocos mantém a origem da marca; a leitura da plataforma permanece à frente do cenário.
 
-O papel claro dá espaço à leitura; o grafite organiza navegação e áreas de maior concentração. Verde, azul e dourado distinguem ações e contextos. A densidade é baixa nos títulos e maior nos controles e demonstrações. O movimento responde à escolha da pessoa e preserva a compreensão quando reduzido.
+O papel claro dá espaço à leitura; o grafite organiza navegação e áreas de maior concentração. Verde, azul e dourado distinguem ações e contextos. A densidade é baixa nos títulos e maior nos controles e demonstrações. Movimento lento dá presença à cena; a pessoa pode pausá-lo e explorar os exemplos sem depender de animação.
 
 **Key Characteristics:**
 - Manrope de forte presença nos títulos e leitura direta nos controles.
-- Imagens próprias com recortes horizontais e interfaces demonstrativas identificadas.
-- Ação verde, descoberta azul e convivência dourada sobre bases claras e grafite.
-- Superfícies arredondadas, controles compactos e sombras reservadas a sobreposições.
-- Interação manual, foco visível e adaptação real ao espaço disponível.
+- Cidades próprias em blocos, imagens do produto e demonstrações identificadas.
+- Ação verde, descoberta azul e convivência dourada sobre papel e grafite.
+- Retângulos suaves, controles compactos e sombras localizadas.
+- Demonstrações pausáveis, foco visível e alternativas estáticas.
 
-Escopo: sistema extraído de `index.html`, `home.css`, `home.js` e do componente compartilhado de conta desta pasta. `BRIEF.md` registra a direção escolhida; `PRODUCT.md` fornece os compromissos de marca. Este documento descreve a prévia concluída, sem substituir a identidade do catálogo ou a implementação compartilhada de conta. A revisão final em `.impeccable/review/finish-review.md` tem disposição `ship` para a correção pontual avaliada.
+Registro atualizado por integração com a identidade existente em 16/11/2026. A paleta, Manrope, controles básicos e conta compartilhada foram preservados; a composição manual anterior permanece no histórico Git. Fontes: `index.html`, `home.css`, `cinema.css`, `platform-home.css`, `home.js`, `src/hero.js`, `src/world.js` e `src/skin.js`. `PRODUCT.md` fixa os compromissos de marca; `BRIEF.md` e `REVISAO.md` guardam a estratégia desta superfície. O seed herdado não foi corroborado: `BRIEF.md` registra **SEED UNKNOWN**, sem alegação de validação do sorteio.
 
 ## Colors
 
-A paleta combina papel levemente verde e grafite, com acentos funcionais que aproximam criação, descoberta e comunidade. Os valores normativos estão no frontmatter.
+A paleta mantém papel levemente verde e grafite, com acentos funcionais. Os valores normativos estão no frontmatter; as rampas do sidecar são derivações de visualização, não novas cores de interface.
 
 ### Primary
-- **Verde de ação (`green`):** chamadas principais e marca de seleção do Manager. O texto escuro de ação usa `action-ink`; o estado de aproximação usa `action-hover`.
-- **Verde de leitura (`green-ink`):** cursor de edição. Os títulos e links verdes têm variações locais observadas; não formam uma escala tonal publicada pelo código.
-- **Menta (`mint`):** contexto de criação e fundo da perspectiva selecionada do Manager.
+- **Verde de ação:** `green`, `action-ink` e `action-hover` orientam os botões principais.
+- **Menta:** `mint` sustenta a área do Manager; `green-ink` é o cursor dos campos.
+- **Verde de luz:** `hero-accent` destaca a segunda linha do título sobre a cena.
 
 ### Secondary
-- **Azul de descoberta (`sky`):** módulo do catálogo e perspectiva selecionada de Minecraft.
-- **Dourado de comunidade (`gold`):** seleção de Community e ícones de benefícios. `community-surface` e `community-ink` compõem o acesso à comunidade.
+- **Azul de descoberta:** `discovery-blue` identifica o acesso Minecraft na faixa de produtos.
+- **Dourado de comunidade:** `gold` acompanha benefícios; os contextos de Community e skins usam variações quentes locais. `skin-surface` e `skin-ink` compõem o módulo do personagem.
+- **Visuais de exemplo:** `skin-ocean`, `skin-plum` e `skin-explorer` identificam roupas selecionáveis, não categorias da marca.
 
 ### Tertiary
-- **Violeta Team (`team-surface`, `team-ink`):** identificação funcional do plano Team, sem competir com a ação verde. O componente de conta mantém seus próprios materiais de assinatura.
+- **Violeta Team:** `team-surface` e `team-ink` identificam o plano. O componente de conta conserva seus próprios materiais de assinatura.
 
 ### Neutral
-- **Tinta (`ink`) e texto secundário (`muted`):** leitura sobre superfícies claras.
-- **Papel (`paper`) e branco (`white`):** página e controles internos, respectivamente.
-- **Grafite (`night`):** cabeçalho, rodapé, área de assinatura e base do panorama.
-- **Linha suave (`line`):** separadores de FAQ, ferramentas e encerramento.
-- **Botão claro (`light-button`, `light-ink`, `light-hover`):** ação contextual sobre imagens e superfícies escuras.
-- **Azul de foco (`focus`):** contorno dos controles da home. A conta compartilhada conserva seu foco verde próprio.
+- **Tinta e texto secundário:** `ink` e `muted` mantêm a leitura nas superfícies claras.
+- **Papel, branco e linha suave:** `paper`, `white` e `line` organizam página, controles e separadores.
+- **Grafite e painel de cena:** `night` organiza navegação e assinatura; `scene-panel` dá contraste ao pequeno demonstrador sobre o mundo.
+- **Azul de foco:** `focus` contorna os controles da home. A conta compartilhada mantém seu próprio foco.
 
 **The Cor com função Rule.** Verde orienta a ação; azul e dourado identificam contextos; violeta identifica Team. A cor acompanha um rótulo ou estado explícito e nunca é a única informação.
-
-As rampas do sidecar são derivações para visualização da paleta, não novos valores aplicados à interface.
 
 ## Typography
 
 **Display Font:** Manrope variável local, com fallback `system-ui, sans-serif`.
 
-**Body Font:** a mesma Manrope. Não há uma segunda família editorial nem uma fonte mono no sistema da home. A conta compartilhada conserva também `Inter` em seu fallback interno.
+**Body Font:** a mesma Manrope. Não há segunda família editorial nem fonte mono na home. A conta compartilhada conserva sua pilha interna.
 
-**Character:** títulos pesados, próximos e compactos; parágrafos mais leves e abertos. A hierarquia usa diferenças de escala e peso, sem prefixos ornamentais acima dos títulos.
+**Character:** títulos pesados e compactos, parágrafos leves e abertos. Escala, peso e espaço estabelecem a hierarquia.
 
 ### Hierarchy
-- **Display:** papel `display`, reservado ao título de abertura. Em até 980 px passa a 64 px; em até 640 px usa `clamp(38px,10.4vw,62px)` e espaçamento de letras de `-.04em`.
-- **Headline:** papel `headline`, base dos títulos de seção. Existem ajustes contextuais, como 44 px na história e 40 px na FAQ em telas amplas.
-- **Title:** papel `title`, base dos títulos de módulos; variações locais entre 27 e 31 px se acomodam à composição.
-- **Body:** papel `body`; textos de módulos usam 13–15 px e entrelinha de 1.6–1.75 conforme a largura. A abertura usa `lead`, com limite de 46 caracteres tipográficos (`46ch`), reduzido a 43 no celular.
-- **Label:** papel `label` para a chamada principal. A navegação usa o papel `navigation`; links de texto têm 14 px e peso 750, com variantes menores por contexto.
-- **Notas:** 11–12 px para condições, metadados e indicações de demonstração. São texto auxiliar, sem substituir a explicação principal.
-- **Preços:** números tabulares, peso 800; valor Pro de 52 px, reduzido a 48 px no celular, e Team de 27 px.
+- **Display:** papel `display` na abertura, com peso 800. Entre 901 e 1100 px usa 68 px; até 900 px usa `clamp(42px,8.4vw,64px)`; até 380 px usa 42 px. O limite efetivo em telas amplas é 84 px, aplicado pela última folha de estilos.
+- **Headline:** papel `headline` para seções. Manager usa `clamp(34px,3.5vw,49px)`; descoberta e Manager usam 35 px até 760 px. Assinatura e FAQ mantêm seus ajustes locais.
+- **Title:** papel `title` nos módulos. Skins usa 34 px com entrelinha 1.12, reduzindo para 29, 27 e 25 px conforme o espaço; Community parte de 32 px e chega a 29 px.
+- **Body:** papel `body` na leitura principal. Descoberta usa entrelinha 1.7; Manager e social, 1.75. O `lead` da abertura tem largura máxima de 430 px e cai para 15 px até 900 px, depois 14 px até 380 px.
+- **Label:** `label`, `navigation` e `link` mantêm a família comum. A chamada da abertura usa 15 px, reduzidos a 13 px até 900 px.
+- **Notas:** 11–12 px para metadados, demonstração e condições. Não substituem a explicação principal.
+- **Preços:** números tabulares e peso 800; Pro usa 52 px, reduzidos a 48 px no celular; Team usa 27 px.
 
 **The Uma família, várias escalas Rule.** A mesma Manrope sustenta títulos e controles; o peso 800 e o espaçamento negativo distinguem os títulos, enquanto os parágrafos mantêm ritmo aberto.
 
 ## Layout
 
-O contêiner principal tem largura máxima de 1328 px. As margens laterais são 48 px na base, 32 px até 1200 px e 18 px até 640 px. O cabeçalho usa contêiner próprio de até 1536 px; sua altura mínima é 78 px, depois 70 px até 980 px e 66 px até 640 px. Ele permanece preso ao topo.
+O conteúdo usa contêiner de até 1328 px, com margens laterais de 48 px, reduzidas a 32 px até 1200 px e 18 px até 640 px. O cabeçalho preso ao topo tem contêiner de até 1536 px e altura mínima de 78 px, depois 70 px até 980 px e 66 px até 640 px. O menu da conta conserva seus próprios pontos de adaptação.
 
-A composição alterna campos largos com grupos assimétricos: abertura em proporção 1.25:1, descoberta em 1.55:1 e assinatura em duas colunas. São relações observadas por seção, não um grid obrigatório para novas páginas. O ritmo reutiliza intervalos de 8, 12, 16, 24, 32 e 48 px, com seções amplas próximas de 80 px. Ajustes locais existem e não implicam uma escala matemática rígida.
+A cena atravessa a largura da janela. A altura parte de `calc(100svh - 112px)`, limitada entre 730 e 1050 px; até 1100 px o mínimo é 720 px; até 900 px a altura fixa é 850 px. Texto e ações ficam à esquerda, com demonstração no canto inferior direito. Até 900 px, mensagem, ações, cidade e demonstração seguem uma leitura vertical. A imagem móvel tem enquadramento próprio. Os controles de vista só aparecem ao explorar; não disputam a primeira leitura com a ação principal.
 
-Até 1200 px, os intervalos e módulos se compactam. Até 980 px, a navegação vira menu, o título da abertura ocupa uma faixa própria e a proposta ainda pode dividir espaço com as ações. Até 640 px, a ordem fica linear: título, proposta, ações, seletor e demonstração; descoberta, assinatura, FAQ e encerramento passam a uma coluna. O rodapé mantém duas colunas de links. O componente de conta tem adaptação própria em 600 px; a regra de 420 px vinculada ao cabeçalho do Manager não é uma regra geral desta home.
+A implementação atual apresenta descoberta e skin em duas colunas iguais, social atravessando ambas, Manager em proporção .8:1.3 e assinatura em duas colunas. Até 1100 px a skin empilha personagem e texto; até 760 px, a página de produtos passa a uma coluna e a skin volta a duas partes compactas lado a lado. A faixa de produtos empilha até 900 px; assinatura e FAQ passam a uma coluna até 640 px. Estas relações descrevem a home, não um grid obrigatório para toda a marca.
 
-O panorama mede 424 px de altura na base, 462 px a partir de 1600 px, 390 px até 1200 px, 365 px até 980 px e 550 px no celular. A altura maior no celular acomoda texto e demonstração empilhados. As três opções de produto continuam visíveis; seus subtítulos são ocultados no menor formato. Quebras de linha editoriais que desaparecem no celular preservam espaços entre palavras.
+Intervalos recorrentes de 8, 12, 16, 24, 32 e 48 px convivem com respiros maiores por seção. Descoberta usa 84/64 px verticais; Manager, 72/48 px; no celular, 48/38 e 44/34 px, respectivamente. O rodapé preserva duas colunas de links no celular. Quebras editoriais nunca devem unir palavras quando removidas.
 
 ## Elevation & Depth
 
-A base é plana, com profundidade por contraste de superfície, fotografia e sobreposição. Sombras suaves sustentam as prévias de produto, o menu de conta, a imagem ampliada e os avisos. Pequenas rotações nas prévias e no selo do mundo acrescentam informalidade sem alterar a geometria dos controles.
+A base permanece plana, com profundidade pelo cenário iluminado, contraste e sobreposição. A sombra separa a pequena demonstração do mundo, destaca o aplicativo e marca camadas temporárias. Luz, sombra e neblina pertencem à cena em blocos; não são decoração aplicada a todos os controles.
 
 ### Shadow Vocabulary
-- **Prévia sobre o panorama:** `0 20px 52px #07160f2e`, compartilhada pela janela do Manager, cartão de servidor e publicação.
-- **Ação em aproximação:** `0 7px 18px #1028171c`, apenas na chamada verde em hover.
-- **Rotina selecionada:** `0 7px 20px #214a2810`, reforço discreto sobre menta.
-- **Conta compartilhada:** `0 16px 48px #09131930`, aplicado pelo componente existente.
-- **Imagem ampliada:** `0 24px 80px #0005`, com fundo escurecido do diálogo.
-- **Aviso temporário:** `0 8px 28px #0002`.
+- **Demonstração sobre a cena:** `0 16px 44px #09130e40`.
+- **Imagem do Manager:** `0 20px 38px #19382326`.
+- **Ação em aproximação:** `0 7px 18px #1028171c`.
+- **Rotina selecionada:** `0 7px 20px #214a2810`.
+- **Imagem ampliada:** `0 24px 80px #0005`, sobre fundo escurecido.
 
-**The Profundidade localizada Rule.** O fundo e os módulos de conteúdo permanecem planos; a sombra evidencia uma prévia sobreposta, um controle selecionado ou uma camada temporária.
+**The Profundidade localizada Rule.** O fundo e os módulos de conteúdo permanecem planos; a sombra evidencia uma demonstração sobreposta, o aplicativo, um controle selecionado ou uma camada temporária.
 
 ## Shapes
 
-Superfícies principais usam o raio `surface`; controles usam `control`; prévias e diálogo usam `preview`. Etiquetas e selos têm raios menores (`tag`, `badge`, `compact`). São retângulos suavizados, sem converter toda a interface em pílulas. A janela do Manager tem cantos superiores de 10 px e base reta, coerente com o recorte de aplicativo.
+Superfícies principais usam `surface`, controles usam `control`, a busca usa `field` e a demonstração usa `preview`. Selos e pequenas etiquetas usam raios menores. O círculo é reservado a avatar, escolha de visual e giro do personagem. Balões têm um canto menor para sugerir o lado da conversa. A geometria do mundo e do personagem é deliberadamente em blocos; isso não impõe cantos retos aos controles.
 
-O panorama e as fotos recortam a mídia dentro da própria forma. Na base desktop, o cartão de servidor gira 1,5 grau, a publicação gira −1 grau e o selo do mundo gira 3 graus. As linhas divisórias são finas e contidas; não há moldura espessa universal.
-
-Ícones de contorno são SVG, normalmente de 21 px, com traço 1.8 e pontas arredondadas. Variantes menores acompanham controles e metadados. O logotipo é o ativo de marca existente. A conta compartilhada mantém sua geometria e seus materiais próprios.
+Ícones de contorno são SVG, normalmente de 21 px, traço 1.8 e pontas arredondadas. Variantes menores acompanham controles e metadados. O logotipo e a conta reutilizam os ativos existentes.
 
 ## Components
 
 ### Buttons
 
-Diretos e compactos, com texto firme e seta que indica continuidade.
+Diretos e compactos, com texto firme e seta de continuidade.
 
-- **Primário:** `button-primary`; altura mínima de 50 px, espaço de 22 px entre texto e ícone. Em hover sobe 2 px, clareia e recebe sombra; em clique retorna e reduz a escala para .98.
-- **Claro:** `button-light`, a mesma forma sobre imagens e grafite, com superfície clara no lugar do verde.
-- **Link de texto:** sem caixa, 14 px, peso 750, altura mínima de 40 px e intervalo de 14 px. Em hover ganha sublinhado e desloca a seta 4 px; a seta dos botões se desloca 3 px.
-- **Foco:** contorno de 3 px com afastamento de 4 px. Controles indisponíveis ficam com opacidade .5 e cursor de indisponibilidade.
+- **Primário:** `button-primary`, altura mínima de 50 px e intervalo de 22 px. Hover sobe 2 px, clareia e recebe sombra; clique retorna e reduz a escala para .98.
+- **Abertura:** `button-hero`, altura mínima de 54 px. Até 900 px, altura mínima de 48 px e preenchimento de 13 × 19 px. A alternativa é um link branco sem caixa.
+- **Link de texto:** `text-link`, altura mínima de 40 px e intervalo de 14 px. Hover sublinha e desloca a seta 4 px; a seta do botão se desloca 3 px.
+- **Foco:** contorno de 3 px com afastamento de 4 px. Estados indisponíveis usam opacidade .5 e cursor próprio. O movimento de hover é removido com redução de movimento.
 
 ### Inputs / Fields
 
-Busca integrada a uma superfície branca, com ícone de entrada e botão azul no final. O campo usa 13 px; o botão mede 40 × 40 px. O foco pertence ao conjunto, com anel `0 0 0 2px #477ba1`, evitando dois contornos sobrepostos. Não existem estilos de erro ou validação de formulário a generalizar nesta prévia.
+Busca branca, borda discreta e botão verde escuro, com ícone na entrada. O campo usa 13 px, reduzidos a 12 px até 760 px; o botão mantém pelo menos 44 × 44 px. O foco é do conjunto, com anel `0 0 0 2px #477ba1`. O envio e os links de estilos encaminham ao catálogo existente. Não há estados de erro de formulário a generalizar.
 
 ### Navigation
 
-Faixa grafite com marca, navegação e conta. Os links usam o papel `navigation` e revelam uma linha verde de 2 px em hover. Até 980 px o botão abre a navegação vertical com rótulo, descrição e ícone por produto. Escape, clique externo e deslocamento de foco para fora fecham o menu; os links também o fecham.
+Faixa grafite com marca, produtos e conta. Links desktop revelam linha verde de 2 px em hover. Até 980 px a navegação abre verticalmente com descrição e ícone; Escape, clique externo, saída do foco e seleção de um destino a fecham. A faixa abaixo da cena dá acessos completos a Minecraft, Manager e Community, com cor e rótulo.
 
-A conta é `FAAccountMenu`, compartilhada com o Manager. Reutilizar o componente e seus arquivos de origem; não construir um segundo menu a partir dos tokens desta página. Seu dropdown, foco, avatar e selo de assinatura pertencem ao contrato compartilhado.
+A conta é `FAAccountMenu`, compartilhada com o Manager. Reutilizar o componente, sua geometria, foco, avatar e materiais de assinatura. Não derivar uma segunda conta dos tokens da home. A barra de persona e campanha é ferramenta desta prévia.
 
 ### Chips
 
-Etiquetas identificam plataformas e planos; não são adornos de abertura. As etiquetas de mundo têm fundo neutro e raio `tag`. Pro usa um gradiente dourado; Team usa `badge-team`. O significado de plano não se confunde com o selo de servidor oficial.
+Selos Pro e Team identificam assinatura; não significam verificação de servidor. Links de interesse são controles compactos sobre fundo neutro, com 40 px de altura mínima e raio de 6 px. Na skin, a escolha circular mantém `aria-pressed`, marca de confirmação e contorno, sem depender só da cor.
 
 ### Cards / Containers
 
-Módulos de criação, descoberta e comunidade usam superfícies menta, azul e dourada, respectivamente, com cantos `surface` e sem sombra em repouso. O cartão de plano usa `plan-card`; o controle de período mostra a seleção em superfície clara sobre grafite. Os valores e os links de contratação mudam juntos ao selecionar o período.
+O personagem ocupa uma superfície quente e o Manager um campo menta. A demonstração sobre a cena usa superfície escura quase opaca. O cartão Pro usa `plan-card` sobre grafite; Team permanece em superfície escura própria. O seletor de período muda preço, nota de cobrança e destino juntos. As notas permanecem próximas da decisão.
 
-### Panorama de produtos
+### Cena própria e demonstração de produtos
 
-Três botões sem rolagem automática escolhem perspectivas da mesma imagem. O estado ativo combina fundo, faixa inferior de 4 px, rótulo e `aria-selected`; no celular a faixa mede 3 px. Setas, Home e End navegam entre as opções; apenas a opção ativa integra a sequência de Tab. O painel exibe título, contexto, ação e uma prévia real ou demonstrativa identificada.
+A abertura usa geometria extraída em leitura de uma cópia do mundo próprio: dois recortes de cidades, interpretados por superfícies em blocos. É uma aproximação deliberada de formas, não reprodução integral dos modelos do Minecraft. As imagens de espera são renderizações da mesma geometria; não há raster de IA. Procedência e limites estão em `HERO-3D.md`.
 
-A transição do conteúdo dura 440 ms com a curva `cubic-bezier(.16,1,.3,1)`; o segundo elemento entra 45 ms depois. O enquadramento do mundo muda em 1,2 s. Controles comuns transitam em 180–300 ms. Com redução de movimento, transições e animações são desligadas, o enquadramento fica sem escala animada e os cartões de prévia ficam sem rotação.
+Título, proposta e ação permanecem estáveis; campanhas mudam por escolha da prévia ou configuração. O pequeno demonstrador alterna servidores, skins e amigos a cada 7 s, com progresso de 6.4 s, entrada de 350 ms e curva `power3.out`. Hover ou foco nessa área pausa sua sequência; o botão geral pausa sequência e passeio. A cena faz um percurso lento de ida e volta em 26 s, sem trocar de vista automaticamente. Explorar recolhe texto e demonstração, revela quatro vistas e permite retornar com Escape. É uma escolha explícita da pessoa.
 
-### Rotina interativa
+O poster aparece primeiro. WebGL, dados de geometria ou descompressão indisponíveis preservam a imagem e os destinos de produto. A segunda cidade é carregada sob demanda. O passeio para fora da tela e com aba oculta; a demonstração também pausa nesses estados. Redução de movimento inicia o conjunto pausado, elimina as transições CSS e torna seleções diretas imediatas; o controle de reprodução continua explícito. O render limita-se a cerca de 30 quadros/s e reduz a resolução quando necessário. O sidecar exemplifica controles e estados visuais, não emula a cena 3D.
 
-Linhas de rotina compartilham raio `control` e fundo transparente. A seleção fica branca, com ícone de confirmação, sombra leve e `aria-pressed`; a explicação atualizada é anunciada de forma discreta. O texto permanece utilizável sem animação.
+### Skin interativa
 
-### FAQ, imagem e retorno de ação
+O personagem não gira sozinho. Três looks são compostos a partir das camadas `SAMPLE_PARTS` existentes do editor e identificados como demonstração. Trocar roupa atualiza o personagem; girar avança 90 graus em 650 ms com `power3.out`, imediatamente sob redução de movimento. A inicialização é próxima à entrada na tela. Sem WebGL, a imagem permanece e os botões ainda trocam o visual; o giro fica oculto até o modelo estar pronto. A ação final abre o editor existente.
 
-A FAQ usa divisórias e o elemento nativo `details`, sem cartões adicionais; o chevron gira com a abertura. A imagem ampliada usa diálogo modal com botão de fechamento e devolve o foco à origem. Copiar o endereço produz um aviso temporário com anúncio acessível, durante 4,5 s.
+### Publicação e conversa
+
+A composição combina avatar de exemplo, imagem do mundo próprio, legenda, sinais de reação e dois balões. A publicação e as mensagens são ilustrativas, mesmo quando a imagem tem origem real. A indicação de exemplo é visível. Não são dados de atividade de usuários, nem botões sociais funcionais dentro da home.
+
+### Manager, FAQ e imagem ampliada
+
+A interface do Manager é uma imagem demonstrativa ampliável. Três rotinas mudam seleção, ícone e explicação com anúncio discreto; a entrada dura 440 ms quando movimento é permitido. FAQ usa `details` nativo e divisórias, com chevron que gira. A imagem ampliada usa diálogo modal, fechamento explícito e retorno do foco à origem. A janela real do aplicativo não é simulada por controles sem função na home.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** usar imagens próprias e identificar recortes com conteúdo demonstrativo.
-- **Do** preservar as funções de verde, azul, dourado e violeta junto a rótulos claros.
-- **Do** manter Manrope, títulos firmes e controles com texto legível.
+- **Do** usar matéria visual própria e identificar dados e conversas demonstrativos.
+- **Do** preservar Manrope, verde de ação e os contextos de cor junto a rótulos claros.
 - **Do** reutilizar o componente compartilhado de conta sem redesenhá-lo.
-- **Do** preservar foco visível, operação por teclado e compreensão sem movimento.
-- **Do** manter espaços entre palavras quando uma quebra editorial deixa de aparecer no celular.
+- **Do** manter texto e destinos úteis antes do carregamento do 3D.
+- **Do** oferecer pausa, foco visível e compreensão sem movimento.
+- **Do** preservar espaços entre palavras quando uma quebra editorial desaparece.
 
 ### Don't:
-- **Don't** transformar o panorama manual em carrossel automático.
-- **Don't** acrescentar prefixos ornamentais acima dos títulos ou substituir SVG por glifos de texto.
+- **Don't** trocar automaticamente o título ou a oferta comercial junto à demonstração.
+- **Don't** apresentar a geometria simplificada como reprodução integral do jogo ou as mensagens como atividade real.
+- **Don't** acrescentar prefixos ornamentais aos títulos ou substituir SVG por glifos de texto.
 - **Don't** espalhar sombras sobre os módulos que o sistema apresenta como planos.
-- **Don't** tratar o selo de assinatura e a identificação de servidor oficial como o mesmo sinal.
-- **Don't** transformar as notas compactas em padrão para o texto principal.
+- **Don't** tratar selo de assinatura e identificação de servidor como o mesmo sinal.
+- **Don't** transformar notas compactas em padrão para o texto principal.
 
-Não canonizado: a variável `--violet` está declarada, mas não é consumida pelo CSS da home; o violeta Team documentado vem dos valores realmente aplicados. A barra de prévia é ferramenta de demonstração, não padrão de navegação pública. Nenhum defeito foi reparado nesta documentação; a separação de palavras no celular já consta como resolvida na revisão final.
+Não canonizado: `home.css` ainda contém o panorama manual e estilos sem uso nesta composição, incluindo a variável `--violet`; sua existência não os torna padrões da versão atual. A barra de prévia não é navegação pública. O seed herdado permanece desconhecido. Este passe registra a implementação e não repara esses resíduos nem valida intenção com testes de interface.

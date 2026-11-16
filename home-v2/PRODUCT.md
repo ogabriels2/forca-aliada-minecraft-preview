@@ -1,6 +1,6 @@
 # Força Aliada — nova home pública
 
-Protótipo isolado. Não substitui a home de produção nem o catálogo. Público inicial: jogadores de Minecraft, pessoas que criam servidores e comunidades. Marca com espaço para outros produtos, comunicada pelo que oferece hoje.
+Protótipo isolado. Não substitui a home de produção nem o catálogo. Público inicial: jogadores de Minecraft, pessoas que criam servidores e comunidades. Marca com espaço para outros produtos, comunicada pelo que oferece hoje. A plataforma para quem joga é o produto principal: descoberta por interesses e recomendações, favoritos, amigos, chat e skins/editor. A conta é o início dessa experiência integrada. Manager recebe destaque comercial depois dessa apresentação; o servidor próprio nunca é o produto central.
 
 O Manager é aplicativo Windows para criar/importar e administrar servidores no PC do dono, com endereço protegido, automações e console remoto. O computador precisa permanecer ligado. A assinatura Pro/Team inclui Manager, benefícios pessoais no Community e personalização avançada da página Minecraft. O catálogo, as páginas básicas, as skins e a participação no Community não exigem assinatura. O selo de domínio/servidor e o selo de perfil assinante têm significados diferentes.
 

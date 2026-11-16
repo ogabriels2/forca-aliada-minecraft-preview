@@ -2,7 +2,9 @@
 
 Protótipo público isolado em `/home-v2/`. Não modifica a aplicação Minecraft da raiz, a prévia antiga em `/home/` ou a home do domínio principal.
 
-- `index.html`, `home.css`, `home.js`: interface e comportamentos da prévia.
+- `index.html`, `home.css`, `cinema.css`, `platform-home.css`, `home.js`: interface e comportamentos da prévia.
+- `src/`, `hero-campaigns.js`, `build/`: cena 3D, demonstração de skins, movimentos e destaques por ocasião. `npm ci && npm run build` atualiza os módulos publicados; nomes com hash evitam versões antigas no cache.
+- `HERO-3D.md`, `REVISAO.md`: execução da arte, critérios de composição e hierarquia de produto.
 - `ESTRATEGIA.md` / `estrategia.html`: pesquisa, alternativas, critérios, limites e recomendação.
 - `PRODUCT.md` / `BRIEF.md`: escopo confirmado e direção de produto/arte.
 - `DESIGN.md` / `.impeccable/design.json`: sistema visual observado na entrega.
@@ -13,11 +15,11 @@ Abra com qualquer servidor estático. Exemplo: `python -m http.server 8876 --bin
 
 ## O que funciona nesta prévia
 
-Troca de produtos com mouse, toque e teclado; navegação móvel; rotina ilustrativa do Manager; busca que transfere o termo para o catálogo real; cópia do endereço do servidor próprio; comparação mensal/anual; seleção visual de visitante/assinante; menu de conta compartilhado; imagem ampliada; perguntas expansíveis; movimento reduzido.
+Cenário 3D real de duas cidades com quatro enquadramentos; pausa e exploração sem sobreposição de texto; imagens alternativas quando 3D não estiver disponível; destaques editoriais por ocasião; demonstração de skin com troca de roupa e giro; navegação móvel; funções ilustrativas do Manager; busca e estilos com destino no catálogo real; comparação mensal/anual; seleção visual de visitante/assinante; menu compartilhado de conta; interface do Manager ampliada; perguntas expansíveis; movimento reduzido.
 
 Não há autenticação ou pagamento na prévia. Links abrem produtos reais, e `Entrar` aponta ao login de produção com retorno para `/minecraft`. O seletor superior só muda a demonstração visual. A regra global de retorno para o destino anterior é uma decisão documentada para a implementação de produção, não foi alterada nesta entrega.
 
-Não há rastreadores, analytics, cookies publicitários, conteúdo privado ou credenciais. Fontes e imagens são locais. `noindex,nofollow` é intencional.
+Não há rastreadores, analytics, cookies publicitários, conteúdo privado ou credenciais. Fontes, bibliotecas e imagens são locais. `noindex,nofollow` é intencional. O mundo original não é alterado nem disponibilizado; somente dois recortes arquitetônicos simplificados são publicados.
 
 ## Verificação
 
