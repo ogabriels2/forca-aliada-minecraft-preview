@@ -32,7 +32,7 @@ O navegador com extensões registrou mensagens de canal assíncrono; não se atr
 
 Não é certificação universal de acessibilidade, compatibilidade ou conversão. A proposta precisa de aprovação de direção e observação com pessoas novas. Nenhum teste compra assinatura ou cria servidor real. Responsividade no Edge não substitui aparelhos iOS/Android físicos.
 
-PageSpeed: resultado externo será registrado apenas se o serviço concluir a medição da versão publicada. Não há nota presumida.
+PageSpeed foi medido na URL pública. Resultados e limites abaixo.
 
 ## Medição externa e otimização
 
@@ -41,3 +41,20 @@ Primeira medição pública (16/11, 19:11 BRT): desempenho 74 no celular e 98 no
 A medição identificou arquivos de imagens maiores que a exibição e entrada tardia via JavaScript. Foram criadas variantes responsivas WebP a partir dos arquivos próprios, preservando enquadramento; cenas fechadas e imagens secundárias usam carregamento adiado. A entrada agora começa no primeiro desenho via CSS e não oculta a imagem principal. Duas imagens do escudo ganharam object-fit para preservar a proporção.
 
 SEO reduzido na prévia é esperado: ela usa noindex/nofollow e as restrições do repositório de testes. Não removê-las para elevar pontuação. A versão pública da empresa exige metadados e indexação próprios após aprovação.
+
+## Resultado após as correções
+
+Relatório público de 16/11/2026, 19:16 BRT, versão 06b9531: [PageSpeed Insights](https://pagespeed.web.dev/analysis/https-ogabriels2-github-io-forca-aliada-minecraft-preview-home-v2/xx5nzmx1tp?form_factor=mobile).
+
+| Medida | Celular | Desktop |
+|---|---:|---:|
+| Desempenho | 100 | 100 |
+| Acessibilidade automática | 100 | 100 |
+| Boas práticas | 100 | 100 |
+| LCP | 1,4 s | 0,3 s |
+| Total Blocking Time | 0 ms | 0 ms |
+| Cumulative Layout Shift | 0 | 0 |
+
+SEO 63: única reprovação exibida foi o bloqueio intencional de indexação da prévia. Restam recomendações de cache controladas pelo GitHub Pages e pequena economia possível em imagens; não prejudicaram as métricas desta execução. Dados de usuários reais não estavam disponíveis. Notas de laboratório variam e não demonstram conversão nem eliminam a necessidade de revisão humana.
+
+Caminhos locais e fragmentos conferidos sem ausências ou IDs duplicados; destinos públicos de produto e páginas institucionais responderam HTTP 200. A página publicada foi aberta novamente e conferida em desktop e 390 px.

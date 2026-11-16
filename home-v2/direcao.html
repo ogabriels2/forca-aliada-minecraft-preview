@@ -375,8 +375,53 @@ header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1
 <p>O navegador com extensões registrou mensagens de canal assíncrono; não se atribui ausência absoluta de erros a essa sessão. A conferência distingue essas mensagens dos scripts da página.</p>
 <h2>Limites</h2>
 <p>Não é certificação universal de acessibilidade, compatibilidade ou conversão. A proposta precisa de aprovação de direção e observação com pessoas novas. Nenhum teste compra assinatura ou cria servidor real. Responsividade no Edge não substitui aparelhos iOS/Android físicos.</p>
-<p>PageSpeed: resultado externo será registrado apenas se o serviço concluir a medição da versão publicada. Não há nota presumida.</p>
+<p>PageSpeed foi medido na URL pública. Resultados e limites abaixo.</p>
 <h2>Medição externa e otimização</h2>
 <p>Primeira medição pública (16/11, 19:11 BRT): desempenho 74 no celular e 98 no desktop; acessibilidade 100; boas práticas 96. LCP móvel 6,6 s, TBT 0 ms e CLS 0. Relatório: https://pagespeed.web.dev/analysis/https-ogabriels2-github-io-forca-aliada-minecraft-preview-home-v2/wyzuq3ltjt?form_factor=mobile</p>
 <p>A medição identificou arquivos de imagens maiores que a exibição e entrada tardia via JavaScript. Foram criadas variantes responsivas WebP a partir dos arquivos próprios, preservando enquadramento; cenas fechadas e imagens secundárias usam carregamento adiado. A entrada agora começa no primeiro desenho via CSS e não oculta a imagem principal. Duas imagens do escudo ganharam object-fit para preservar a proporção.</p>
-<p>SEO reduzido na prévia é esperado: ela usa noindex/nofollow e as restrições do repositório de testes. Não removê-las para elevar pontuação. A versão pública da empresa exige metadados e indexação próprios após aprovação.</p></main></body></html>
+<p>SEO reduzido na prévia é esperado: ela usa noindex/nofollow e as restrições do repositório de testes. Não removê-las para elevar pontuação. A versão pública da empresa exige metadados e indexação próprios após aprovação.</p>
+<h2>Resultado após as correções</h2>
+<p>Relatório público de 16/11/2026, 19:16 BRT, versão 06b9531: <a href="https://pagespeed.web.dev/analysis/https-ogabriels2-github-io-forca-aliada-minecraft-preview-home-v2/xx5nzmx1tp?form_factor=mobile">PageSpeed Insights</a>.</p>
+<section class="table-scroll" tabindex="0" aria-label="Tabela de comparação"><table>
+<thead>
+<tr>
+<th>Medida</th>
+<th style="text-align: right;">Celular</th>
+<th style="text-align: right;">Desktop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Desempenho</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr>
+<td>Acessibilidade automática</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr>
+<td>Boas práticas</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr>
+<td>LCP</td>
+<td style="text-align: right;">1,4 s</td>
+<td style="text-align: right;">0,3 s</td>
+</tr>
+<tr>
+<td>Total Blocking Time</td>
+<td style="text-align: right;">0 ms</td>
+<td style="text-align: right;">0 ms</td>
+</tr>
+<tr>
+<td>Cumulative Layout Shift</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table></section>
+<p>SEO 63: única reprovação exibida foi o bloqueio intencional de indexação da prévia. Restam recomendações de cache controladas pelo GitHub Pages e pequena economia possível em imagens; não prejudicaram as métricas desta execução. Dados de usuários reais não estavam disponíveis. Notas de laboratório variam e não demonstram conversão nem eliminam a necessidade de revisão humana.</p>
+<p>Caminhos locais e fragmentos conferidos sem ausências ou IDs duplicados; destinos públicos de produto e páginas institucionais responderam HTTP 200. A página publicada foi aberta novamente e conferida em desktop e 390 px.</p></main></body></html>
