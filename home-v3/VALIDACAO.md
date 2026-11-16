@@ -45,3 +45,22 @@ Lighthouse usa CPU/rede simuladas; não mede INP real de campo. Sem tráfego e c
 ## Limites
 
 Não testado com leitores de tela por uma pessoa usuária nem em aparelhos físicos. Firefox/WebKit não confirmados nesta estação. As fontes de contraste sobre imagem exigem julgamento além do axe; a camada escura de leitura foi conferida visualmente. Não existe pesquisa de conversão ou teste dos cinco segundos com participantes externos; houve revisão heurística das duas primeiras telas solicitadas.
+
+
+## Fechamento da revisão
+
+- Lighthouse desktop local: **100 desempenho / 100 acessibilidade / 100 boas práticas**, LCP **0,7s**, CLS **0**, TBT **0ms**.
+- Axe 4.14 no Edge, com regras WCAG 2 A/AA, 2.1 AA, 2.2 AA e boas práticas: **zero violações**, 49 verificações aprovadas. O motor deixou contraste de elementos sobre imagens e um atributo ARIA como revisão manual/incompleta. Isso não equivale a certificação WCAG. A galeria recebeu `role="group"` explícito na revisão final.
+- Menu compartilhado: modo assinante de exemplo abriu com selo Pro, links de conta/assinatura/console/Community e saída para visitante. O menu foi mantido idêntico ao componente da v2. Nenhuma sessão de produção foi acessada.
+- Capturas finais em **320, 390, 768, 1024, 1440, 1920 e 2560px**, obtidas pelo diagnóstico Lighthouse em Chromium. Em todas, os controles de tamanho, contraste automatizável, atributos ARIA e erros de console passaram. Arquivos `home-research/v3/viewport-{largura}.json`, `page-{largura}-final.jpg` e `opening-{largura}-final.jpg`.
+- Nas medições realizadas no Edge, documento sem transbordamento horizontal em 320, 390, 768, 1024, 1920 e 2560px. A medição final de 1440px confirmou largura de documento e área útil iguais (1425px, descontada a barra vertical). A galeria mantém sua própria rolagem lateral, por projeto.
+- Auditoria estática: 68 IDs únicos, 197 referências locais/âncoras válidas, 18 imagens com `alt`, sintaxe JS válida e duas cópias do componente compartilhado idênticas às originais. Nenhuma alteração em `/home-v2/` comparada ao commit `58ae71a`.
+- Refinamentos finais: título sem quebra desnecessária em tablet/tela grande; texto de leitura mínimo de 16px também em tablets; destino em português do seletor consistente com os demais; acesso alternativo ao catálogo sem script; galeria sem barra horizontal visual redundante.
+
+### O que não foi executado
+
+O acesso interativo ao navegador ficou indisponível no encerramento. Por isso, a verificação dinâmica com JavaScript efetivamente desativado e com a preferência de movimento reduzido emulada não foi concluída. As alternativas foram implementadas e revisadas no código, mas não são apresentadas como testes executados. As capturas finais e auditorias Chromium foram concluídas pela ferramenta Lighthouse solicitada no brief. Firefox e WebKit, dispositivos físicos, leitor de tela humano, teste externo dos cinco segundos e INP de campo continuam fora da evidência desta prévia.
+
+### Antes de produção
+
+Aprovar a direção visual; integrar sessão real preservando o componente aprovado e o destino do login; consumir preços/limites da oferta central; concluir tradução e rotas; testar Firefox/WebKit e preferências de acessibilidade; decidir indexação. Caso haja medição futura, definir consentimento/base legal e objetivos. Não há rastreamento nesta variante. Os módulos de produto são demonstrações explicitamente identificadas, e os CTAs abrem destinos reais sem executar ações na conta.

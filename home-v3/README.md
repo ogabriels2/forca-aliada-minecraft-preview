@@ -4,6 +4,10 @@ Proposta independente em `/home-v3/`, baseada no brief de 16/11/2026. A versão 
 
 ## Abrir
 
+Prévia pública: https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v3/
+
+Versão preservada: https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v2/
+
 HTML, CSS e JavaScript estáticos. Nenhum build ou instalação é necessário. Servir a raiz do repositório com qualquer servidor estático e abrir `/home-v3/`.
 
 - `index.html`: conteúdo semântico, navegação, produtos, planos e perguntas.
@@ -19,7 +23,7 @@ Navegação desktop/móvel, links reais dos produtos, busca encaminhada ao catá
 
 As demonstrações não fazem instalações, não criam servidores, não enviam mensagens, não modificam skins e não acessam sessão de produção. O controle “Assinante de exemplo”, no rodapé, só demonstra o componente aprovado; sair retorna ao modo visitante. Os CTAs levam à produção, sem concluir cadastro, assinatura ou pagamento.
 
-Sem JavaScript, o conteúdo e links principais continuam disponíveis, inclusive navegação móvel, FAQ, fotos, oferta mensal e totais anuais. A busca mantém um formulário GET; a navegação por categorias e o acesso direto ao catálogo não dependem de script. Interações exclusivas da demo ficam ocultas. Nenhuma animação é condição para leitura.
+Sem JavaScript, o conteúdo e links principais continuam disponíveis, inclusive navegação móvel, FAQ, fotos, oferta mensal e totais anuais. A busca aprimorada depende de script; sem ele, é substituída por um acesso direto ao catálogo. A navegação por categorias continua disponível. Interações exclusivas da demo ficam ocultas. Nenhuma animação é condição para leitura.
 
 ## Publicação definitiva
 
