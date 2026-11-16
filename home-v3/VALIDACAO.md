@@ -64,3 +64,12 @@ O acesso interativo ao navegador ficou indisponível no encerramento. Por isso, 
 ### Antes de produção
 
 Aprovar a direção visual; integrar sessão real preservando o componente aprovado e o destino do login; consumir preços/limites da oferta central; concluir tradução e rotas; testar Firefox/WebKit e preferências de acessibilidade; decidir indexação. Caso haja medição futura, definir consentimento/base legal e objetivos. Não há rastreamento nesta variante. Os módulos de produto são demonstrações explicitamente identificadas, e os CTAs abrem destinos reais sem executar ações na conta.
+
+
+## Publicação conferida
+
+GitHub Pages: https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v3/?v=025bf9a
+
+A publicação do código `025bf9a` concluiu com sucesso. HTML, CSS e JS públicos responderam 200 e coincidiram com os arquivos locais, normalizadas somente as quebras de linha. A versão anterior permanece em `/home-v2/`.
+
+Lighthouse **na URL pública**, em perfil móvel com rede/CPU simuladas: **100 desempenho / 100 acessibilidade / 100 boas práticas**, **LCP 1,6s**, **CLS 0**, **TBT 0ms**, FCP 1,0s e transferência inicial de aproximadamente **196 KiB**. Arquivo local: `home-research/v3/lighthouse-public-mobile.json`. Uma execução de laboratório, não garantia de resultado em todos os aparelhos. Permanecem recomendações diagnósticas de cache e cadeia de carregamento; nenhuma falha pontuada em acessibilidade ou boas práticas. A política de cache pertence ao GitHub Pages desta prévia.
