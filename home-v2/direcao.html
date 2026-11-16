@@ -194,7 +194,7 @@ header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1
 <td>Principal</td>
 <td>0 ms</td>
 <td>550 ms</td>
-<td>14 px e opacidade</td>
+<td>14 px, sem fade</td>
 <td>Uma unidade de leitura</td>
 </tr>
 <tr>
@@ -202,7 +202,7 @@ header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1
 <td>Apoio</td>
 <td>80 ms</td>
 <td>700 ms</td>
-<td>24 px e opacidade</td>
+<td>24 px, sem fade</td>
 <td>Sobrepõe a entrada do título</td>
 </tr>
 <tr>
@@ -339,7 +339,7 @@ header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1
 <h2>Checklist do guia</h2>
 <ol>
 <li><strong>Pixels:</strong> nenhum rastreador de marketing foi adicionado à prévia. Implantação futura deve respeitar consentimento e necessidade, não apenas adiar até um clique.</li>
-<li><strong>Imagens:</strong> WebP próprio; 3D da skin carregado perto da seção. Imagens abaixo da abertura usam lazy loading.</li>
+<li><strong>Imagens:</strong> WebP próprio; 3D da skin carregado perto da seção. Imagens abaixo da abertura e painéis inicialmente fechados usam lazy loading; variantes responsivas evitam baixar os arquivos grandes no celular.</li>
 <li><strong>Estabilidade:</strong> dimensões reservadas; altura estável entre produtos; sem loading artificial.</li>
 <li><strong>Metadados:</strong> título e descrição específicos. Prévia <code>noindex,nofollow</code>; canonical da produção só na promoção da página aprovada.</li>
 <li><strong>Open Graph:</strong> imagem real do Manager, texto e tipo definidos.</li>
@@ -375,4 +375,8 @@ header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1
 <p>O navegador com extensões registrou mensagens de canal assíncrono; não se atribui ausência absoluta de erros a essa sessão. A conferência distingue essas mensagens dos scripts da página.</p>
 <h2>Limites</h2>
 <p>Não é certificação universal de acessibilidade, compatibilidade ou conversão. A proposta precisa de aprovação de direção e observação com pessoas novas. Nenhum teste compra assinatura ou cria servidor real. Responsividade no Edge não substitui aparelhos iOS/Android físicos.</p>
-<p>PageSpeed: resultado externo será registrado apenas se o serviço concluir a medição da versão publicada. Não há nota presumida.</p></main></body></html>
+<p>PageSpeed: resultado externo será registrado apenas se o serviço concluir a medição da versão publicada. Não há nota presumida.</p>
+<h2>Medição externa e otimização</h2>
+<p>Primeira medição pública (16/11, 19:11 BRT): desempenho 74 no celular e 98 no desktop; acessibilidade 100; boas práticas 96. LCP móvel 6,6 s, TBT 0 ms e CLS 0. Relatório: https://pagespeed.web.dev/analysis/https-ogabriels2-github-io-forca-aliada-minecraft-preview-home-v2/wyzuq3ltjt?form_factor=mobile</p>
+<p>A medição identificou arquivos de imagens maiores que a exibição e entrada tardia via JavaScript. Foram criadas variantes responsivas WebP a partir dos arquivos próprios, preservando enquadramento; cenas fechadas e imagens secundárias usam carregamento adiado. A entrada agora começa no primeiro desenho via CSS e não oculta a imagem principal. Duas imagens do escudo ganharam object-fit para preservar a proporção.</p>
+<p>SEO reduzido na prévia é esperado: ela usa noindex/nofollow e as restrições do repositório de testes. Não removê-las para elevar pontuação. A versão pública da empresa exige metadados e indexação próprios após aprovação.</p></main></body></html>

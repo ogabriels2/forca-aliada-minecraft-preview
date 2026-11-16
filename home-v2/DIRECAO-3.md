@@ -64,8 +64,8 @@ Manrope é mantida por continuidade com a página aprovada do Manager. A abertur
 
 | Elemento | Papel | Início | Duração | Movimento | Relação |
 |---|---|---|---|---|---|
-| Título, explicação e ações | Principal | 0 ms | 550 ms | 14 px e opacidade | Uma unidade de leitura |
-| Demonstrador | Apoio | 80 ms | 700 ms | 24 px e opacidade | Sobrepõe a entrada do título |
+| Título, explicação e ações | Principal | 0 ms | 550 ms | 14 px, sem fade | Uma unidade de leitura |
+| Demonstrador | Apoio | 80 ms | 700 ms | 24 px, sem fade | Sobrepõe a entrada do título |
 | Aba anterior | Apoio | Clique | 200 ms | 24 px na direção de saída | Sai enquanto a próxima entra |
 | Nova aba | Principal | Mesmo clique | 320 ms | 24 px na direção da escolha | Espaço reservado; sem deslocar a página |
 | Confirmação do backup | Apoio | Fim do progresso | 250 ms | Confirmação e mudança de texto | Explica o resultado da rotina |
@@ -103,7 +103,7 @@ Essas heurísticas orientam decisões; não substituem testes com usuários nem 
 ## Checklist do guia
 
 1. **Pixels:** nenhum rastreador de marketing foi adicionado à prévia. Implantação futura deve respeitar consentimento e necessidade, não apenas adiar até um clique.
-2. **Imagens:** WebP próprio; 3D da skin carregado perto da seção. Imagens abaixo da abertura usam lazy loading.
+2. **Imagens:** WebP próprio; 3D da skin carregado perto da seção. Imagens abaixo da abertura e painéis inicialmente fechados usam lazy loading; variantes responsivas evitam baixar os arquivos grandes no celular.
 3. **Estabilidade:** dimensões reservadas; altura estável entre produtos; sem loading artificial.
 4. **Metadados:** título e descrição específicos. Prévia `noindex,nofollow`; canonical da produção só na promoção da página aprovada.
 5. **Open Graph:** imagem real do Manager, texto e tipo definidos.

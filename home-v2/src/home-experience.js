@@ -74,10 +74,7 @@ tabs.forEach((tab,i)=>{
 panels.forEach((panel,i)=>{panel.tabIndex=0;panel.inert=i!==0;panel.setAttribute('aria-hidden',String(i!==0))});
 if(motion.matches){backup.progress(1);backup.pause()}
 syncMotion();
-if(!motion.matches){
-  gsap.from('.hero-copy',{y:14,opacity:.45,duration:.55,ease:'power3.out',clearProps:'transform,opacity'});
-  gsap.from(theater,{y:24,opacity:.3,duration:.7,delay:.08,ease:'power3.out',clearProps:'transform,opacity'});
-}
+// Entrance starts with CSS at first paint; never fade the LCP image after JS loads.
 
 let step=0, kind='survival';
 const content=$('#creation-content'), initial=content.innerHTML;
