@@ -145,6 +145,7 @@
     const session = member ? {username: 'Conta exemplo', displayName: 'Conta de demonstração', avatarUrl: new URL('media/avatar-demo.svg', location.href).href} : null;
     window.FAAccountMenu?.mount($('#account'), session, {onLogout: () => persona('guest')});
     window.FAAccountMenu?.setPlan(member ? {name: 'Força Aliada Pro', tone: 'active', status: 'Assinatura ativa'} : {kind: 'free'});
+    prepareAccountLinks();
     $$('[data-plan-link]').forEach(link => {
       if (member) {
         link.dataset.originalHref = link.href;

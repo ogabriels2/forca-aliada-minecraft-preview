@@ -1,0 +1,378 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Pesquisa e direção da home — Força Aliada</title><style>
+@font-face{font-family:Manrope;src:url(media/manrope-latin.woff2)}
+*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:#202428;font:15px/1.75 Manrope,system-ui,sans-serif}
+header{background:#202428;color:white;padding:22px max(24px,calc((100% - 1120px)/2));display:flex;gap:30px;align-items:center}
+header a{color:white}main{max-width:1168px;margin:auto;padding:48px 24px 80px}h1{font-size:clamp(30px,4vw,48px);line-height:1.15;letter-spacing:-.035em}h2{margin-top:52px;line-height:1.3}h3{margin-top:32px}a{color:#2959c6;text-underline-offset:3px}p,li{max-width:850px}code{background:#e6e9ee;border-radius:4px;padding:2px 5px;font-size:.9em}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.6}th,td{padding:14px;border:1px solid #dce1e6;text-align:left;vertical-align:top}th{background:#e8edf4}td{min-width:155px}th:first-child,td:first-child{min-width:125px}section.table-scroll{overflow:auto;margin:22px 0}hr{border:0;border-top:1px solid #d9dde1;margin-top:60px}a:focus-visible{outline:3px solid #3262d9;outline-offset:4px}@media(max-width:600px){header{font-size:13px;gap:16px}main{padding-top:28px}table{font-size:12px}}
+</style></head><body><header><strong>Força Aliada</strong><a href="./">← Voltar à prévia</a></header><main><h1>Home: produtos em primeiro plano</h1>
+<p>16 de novembro de 2026. Proposta em avaliação, isolada da home pública. A versão anterior permanece no histórico Git. O código ativo está em <code>index.html</code>, <code>home-3.css</code>, <code>home.js</code>, <code>src/home-experience.js</code> e <code>src/skin.js</code>.</p>
+<h2>Decisão de produto</h2>
+<p>A home apresenta a Força Aliada como software e plataforma para jogar e criar comunidades. Manager, Minecraft e Community aparecem juntos na abertura, com explicação literal do que fazem. Criar conta é a ação principal; planos e acesso direto aos produtos continuam disponíveis. Usuários frequentes não precisam percorrer a apresentação.</p>
+<p>O Manager abre a demonstração e recebe a primeira seção comercial. Isso dá visibilidade ao produto pago sem sugerir que todo o catálogo depende de assinatura. A assinatura reúne os benefícios e apresenta valores, capacidade e cobrança juntos. O mundo próprio aparece como exemplo de uso e origem das imagens, não como oferta principal nem como prova de escala comercial.</p>
+<p>Alternativas consideradas:</p>
+<section class="table-scroll" tabindex="0" aria-label="Tabela de comparação"><table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Vantagem</th>
+<th>Limitação nesta fase</th>
+<th>Decisão</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mundo 3D em tela cheia</td>
+<td>Imersão e identidade própria</td>
+<td>Foi confundido com um servidor ou projeto de construção; custo visual e técnico alto</td>
+<td>Retirado da abertura, preservado no histórico</td>
+</tr>
+<tr>
+<td>Página inteiramente centrada no Manager</td>
+<td>Conversão comercial direta</td>
+<td>Oculta catálogo, social e criação gratuita</td>
+<td>Manager em destaque, sem substituir a empresa</td>
+</tr>
+<tr>
+<td>Catálogo como home deslogada</td>
+<td>Entrada rápida no uso</td>
+<td>Pouco inventário real nesta fase e pouco contexto da empresa</td>
+<td>Acesso direto; destino padrão depois de entrar</td>
+</tr>
+<tr>
+<td>Institucional com três cards iguais</td>
+<td>Fácil de organizar</td>
+<td>Frio, repetitivo, não demonstra valor</td>
+<td>Substituído por demonstrações e composições distintas</td>
+</tr>
+<tr>
+<td>Apresentação conectada dos produtos</td>
+<td>Explica oferta, uso e assinatura</td>
+<td>Exige hierarquia para não virar lista de recursos</td>
+<td>Direção implementada</td>
+</tr>
+</tbody>
+</table></section>
+<p>Essa é uma hipótese fundamentada de produto e design, não uma promessa de conversão. Depois da aprovação, validação com pessoas novas deve medir compreensão da oferta, primeira escolha e conclusão de cadastro.</p>
+<h2>Referências examinadas, uma a uma</h2>
+<section class="table-scroll" tabindex="0" aria-label="Tabela de comparação"><table>
+<thead>
+<tr>
+<th>Fonte</th>
+<th>Material examinado</th>
+<th>O que aproveitamos</th>
+<th>O que não importamos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://21st.dev/@manuarora700/components/container-scroll-animation">21st</a></td>
+<td>Container Scroll Animation: prévia com perspectiva, rolagem e controles</td>
+<td>Profundidade localizada para mostrar a interface real do aplicativo</td>
+<td>Cena longa dependente de scroll; a imagem da demo estava indisponível. Nenhum prompt/HTML desse exemplo foi incorporado</td>
+</tr>
+<tr>
+<td><a href="https://profitize.com.br/build/landing-pages/nubo">Profitize</a></td>
+<td>Nubo: prévia visual, pacote de prompt/CLAUDE/checklist, condições de acesso; ferramenta Raio-X</td>
+<td>Contraste de escala, superfícies claras e acento forte; ritmo diferente entre seções</td>
+<td>Pacote pago, metáfora de agência e 3D decorativo. Não houve compra</td>
+</tr>
+<tr>
+<td><a href="https://skiper-ui.com/v1/skiper52">Skiper</a></td>
+<td>Expand on Hover, preview, código/uso e licença gratuita com atribuição</td>
+<td>Feedback rápido e continuidade ao mudar seleção</td>
+<td>Galeria estreita que esconde as opções; hover como condição para entender um produto. Código não distribuído</td>
+</tr>
+<tr>
+<td><a href="https://www.cult-ui.com/docs/components/direction-aware-tabs">Cult UI</a></td>
+<td>Direction Aware Tabs, exemplo interativo e fonte completa</td>
+<td>Direção da transição conforme a posição da aba</td>
+<td>Blur, deslocamento de 300 px, bloqueio de cliques durante animação e dependência React/Motion</td>
+</tr>
+<tr>
+<td><a href="https://uberdesigner.ai/t/portale">Uberdesigner</a></td>
+<td>Portale gratuito, preview e termos exibidos</td>
+<td>Composição com profundidade e contraste quente/frio</td>
+<td>Licença gratuita limitada a uso pessoal; prompt e projeto não foram reutilizados comercialmente</td>
+</tr>
+<tr>
+<td><a href="https://reactbits.dev/components/stack">React Bits</a></td>
+<td>Stack, controles, opções de autoplay/hover e interface de código</td>
+<td>Comparação entre interação direta e carrossel automático</td>
+<td>Pilha de cartões oculta conteúdo importante; nenhuma dependência adicional instalada</td>
+</tr>
+<tr>
+<td><a href="https://www.originkit.dev/functional">OriginKit</a></td>
+<td>Catálogo funcional, Charcoal Shuttle, alteração de seleção, editor e opções CLI/Code/AI Prompt</td>
+<td>Estado selecionado contínuo e configuração de movimento</td>
+<td>AI Prompt exigia nova chave; nenhuma foi criada. Tentativa de Copy Code não retornou texto utilizável, portanto não se registra como código obtido</td>
+</tr>
+<tr>
+<td><a href="https://motion.dev/docs/animate">Motion</a></td>
+<td>Documentação de animate, sequências, interrupção e tamanho das versões</td>
+<td>Critérios para escolher o motor e controlar animações</td>
+<td>Segundo motor concorrente com GSAP</td>
+</tr>
+<tr>
+<td><a href="https://gsap.com/docs/v3/GSAP/gsap.matchMedia()/">GSAP</a></td>
+<td>Timeline, matchMedia e reversão de movimentos</td>
+<td>Motor já presente; pausa, interrupção e redução de movimento</td>
+<td>Plugins de scroll desnecessários à tarefa</td>
+</tr>
+<tr>
+<td><a href="https://lenis.dev/">Lenis</a></td>
+<td>Finalidade e exemplos de rolagem sincronizada</td>
+<td>Critério para avaliar quando suavização ajuda</td>
+<td>Não há cena ligada ao scroll que justifique trocar a rolagem nativa</td>
+</tr>
+<tr>
+<td><a href="https://animejs.com/documentation/timeline/">Anime.js</a></td>
+<td>Timeline e coordenação de animações</td>
+<td>Comparação da organização temporal</td>
+<td>Segundo motor sem ganho funcional</td>
+</tr>
+<tr>
+<td><a href="https://mobbin.com/discover/sites/latest">Mobbin</a></td>
+<td>Acervo por fluxos/seções; preview Graphical</td>
+<td>Descrição concreta do produto, reconhecimento dos controles e acesso direto</td>
+<td>Confundir estética de referência com evidência de conversão; acervo pago não foi adquirido</td>
+</tr>
+<tr>
+<td><a href="https://www.awwwards.com/">Awwwards</a></td>
+<td>Busca gaming: contraste entre experiências imersivas, galerias e sites de estúdio</td>
+<td>Escala e variação de composição</td>
+<td>Premiação como substituto de usabilidade; luz neon e partículas sem função</td>
+</tr>
+<tr>
+<td><a href="https://www.cosmos.so/">Cosmos</a></td>
+<td>Busca playful technology branding</td>
+<td>Neutros como base e acentos distribuídos; contraste entre material e superfície</td>
+<td>Mascotes, fotografias ou marcas de terceiros; resultados com estética de IA</td>
+</tr>
+<tr>
+<td><a href="https://br.pinterest.com/search/pins/?q=gaming%20platform%20web%20design">Pinterest</a></td>
+<td>Busca de plataformas de jogos</td>
+<td>Comparação de padrões recorrentes e seus excessos</td>
+<td>Loja de jogos genérica com neon, grids e hero de personagem sem relação com a oferta</td>
+</tr>
+<tr>
+<td><a href="https://namethatui.com/">Name That UI</a></td>
+<td>Dicionário e categorias de elementos/estilos</td>
+<td>Nomes concretos dos componentes e linguagem de interação</td>
+<td>Não foi copiado prompt; a interação de busca foi interrompida</td>
+</tr>
+<tr>
+<td><a href="https://forcaaliada.com/manager">Manager</a></td>
+<td>Página completa e recursos existentes</td>
+<td>Manrope, conta aprovada, verde de ação, interface real e alternância entre claro/escuro</td>
+<td>Nenhum novo menu de conta nem linguagem de hospedagem em nuvem</td>
+</tr>
+</tbody>
+</table></section>
+<p>Não é necessário utilizar código de todas as bibliotecas. A seleção evita licenças incompatíveis, dependências duplicadas e efeitos que enfraquecem a compreensão.</p>
+<h2>Código realmente obtido</h2>
+<p>A fonte completa do Direction Aware Tabs foi lida na documentação do Cult e guardada em <code>research-cult-direction-aware-tabs.tsx</code>, a partir do repositório oficial <code>nolly-studio/cult-ui</code>, arquivo <code>apps/www/registry/default/ui/direction-aware-tabs.tsx</code>. Licença MIT preservada em <code>media/Cult-UI-LICENSE.txt</code>.</p>
+<p>A home adapta o princípio direcional em JavaScript e GSAP. A distância cai para 24 px, a entrada dura 320 ms e a saída 200 ms; não bloqueia a próxima seleção. ARIA, teclado, painéis inativos e interrupção foram implementados para esta página. O TSX de referência não é executado nem faz parte do bundle.</p>
+<h2>Vídeo fornecido</h2>
+<p>O vídeo foi examinado visualmente em quadros e transcrito localmente. Seu tema é principalmente a entrada/carregamento: evitar imagens e fontes rearranjando a tela, contadores artificiais e espera desnecessária; usar uma entrada que pertença à identidade. Aplicação: fonte local pré-carregada, dimensões reservadas, conteúdo visível por padrão e uma entrada breve. Não adicionamos uma tela de loading para simular sofisticação.</p>
+<h2>Direção visual</h2>
+<p>Base grafite <code>#202428</code> e papel neutro <code>#f7f8fa</code>. Verde <code>#37d17a</code> indica a ação principal. Azul <code>#3262d9</code> acompanha o software e seleção. Âmbar aparece no editor e no Pro; violeta acompanha conversa e Team, sempre com rótulo e contraste. Não há um filtro verde sobre imagens, títulos em degradê ou uma cor forte preenchendo todos os módulos.</p>
+<p>Manrope é mantida por continuidade com a página aprovada do Manager. A abertura usa tipografia firme e demonstração à direita; Manager tem faixa grafite e simulador; descoberta combina imagem e busca; skins e conversa têm superfícies e comportamentos próprios; assinatura é uma decisão comercial clara. Fotos, skins e interfaces pertencem ao material já existente da Força Aliada.</p>
+<h2>Coreografia</h2>
+<section class="table-scroll" tabindex="0" aria-label="Tabela de comparação"><table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Papel</th>
+<th>Início</th>
+<th>Duração</th>
+<th>Movimento</th>
+<th>Relação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Título, explicação e ações</td>
+<td>Principal</td>
+<td>0 ms</td>
+<td>550 ms</td>
+<td>14 px e opacidade</td>
+<td>Uma unidade de leitura</td>
+</tr>
+<tr>
+<td>Demonstrador</td>
+<td>Apoio</td>
+<td>80 ms</td>
+<td>700 ms</td>
+<td>24 px e opacidade</td>
+<td>Sobrepõe a entrada do título</td>
+</tr>
+<tr>
+<td>Aba anterior</td>
+<td>Apoio</td>
+<td>Clique</td>
+<td>200 ms</td>
+<td>24 px na direção de saída</td>
+<td>Sai enquanto a próxima entra</td>
+</tr>
+<tr>
+<td>Nova aba</td>
+<td>Principal</td>
+<td>Mesmo clique</td>
+<td>320 ms</td>
+<td>24 px na direção da escolha</td>
+<td>Espaço reservado; sem deslocar a página</td>
+</tr>
+<tr>
+<td>Confirmação do backup</td>
+<td>Apoio</td>
+<td>Fim do progresso</td>
+<td>250 ms</td>
+<td>Confirmação e mudança de texto</td>
+<td>Explica o resultado da rotina</td>
+</tr>
+<tr>
+<td>Etapa do Manager</td>
+<td>Principal</td>
+<td>Avançar/voltar</td>
+<td>250 ms</td>
+<td>12 px na direção da ação</td>
+<td>Resposta imediata e reversível</td>
+</tr>
+<tr>
+<td>Giro da skin</td>
+<td>Principal</td>
+<td>Clique</td>
+<td>650 ms</td>
+<td>90 graus</td>
+<td>Render somente durante a ação</td>
+</tr>
+</tbody>
+</table></section>
+<p>Não se movem: cabeçalho, preços em repouso, texto comercial da abertura, busca e seções inteiras ao rolar. São referências estáveis. O backup pode ser pausado e para fora da tela/aba oculta. Redução de movimento elimina os deslocamentos e a repetição, preservando conteúdo e seleção.</p>
+<h2>Leis e heurísticas do guia, contextualizadas</h2>
+<section class="table-scroll" tabindex="0" aria-label="Tabela de comparação"><table>
+<thead>
+<tr>
+<th>Princípio</th>
+<th>Aplicação / limite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hick</td>
+<td>Uma ação principal na abertura; três produtos identificados, detalhes progressivos</td>
+</tr>
+<tr>
+<td>Fitts e distância</td>
+<td>Áreas de clique adequadas, ação junto ao contexto; controles do simulador permanecem no mesmo lugar</td>
+</tr>
+<tr>
+<td>Jakob</td>
+<td>Links, tabs, busca, menu e FAQ convencionais; conta idêntica ao componente aprovado</td>
+</tr>
+<tr>
+<td>Proximidade</td>
+<td>Preço, período, limite e contratação juntos; descrição junto da demonstração correspondente</td>
+</tr>
+<tr>
+<td>Miller</td>
+<td>Agrupamento por tarefa; não usamos um número mágico de itens como regra universal</td>
+</tr>
+<tr>
+<td>Doherty</td>
+<td>Seleção responde de imediato, sem aguardar o término da animação anterior</td>
+</tr>
+<tr>
+<td>Von Restorff</td>
+<td>Verde reservado à ação; selo dourado/violeta destaca plano, não tudo ao mesmo tempo</td>
+</tr>
+<tr>
+<td>Posição serial</td>
+<td>Oferta e entrada no início; cadastro novamente após benefícios e dúvidas</td>
+</tr>
+<tr>
+<td>Pico-fim</td>
+<td>Experimentação da skin e do Manager, fechamento direto; sem afirmar efeito garantido de conversão</td>
+</tr>
+<tr>
+<td>Zeigarnik</td>
+<td>Progresso 1 de 3 somente na demonstração, sem impor cadastro ou criar pendências artificiais</td>
+</tr>
+<tr>
+<td>Occam</td>
+<td>Retirada do passeio 3D e de bibliotecas de animação redundantes</td>
+</tr>
+<tr>
+<td>Tesler</td>
+<td>A interface esconde complexidade operacional sem omitir que o servidor depende do PC ligado</td>
+</tr>
+<tr>
+<td>Postel</td>
+<td>Busca aceita texto livre e remove espaços; controles não dependem de precisão gestual</td>
+</tr>
+<tr>
+<td>Murphy</td>
+<td>Imagem alternativa sem WebGL, cliques rápidos, teclado, menu estreito e falhas de carregamento considerados</td>
+</tr>
+<tr>
+<td>Semelhança</td>
+<td>Mesmo desenho para ações equivalentes; diferenciação de produtos pelo conteúdo</td>
+</tr>
+<tr>
+<td>Conectividade uniforme</td>
+<td>Abas ligadas ao mesmo palco; conta e benefícios tratados como partes da mesma plataforma</td>
+</tr>
+<tr>
+<td>Parkinson</td>
+<td>Nenhum contador de urgência falso; demonstração curta e opcional</td>
+</tr>
+<tr>
+<td>Carga cognitiva</td>
+<td>Funções concretas antes de recursos detalhados; sem falso feed de usuários ativos</td>
+</tr>
+<tr>
+<td>Gradiente de meta</td>
+<td>Três etapas visíveis no exemplo; fim explícito, sem recompensa comercial inventada</td>
+</tr>
+</tbody>
+</table></section>
+<p>Essas heurísticas orientam decisões; não substituem testes com usuários nem são todas leis experimentais universais.</p>
+<h2>Checklist do guia</h2>
+<ol>
+<li><strong>Pixels:</strong> nenhum rastreador de marketing foi adicionado à prévia. Implantação futura deve respeitar consentimento e necessidade, não apenas adiar até um clique.</li>
+<li><strong>Imagens:</strong> WebP próprio; 3D da skin carregado perto da seção. Imagens abaixo da abertura usam lazy loading.</li>
+<li><strong>Estabilidade:</strong> dimensões reservadas; altura estável entre produtos; sem loading artificial.</li>
+<li><strong>Metadados:</strong> título e descrição específicos. Prévia <code>noindex,nofollow</code>; canonical da produção só na promoção da página aprovada.</li>
+<li><strong>Open Graph:</strong> imagem real do Manager, texto e tipo definidos.</li>
+<li><strong>Schema:</strong> não publicar dados estruturados de oferta/empresa duplicados na prévia. Integrar os dados verdadeiros do domínio principal após aprovação; não inventar avaliações nem organização nova.</li>
+<li><strong>Responsividade:</strong> composição vertical própria; navegação recolhida; teste de 320 a 1920 px.</li>
+<li><strong>Integridade:</strong> conversas, interface e fluxo demonstrativos identificados. Proveniência mantida nos documentos, sem rótulos de ferramenta expostos no produto.</li>
+<li><strong>PageSpeed:</strong> registrar resultado real, limitações e correções em <code>VALIDACAO-3.md</code>; não atribuir nota sem medição.</li>
+<li><strong>Guia:</strong> critérios acima cruzados com briefing, código e renderização. A aprovação de direção continua sendo do proprietário.</li>
+</ol><hr><h1>Conferência da home — direção 3</h1>
+<p>16 de novembro de 2026. Prévia estática, sem gravações em produção.</p>
+<h2>Conferido no navegador</h2>
+<ul>
+<li>Layout em larguras de 320, 390, 768, 1024 e 1440 px, além da janela desktop ampla. Sem rolagem horizontal da página nas larguras medidas.</li>
+<li>Seleção dos três produtos e navegação pelas setas/Home/End; uma seleção ativa e conteúdo das outras abas retirado da navegação.</li>
+<li>Demonstração do Manager: criar/importar, avançar, voltar, preservar escolha e reiniciar após a terceira etapa.</li>
+<li>Troca de roupa e giro da skin em WebGL. Fallback por imagem mantido para falha de importação, textura ou contexto; esse caminho foi revisado no código, sem simulação de todos os drivers.</li>
+<li>Menu móvel e Escape; componente de conta aprovado. Destinos corrigidos, inclusive Gerenciar assinatura após trocar persona.</li>
+<li>Mensal/anual: R$ 24,92 e R$ 66,58 como equivalentes mensais, com totais de R$ 299 e R$ 799 exibidos. Período selecionado acompanha os links dos planos.</li>
+<li>Ampliação da interface, Escape, devolução do foco e restauração da rolagem.</li>
+<li>FAQ e explicação de que Manager roda no computador do usuário.</li>
+</ul>
+<h2>Correções durante a revisão</h2>
+<ul>
+<li>Espaço vertical ampliado nas demonstrações estreitas para não cortar a última mensagem.</li>
+<li>Menu de conta limitado à largura disponível, descontando a barra de rolagem em 320 px.</li>
+<li>Textos secundários com mais contraste e controles de toque ampliados.</li>
+<li>Pausa somente onde existe repetição; redução de movimento mostra o estado concluído e interrompe transições pendentes.</li>
+<li>Giro oculto quando 3D não está disponível; seleção dos exemplos por imagem preservada.</li>
+<li>Fonte e imagens com espaço reservado; 3D fora do carregamento inicial.</li>
+</ul>
+<h2>Verificação técnica</h2>
+<p>Build local e análise de sintaxe executados. Conferência de caminhos locais, IDs e referências de ícones. Nenhuma mudança no catálogo da raiz, no backend ou em contas reais.</p>
+<p>O navegador com extensões registrou mensagens de canal assíncrono; não se atribui ausência absoluta de erros a essa sessão. A conferência distingue essas mensagens dos scripts da página.</p>
+<h2>Limites</h2>
+<p>Não é certificação universal de acessibilidade, compatibilidade ou conversão. A proposta precisa de aprovação de direção e observação com pessoas novas. Nenhum teste compra assinatura ou cria servidor real. Responsividade no Edge não substitui aparelhos iOS/Android físicos.</p>
+<p>PageSpeed: resultado externo será registrado apenas se o serviço concluir a medição da versão publicada. Não há nota presumida.</p></main></body></html>

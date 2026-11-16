@@ -8,3 +8,6 @@
 - Imagem do Manager: interface demonstrativa já existente na página do produto; origem no arquivo adjacente `.json`.
 
 Nenhuma referência visual de outra empresa foi copiada como mídia da Força Aliada.
+
+- Cult UI, Direction Aware Tabs: código consultado e princípio de transição adaptado, MIT, Copyright (c) 2023 Jordan-Gilliam. Fonte guardada em research-cult-direction-aware-tabs.tsx; licença integral em media/Cult-UI-LICENSE.txt. O arquivo de referência não é carregado pela página.
+- A home atual não carrega os recortes 3D das cidades. Esses arquivos preservam a pesquisa anterior. A skin continua em Three.js e as fotografias atuais são capturas próprias do jogo.

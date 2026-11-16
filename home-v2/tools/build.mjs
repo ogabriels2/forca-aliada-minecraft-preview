@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const result=await build({absWorkingDir:root,entryPoints:['src/hero.js'],bundle:true,minify:true,format:'esm',splitting:true,outdir:'build',entryNames:'[name]-[hash]',chunkNames:'chunks/[name]-[hash]',legalComments:'eof',metafile:true});
+const result=await build({absWorkingDir:root,entryPoints:{hero:'src/home-experience.js'},bundle:true,minify:true,format:'esm',splitting:true,outdir:'build',entryNames:'[name]-[hash]',chunkNames:'chunks/[name]-[hash]',legalComments:'eof',metafile:true});
 const current=new Set(Object.keys(result.metafile.outputs).map(p=>resolve(root,p)));
 const chunkDir=resolve(root,'build/chunks');
 for(const name of await readdir(chunkDir)) {
@@ -13,10 +13,10 @@ for(const name of await readdir(chunkDir)) {
   if(name.endsWith('.js')&&!current.has(path))await rm(path);
 }
 for(const name of await readdir(resolve(root,'build'))){const path=resolve(root,'build',name);if(name.endsWith('.js')&&!current.has(path))await rm(path);}
-const entry=Object.keys(result.metafile.outputs).find(p=>result.metafile.outputs[p].entryPoint==='src/hero.js');
+const entry=Object.keys(result.metafile.outputs).find(p=>result.metafile.outputs[p].entryPoint==='src/home-experience.js');
 let html=await readFile(resolve(root,'index.html'),'utf8');
 html=html.replace(/src="build\/hero[^"/]*\.js"/,`src="${entry}"`);
-for(const file of ['home.css','cinema.css','platform-home.css','home.js']){
+for(const file of ['home-3.css','home.js']){
   const version=createHash('sha256').update(await readFile(resolve(root,file))).digest('hex').slice(0,10);
   html=html.replace(new RegExp(`((?:href|src)=")${file.replace('.','\\.')}(?:\\?[^\"]*)?"`),`$1${file}?v=${version}"`);
 }

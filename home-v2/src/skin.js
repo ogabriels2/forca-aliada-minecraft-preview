@@ -3,6 +3,15 @@ import {gsap} from 'gsap';
 
 export function initSkin(host){
   const canvas=host.querySelector('canvas'),fallback=host.querySelector('img');
+  const choices=host.closest('article').querySelectorAll('[data-skin]');
+  const turn=host.querySelector('#skin-turn');
+  turn.hidden=true;
+  function updateFallback(name){
+    fallback.src=`media/skin-${name}.png?v=wardrobe-2`;
+    fallback.alt=`Personagem de exemplo com visual ${name==='ocean'?'azul':name==='plum'?'roxo':'verde'}`;
+    choices.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.skin===name)));
+  }
+  choices.forEach(button=>button.addEventListener('click',()=>updateFallback(button.dataset.skin)));
   let renderer;
   try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});}catch{return;}
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -34,14 +43,14 @@ export function initSkin(host){
       const texture=await new THREE.TextureLoader().loadAsync(`media/skin-texture-${name}.png?v=wardrobe-2`);
       if(token!==request){texture.dispose();return;}
       texture.magFilter=THREE.NearestFilter;texture.minFilter=THREE.NearestFilter;texture.colorSpace=THREE.SRGBColorSpace;
-      activeTexture?.dispose();activeTexture=texture;material.map=texture;material.needsUpdate=true;render();host.dataset.ready='true';
-    }catch{host.dataset.ready='false';}
+      activeTexture?.dispose();activeTexture=texture;material.map=texture;material.needsUpdate=true;render();host.dataset.ready='true';turn.hidden=false;
+    }catch{host.dataset.ready='false';turn.hidden=true;}
   }
   host.closest('article').querySelectorAll('[data-skin]').forEach(button=>button.addEventListener('click',()=>select(button.dataset.skin)));
   host.querySelector('#skin-turn').addEventListener('click',()=>{
     gsap.to(model.rotation,{y:model.rotation.y+Math.PI/2,duration:matchMedia('(prefers-reduced-motion:reduce)').matches?0:.65,ease:'power3.out',onUpdate:render,overwrite:true});
   });
-  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();host.dataset.ready='false';});
-  canvas.addEventListener('webglcontextrestored',()=>{render();host.dataset.ready='true';});
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();host.dataset.ready='false';turn.hidden=true;});
+  canvas.addEventListener('webglcontextrestored',()=>{render();host.dataset.ready='true';turn.hidden=false;});
   select('ocean');
 }
