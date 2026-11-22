@@ -73,3 +73,5 @@ Uma única pausa ocupa 44px no canto. Entradas finitas usam transform/opacity; o
 A direção permanece. As miniaturas dos três produtos compartilham uma mesma linha de base no desktop/tablet, e o Community conserva sua fotografia no celular. Os filtros da demonstração não alteram a altura do conteúdo; o visitante pode limpar a busca e a categoria numa única ação. Links internos descontam o cabeçalho fixo.
 
 A comparação de planos usa três colunas acima de 1000px. Entre 761 e 1000px, a conta gratuita ocupa uma faixa horizontal e Pro/Team ficam lado a lado; no celular, os três ficam em coluna, com espaçamentos mais compactos. Símbolos repetidos do bloco grátis são dispensados nas telas menores, preservando a lista completa de benefícios. Preços, limites, cobrança e requisitos do PC continuam explícitos.
+
+Os ícones de interface usam formas familiares e traço uniforme. O monitor identifica o Manager, o bloco identifica Minecraft e a camiseta identifica skins. Os servidores de exemplo usam iniciais discretas. Community e Team conservam seus símbolos aprovados, e o cartão do servidor da equipe usa o brasão com o selo dourado.

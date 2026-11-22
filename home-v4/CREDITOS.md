@@ -8,7 +8,7 @@
 - **Avatares:** portrait-lia.svg, portrait-rui.svg e portrait-noa.svg são desenhos SVG próprios; avatar-demo.svg é o monograma herdado da v3. Pessoas e perfis fictícios, sem depoimentos atribuídos a clientes.
 - **Marca:** fa-icon-64.webp, identidade da Força Aliada fornecida pelo projeto, usada com autorização.
 - **Fonte:** Manrope local, SIL Open Font License; licença integral em media/Manrope-OFL.txt. Segoe UI usa a fonte do sistema disponível no aparelho, sem redistribuir o arquivo.
-- **Ícones:** símbolos originais dos produtos e dos servidores de exemplo em `identity.svg`. O cartão do servidor da equipe usa o brasão da Força Aliada fornecido pelo projeto. Os símbolos de redes sociais identificam serviços e marcas dos respectivos titulares.
+- **Ícones:** símbolos em traço da própria prévia e marca ilustrada do Community em `identity.svg`. O cartão do servidor da equipe usa o brasão da Força Aliada fornecido pelo projeto. Os símbolos de redes sociais identificam serviços e marcas dos respectivos titulares.
 - **Conta:** componente próprio aprovado no Manager, copiado da v3 sem modificações internas.
 
 Não foram usados geradores de imagem: os avatares são SVG, os personagens 3D usam o formato padrão Minecraft e texturas originais e os cenários são capturas do mundo real. Nenhum ativo comercial das referências externas foi copiado. O renderizador skinview3d, Three.js e skinview-utils está em vendor/, com suas licenças MIT integrais. A fonte Minecraft do Manager é de IdreesInc/Minecraft-Font, sob SIL OFL, com licença em manager/source/assets/fonts/minecraft/. Os desenhos e fotografias não tornam a Força Aliada proprietária da marca Minecraft. Mantido aviso de independência no rodapé.
