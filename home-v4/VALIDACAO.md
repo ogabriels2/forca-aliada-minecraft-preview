@@ -15,7 +15,17 @@ Verificações executadas nesta revisão:
 
 Os testes em Firefox/WebKit detectaram e ajudaram a localizar uma região semântica duplicada, corrigida posteriormente. A conferência final dos sete painéis foi feita em Chromium. Um carregamento Chromium durante testes simultâneos falhou; a execução isolada carregou todos os recursos e passou. Esses resultados são de laboratório, não certificação de acessibilidade ou teste com usuários.
 
-Evidências locais: `*-presentation-final*.json`, `chromium-native-panels-final.json`, `chromium-presentation-fallback2.json`, `section-{1440,390}-*.png`, `static-check.json`, em home-research/v4. As medições de desempenho abaixo são da revisão anterior; a nova entrega é registrada separadamente ao final.
+Evidências locais: `*-presentation-final*.json`, `chromium-native-panels-final.json`, `chromium-presentation-fallback-final.json`, `section-{1440,390}-*.png`, `static-check.json`, em home-research/v4. As medições no histórico abaixo são da revisão anterior; a medição vigente está nesta seção.
+
+### Entrega pública e desempenho final
+
+Revisão funcional `9d1b4ad`, otimização `ea02eac`. HTTP 200 no GitHub Pages; terminal local, filtro, preço anual e exportação PNG 64×64 conferidos no domínio público. Nenhuma imagem quebrada ou erro JavaScript no teste. Noindex preservado.
+
+A primeira medição desta revisão foi 92/100/100, LCP 3,0s e 422KiB. O hero estava carregando uma aplicação nativa inteira apenas para apresentá-la em escala. Substituído por três capturas reais, com alternância pausável e carregamento progressivo; a interface interativa permanece sob demanda na seção Manager. A aparência é preservada, e o hero também funciona melhor sem JavaScript.
+
+**Lighthouse 13.6, GitHub Pages, móvel com rede/CPU simuladas: 99 desempenho / 100 acessibilidade / 100 boas práticas. LCP 1,8s; TBT 70ms; CLS 0; transferência observada 285KiB.** Relatório: `lighthouse-public-presentation-final.json`. É uma medição de laboratório, não desempenho de todos os dispositivos ou validação de conversão. A auditoria estática após as capturas tem 33 imagens com alt; 81 IDs e 219 referências, sem falhas.
+
+Os 14 testes de movimento/alternativas foram repetidos após essa otimização e passaram. Os fluxos interativos do produto não foram alterados pela substituição visual do hero.
 
 ## Histórico da revisão anterior
 
