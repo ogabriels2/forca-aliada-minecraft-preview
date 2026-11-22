@@ -13,7 +13,7 @@
  }
  document.querySelector('.app-body').before(nav);
  const dialog=document.createElement('dialog');dialog.className='local-demo-dialog';dialog.dataset.localDemo='';
- dialog.innerHTML='<form><h2 id="local-demo-title"></h2><label id="local-demo-label">Nome<input id="local-demo-value" maxlength="50" required autocomplete="off"></label><p>Esta alteração fica apenas na demonstração.</p><footer><button type="button" data-cancel>Cancelar</button><button type="submit">Salvar</button></footer></form>';
+ dialog.innerHTML='<form><h2 id="local-demo-title"></h2><label id="local-demo-label">Nome<input id="local-demo-value" maxlength="50" required autocomplete="off"></label><p>As mudanças ficam nesta prévia.</p><footer><button type="button" data-cancel>Cancelar</button><button type="submit">Salvar</button></footer></form>';
  dialog.setAttribute('aria-labelledby','local-demo-title');document.body.append(dialog);
  let apply,opener;
  function edit(title,label,value,onSave){opener=document.activeElement;apply=onSave;byId('local-demo-title').textContent=title;byId('local-demo-label').firstChild.textContent=label;byId('local-demo-value').value=value;dialog.showModal();byId('local-demo-value').focus();byId('local-demo-value').select();}

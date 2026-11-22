@@ -47,8 +47,8 @@ import { setupSkinDemo } from './skin-demo.js';
   function account(mode) {
     if (!window.FAAccountMenu) return;
     const member = mode === 'member';
-    window.FAAccountMenu.mount($('#account'), member ? {username:'Alex · exemplo', displayName:'Alex · conta de exemplo', avatarUrl:new URL('media/avatar-demo.svg',location.href).href} : null, {onLogout:() => {$('#preview-persona').value='guest';account('guest');toast('Demonstração em modo visitante.');}});
-    window.FAAccountMenu.setPlan(member ? {name:'Força Aliada Pro',tone:'active',statusLabel:'Assinatura ativa — exemplo'} : {kind:'free'});
+    window.FAAccountMenu.mount($('#account'), member ? {username:'Alex · exemplo', displayName:'Alex · conta de exemplo', avatarUrl:new URL('media/avatar-demo.svg',location.href).href} : null, {onLogout:() => {$('#preview-persona').value='guest';account('guest');toast('Você saiu da conta de teste.');}});
+    window.FAAccountMenu.setPlan(member ? {name:'Força Aliada Pro',tone:'active',statusLabel:'Assinatura de teste ativa'} : {kind:'free'});
     $$('#account a').forEach(a => {
       const path = new URL(a.href).pathname;
       a.href = path === '/login' ? origin + '/login?next=%2Fminecraft' : path === '/manager/console' ? 'https://console.forcaaliada.com/' : origin + new URL(a.href).pathname + new URL(a.href).search;

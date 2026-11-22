@@ -20,7 +20,7 @@ export function setupDemos({toast,animate,motion}) {
     const term=clean(query.value.trim()), category=filters.find(x=>x.checked)?.value||'Todos';let count=0;
     tiles.forEach(tile=>{const visible=(!term||clean(tile.dataset.name+' '+tile.dataset.category).includes(term))&&(category==='Todos'||tile.dataset.category===category);tile.hidden=!visible;if(visible)count++;});
     empty.hidden=count>0;results.dataset.empty=String(!count);
-    $('#catalog-status').textContent=count?'':'Nenhum exemplo encontrado com essa combinação.';
+    $('#catalog-status').textContent = count ? '' : 'Nenhum servidor encontrado. Tente outro nome ou estilo.';
     if(manual)catalogLoop.setPaused();
   }
   const catalogLoop=motion.register('catalog',cat,()=>{
@@ -35,7 +35,7 @@ export function setupDemos({toast,animate,motion}) {
   $('#catalog-reset').addEventListener('click',()=>{query.value='';filters[0].checked=true;filterCatalog(true);query.focus({preventScroll:true});});
   $('#catalog-search').addEventListener('submit',e=>{e.preventDefault();filterCatalog(true);});
   filters.forEach(r=>r.addEventListener('change',()=>filterCatalog(true)));
-  $$('.favorite').forEach(b=>b.addEventListener('click',()=>{catalogLoop.setPaused();const saved=b.getAttribute('aria-pressed')!=='true',name=b.closest('.catalog-tile').dataset.name;b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',saved?`Remover ${name} dos favoritos`:`Favoritar ${name}`);b.title=b.getAttribute('aria-label');animate(b);toast(saved?'Adicionado aos favoritos desta demonstração.':'Removido dos favoritos desta demonstração.');}));
+  $$('.favorite').forEach(b=>b.addEventListener('click',()=>{catalogLoop.setPaused();const saved=b.getAttribute('aria-pressed')!=='true',name=b.closest('.catalog-tile').dataset.name;b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',saved?`Remover ${name} dos favoritos`:`Favoritar ${name}`);b.title=b.getAttribute('aria-label');animate(b);toast(saved?'Salvo nos favoritos da prévia.':'Removido dos favoritos da prévia.');}));
 
   let phoneTab='feed', socialPhase=0;
   const phone=$('.phone'), phoneTabs=$$('[data-phone-tab]');
@@ -45,16 +45,29 @@ export function setupDemos({toast,animate,motion}) {
   phoneTabs.forEach(b=>b.addEventListener('click',()=>{showPhone(b.dataset.phoneTab,true);$('#incoming-message').hidden=false;}));
   $('.phone-feed-scroll').addEventListener('wheel',()=>socialLoop.setPaused(),{passive:true});
   $('.phone-feed-scroll').addEventListener('touchstart',()=>socialLoop.setPaused(),{passive:true});
-  $('#post-like').addEventListener('click',e=>{socialLoop.setPaused();const b=e.currentTarget,liked=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(liked));b.setAttribute('aria-label',liked?'Descurtir publicação demonstrativa':'Curtir publicação demonstrativa');animate(b);});
+  $('#post-like').addEventListener('click',e=>{socialLoop.setPaused();const b=e.currentTarget,liked=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(liked));b.setAttribute('aria-label',liked?'Descurtir publicação de exemplo':'Curtir publicação de exemplo');animate(b);});
   $('#post-comment').addEventListener('click',()=>{socialLoop.setPaused();const comment=$('#sample-comment');comment.hidden=!comment.hidden;if(!comment.hidden){animate(comment);comment.scrollIntoView({block:'nearest',behavior:motion.instant()?'instant':'smooth'});}$('#post-comment').setAttribute('aria-expanded',String(!comment.hidden));});
 
   $('#demo-message-form').addEventListener('submit',e=>{e.preventDefault();const field=$('#demo-message'),value=field.value.trim();if(!value)return;socialLoop.setPaused();const line=document.createElement('p');line.className='outgoing';line.textContent=value;$('.phone-messages').append(line);field.value='';while($('.phone-messages').children.length>7)$('.phone-messages .outgoing').remove();line.scrollIntoView({block:'nearest'});animate(line);});
   const prices={pro:{monthly:29.9,annual:299},team:{monthly:79.9,annual:799}};
   const money=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   $$('[data-billing]').forEach(b=>b.addEventListener('click',()=>{
-    const annual=b.dataset.billing==='annual';$$('[data-billing]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-    for(const [name,p]of Object.entries(prices)){const price=$(`[data-price="${name}"]`);price.textContent=money(annual?p.annual/12:p.monthly);animate(price);$(`[data-total="${name}"]`).textContent=annual?`R$ ${money(p.annual)} cobrados por ano. Equivalente mensal.`:`R$ ${money(p.monthly)} cobrados por mês.`;$(`[data-plan="${name}"]`).href=`https://forcaaliada.com/assinatura?checkout=${name}&interval=${annual?'annual':'monthly'}`;}
-    $('#billing-summary').textContent=annual?'Anual: Pro R$ 299; Team R$ 799. Valores mensais exibidos são equivalentes.':'Mensal: Pro R$ 29,90; Team R$ 79,90.';
+    const interval = b.dataset.billing;
+    const annual = interval === 'annual';
+    $$('[data-billing]').forEach(button => button.setAttribute('aria-pressed', String(button === b)));
+    for (const [name, amounts] of Object.entries(prices)) {
+      const price = $(`[data-price="${name}"]`);
+      price.textContent = money(annual ? amounts.annual / 12 : amounts.monthly);
+      price.nextElementSibling.textContent = annual ? '/mês em média' : '/mês';
+      animate(price);
+      $(`[data-total="${name}"]`).textContent = annual
+        ? `Total de R$ ${money(amounts.annual)} por ano.`
+        : 'Cobrança mensal.';
+      $(`[data-plan="${name}"]`).href = `https://forcaaliada.com/assinatura?checkout=${name}&interval=${interval}`;
+    }
+    $('#billing-summary').textContent = annual
+      ? 'No anual, o Pro custa R$ 299 por ano e o Team custa R$ 799 por ano.'
+      : 'No mensal, o Pro custa R$ 29,90 por mês e o Team custa R$ 79,90 por mês.';
   }));
 
   const photos=$$('[data-gallery]'),dialog=$('#lightbox');let currentPhoto=0, opener;

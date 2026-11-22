@@ -41,7 +41,7 @@
   }
   function info(
     title,
-    text = 'Esta ação é feita no aplicativo instalado. Aqui, você pode continuar explorando a interface com dados de exemplo.',
+    text = 'Para usar este recurso, abra o Manager no Windows.',
   ) {
     setDialog(title, text);
   }
@@ -97,7 +97,7 @@
       ctx.stroke();
     }
     ctx.font = '13px Segoe UI';ctx.fillStyle='#ababab';
-    ctx.fillText('Sem sessão real nesta demonstração',pad,h/2);
+    ctx.fillText('Sem jogadores neste exemplo',pad,h/2);
   }
 
   function renderPlayers() {
@@ -198,12 +198,12 @@
     log(
       online
         ? 'Servidor de exemplo iniciado.'
-        : 'Processo Minecraft parado. O PC continua conectado.',
+        : 'Servidor de exemplo parado.',
     );
     tell(
       online
-        ? 'Servidor de demonstração iniciado.'
-        : 'Minecraft parado. O PC continua conectado à sua conta.',
+        ? 'Servidor de exemplo iniciado.'
+        : 'Servidor de exemplo parado.',
     );
     schedule();
   }
@@ -355,13 +355,13 @@
   byId('fePropsContent').style.display = 'flex';
   byId('fePropsPathHint').textContent =
     'C:\\Servidores\\Vale dos Aliados\\server.properties';
-  byId('fePropsSaveText').textContent = 'Carregado · exemplo';
+  byId('fePropsSaveText').textContent = 'Configurações de exemplo';
   byId('backupWorkspaceSource').textContent =
     'C:\\Servidores\\Vale dos Aliados';
   byId('backupWorkspaceDestination').textContent =
     'C:\\Backups\\Vale dos Aliados';
   byId('backupWorkspaceLast').textContent = 'Hoje, 06:00 · exemplo';
-  byId('backupWorkspaceStatus').textContent = 'Pastas ilustrativas';
+  byId('backupWorkspaceStatus').textContent = 'Pastas de exemplo';
   const fileTabs = [...filePage.querySelectorAll('.file-editor-tab')];
   function fileView(value) {
     fileTabs.forEach((button) => {
@@ -381,7 +381,7 @@
   byId('btnSaveProps').disabled = false;
   byId('btnSaveProps').addEventListener('click', () => {
     set('fePropsSaveText', 'Exemplo salvo');
-    tell('Configurações de exemplo salvas. Nenhum arquivo real foi alterado.');
+    tell('Configurações salvas nesta prévia.');
   });
   byId('btnBackupNow').disabled = false;
   byId('btnBackupNow').addEventListener('click', createBackup);
@@ -398,7 +398,7 @@
       set('backupWorkspaceLast', 'Agora · exemplo');
       set('backupWorkspaceStatus', 'Cópia de exemplo concluída');
       set('saasOverviewLastBackup', 'Agora · exemplo');
-      tell('Backup de exemplo pronto. Nenhum arquivo real foi alterado.');
+      tell('Backup de exemplo concluído.');
     }, 700);
   }
   const scheduledPanel = byId('agendaScheduledPanel'),
@@ -456,7 +456,7 @@
             button.querySelector('strong')?.textContent || 'Programar ação';
           info(
             title,
-            'Escolha os horários e condições no aplicativo. Este catálogo é a interface do Manager com dados de demonstração.',
+            'Abra o Manager para escolher os horários e as condições da tarefa.',
           );
         }),
       );
@@ -557,7 +557,7 @@
     else if (button.dataset.previewDetails)
       info(
         button.dataset.previewDetails,
-        'Perfil ilustrativo. No aplicativo você acompanha presença, histórico e acesso deste jogador.',
+        'No Manager, aqui aparecem o status, o histórico e o acesso do jogador.',
       );
     else if (
       button.matches(
