@@ -66,3 +66,10 @@ O título ocupa menos espaço e a ação de cadastro tem mais respiro. A imagem 
 Substituições visuais: modelos 3D e amostras reais de skins, paleta de cores, ícones de pintar/girar/desfazer/download, reação visual ao favorito, selos e capacidades dos planos. A navegação entre feed e conversa fica no próprio telefone, não na área de convencimento. Preço, cobrança, PC ligado e diferença entre grátis/pago continuam escritos: omiti-los reduziria a clareza.
 
 Uma única pausa ocupa 44px no canto. Entradas finitas usam transform/opacity; o cadastro recebe um reflexo inicial breve, sem pulsação permanente. Hero alterna telas reais, catálogo demonstra busca/filtro/favorito e Community demonstra feed/conversa. Interação manual interrompe o ciclo correspondente. Não há controle de rolagem nem animação necessária para acessar conteúdo.
+
+
+## Refinamento de composição — 22/11/2026
+
+A direção permanece. As miniaturas dos três produtos compartilham uma mesma linha de base no desktop/tablet, e o Community conserva sua fotografia no celular. Os filtros da demonstração não alteram a altura do conteúdo; o visitante pode limpar a busca e a categoria numa única ação. Links internos descontam o cabeçalho fixo.
+
+A comparação de planos usa três colunas acima de 1000px. Entre 761 e 1000px, a conta gratuita ocupa uma faixa horizontal e Pro/Team ficam lado a lado; no celular, os três ficam em coluna, com espaçamentos mais compactos. Símbolos repetidos do bloco grátis são dispensados nas telas menores, preservando a lista completa de benefícios. Preços, limites, cobrança e requisitos do PC continuam explícitos.

@@ -1,5 +1,20 @@
 # Validação da home v4
 
+## Refinamento de composição — 22/11/2026
+
+Esta passagem preserva a direção aprovada. Corrige miniaturas desalinhadas, imagem do Community ausente em telas menores, comparação de planos comprimida no tablet, excesso de espaço no plano gratuito móvel, busca sem recuperação direta e deslocamento vertical provocado pelos filtros demonstrativos.
+
+- Catálogo mantém sua altura durante filtros automáticos ou manuais. A busca vazia oferece limpeza conjunta do termo e da categoria, devolvendo o foco ao campo.
+- Miniaturas ficam alinhadas; Community mantém a fotografia também no celular. Busca móvel usa botão de seta com nome acessível.
+- Planos: três colunas em telas amplas; gratuito compacto acima de Pro/Team no tablet; coluna simples no celular. Preços, capacidades, condições e benefícios foram preservados.
+- Âncoras respeitam o cabeçalho fixo; FAQ móvel não concatena palavras; descrição acessível da skin acompanha escolha e desfazer. A descrição da captura do hero acompanha sua cena.
+
+Validação local: 49 verificações específicas por navegador (Chromium, Firefox e WebKit), sete larguras de 320 a 1920px. Incluem estabilidade vertical, recuperação, imagens, alinhamentos, navegação móvel e descrições acessíveis. Regressão funcional: 32 verificações em Chromium passaram; 14 verificações de movimento e alternativas sem JavaScript/WebGL também passaram; axe sem apontamentos na home e na visão geral nativa. Auditoria de 82 IDs, 222 referências e 34 imagens sem falhas; conta compartilhada permanece idêntica à v3.
+
+Um aviso de ciclo de redimensionamento no WebKit foi corrigido separando leitura de tamanho e atualização visual. A execução final no WebKit passou sem erros JavaScript.
+
+Evidências: `*-refinement-check.json`, `chromium-refinement-regression.json`, `finished-*.png`. O plano e a inspeção ficam em `home-research/v4/REFINAMENTO-2026-11-22.md`. São testes de laboratório; não equivalem a aprovação por participantes externos.
+
 ## Revisão de apresentação — 22/11/2026
 
 A revisão atual substitui o simulador aproximado pelo HTML/CSS nativos do Manager e as figuras CSS por texturas Minecraft 64×64. A abertura ficou mais compacta, com cadastro prioritário. Publicações/mensagens são navegadas dentro do telefone. Controles repetidos de reprodução foram removidos.

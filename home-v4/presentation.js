@@ -7,7 +7,7 @@ export function setupPresentation({motion,toast}){
   if(next.dataset.src){next.src=next.dataset.src;delete next.dataset.src;}
   try{await next.decode();}catch{return;}
   if(!heroLoop.canRun())return;
-  scene=(scene+1)%scenes.length;scenes.forEach(img=>img.classList.toggle('is-active',img===next));hero.dataset.scene=next.dataset.managerScene;
+  scene=(scene+1)%scenes.length;scenes.forEach(img=>img.classList.toggle('is-active',img===next));hero.dataset.scene=next.dataset.managerScene;scenes[0].alt=({overview:'Visão geral',terminal:'Terminal',backups:'Arquivos e backups'})[next.dataset.managerScene]+' do Manager com um servidor de exemplo';
  },6200);
  const start=frame=>{if(!frame.src&&frame.dataset.src)frame.src=frame.dataset.src;};
  const observer=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{

@@ -26,3 +26,113 @@
 .enhanced #phone-chat .phone-chat-person,.enhanced #phone-chat .message-field{flex-shrink:0}
 .enhanced #phone-chat .phone-messages{flex:1;min-height:0;max-height:none;justify-content:flex-start;overflow:auto;padding:18px 14px}
 .phone-messages p{flex-shrink:0}.message-field{min-height:60px;padding:6px 12px}.message-field input{font-size:16px}
+
+/* Final composition pass: consistent previews, stable demonstrations and readable comparisons. */
+.section[id]{scroll-margin-top:80px}
+#manager-demo{scroll-margin-top:104px}
+.product-panel{display:grid;grid-template-rows:auto minmax(52px,auto) 173px auto;align-content:start}
+.product-panel>.panel-preview,.product-panel:nth-child(2)>.panel-preview{margin-top:0;height:173px}
+.product-panel>.panel-foot{align-self:end}
+.mini-app>b{display:flex;align-items:center;gap:9px;padding-block:10px 4px}
+.mini-app>b>img{width:32px;height:32px;border-radius:5px;object-fit:cover;flex:none}
+.mini-app .tiny-bar{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.mini-social{display:grid;grid-template-columns:1fr 45%;grid-template-rows:1fr 36px}
+.mini-social>img{display:block}
+.catalog-results{position:relative}
+.catalog-tiles{align-content:start}
+.catalog-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;color:#4d6072}
+.catalog-empty>svg{width:30px;height:30px;color:#748796}
+.catalog-empty .catalog-feedback{margin:0;max-width:28ch}
+.catalog-empty .text-link{font:650 14px Manrope,sans-serif;background:transparent;border:0;color:#243b2e;min-height:44px;cursor:pointer}
+.catalog-search:focus-within label{border-color:#688778}
+.price strong{font-variant-numeric:tabular-nums}
+.price-total{min-height:44px}
+.plan-title{min-height:65px}
+.plan-capacity,.free-plan-visual{min-height:94px}
+.plan-capacity{align-items:center}
+.faq-list details{transition:background-color 180ms var(--ease)}
+.faq-list details[open]{background:#edf2ec}
+.faq-list details[open]>p{padding-bottom:4px}
+.faq-list summary:hover{color:#267747}
+@media(min-width:761px) and (max-width:1000px){
+ .overview-heading{align-items:baseline}
+ .overview-heading p{max-width:205px}
+ .product-panel>p{min-height:52px}
+ .mini-social{grid-template-columns:1fr;grid-template-rows:34px 73px 20px;gap:8px;padding:10px}
+ .mini-social>img{grid-column:1;grid-row:2;border-radius:6px}
+ .mini-social>span{grid-row:3}
+ .mini-social .portrait{width:28px;height:28px}
+ .mini-social>div{gap:6px}
+ .mini-social>div b{font-size:13px}
+ .mini-social>span svg{width:17px;height:17px}
+ .plans{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .free-card{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:32px;align-content:start;padding:26px}
+ .free-card .plan-title{grid-column:1;grid-row:1;min-height:0;display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;margin-bottom:12px}
+ .free-card .plan-title>span:last-child{margin:0}
+ .free-card h3{grid-column:1;grid-row:2;font-size:21px}
+ .free-card .price{grid-column:1;grid-row:3;margin-top:8px}
+ .free-card .price-total{grid-column:1;grid-row:4;min-height:0}
+ .free-card .free-plan-visual{display:none}
+ .free-card>.button{grid-column:2;grid-row:1/3;align-self:start}
+ .free-card ul{grid-column:2;grid-row:3/5;margin-top:8px;gap:10px}
+ .free-card .free-manager-note{grid-column:1/-1;grid-row:5;margin-top:18px;padding-top:14px}
+ .plan-card:not(.free-card){padding:26px}
+ .plan-card h3{font-size:22px}
+ .price strong{font-size:46px}
+ .plan-capacity{gap:36px}
+ .plan-title>span:last-child{min-height:0}
+}
+@media(max-width:760px){
+ .section[id]{scroll-margin-top:70px}
+ #manager-demo{scroll-margin-top:88px}
+ .product-panel{grid-template-rows:auto auto auto;row-gap:0;align-content:center}
+ .product-panel>.panel-preview{height:172px;min-height:172px;grid-row:1/4;align-self:center}
+ .mini-app>b{display:block;padding:9px 8px 4px;font-size:13px}
+ .mini-app>b>img{display:block;margin-bottom:8px}
+ .mini-app .mini-line{padding:5px 8px;font-size:12px;gap:6px}
+ .mini-app .mini-line svg{width:15px;height:15px;flex:none}
+ .mini-social{grid-template-columns:1fr;grid-template-rows:32px 72px 20px;padding:10px;gap:8px}
+ .mini-social>img{grid-row:2;grid-column:1;border-radius:5px}
+ .mini-social>span{grid-row:3;gap:14px}
+ .mini-social>span svg{width:17px;height:17px}
+ .mini-social .portrait{width:28px;height:28px}
+ .mini-social>div{gap:5px}
+ .mini-social>div b{font-size:13px;white-space:nowrap}
+ .mini-social .plan-badge{font-size:13px;padding:2px 3px}
+ .mini-social .plan-badge svg{width:12px}
+ .catalog-search{flex-wrap:nowrap;align-items:stretch;gap:7px}
+ .catalog-search label{min-width:0;flex:1;padding-inline:12px}
+ .catalog-search input{width:100%;min-width:0;font-size:16px}
+ .catalog-search .button{width:48px;min-width:48px;min-height:48px;padding:0;flex:none}
+ .catalog-search .button>span{display:none}
+ .catalog-search .button svg{width:20px;height:20px}
+ .catalog-filters fieldset{gap:5px}
+ .catalog-filters label span{padding-inline:10px;font-size:13px}
+ .plan-card{padding:24px}
+ .plan-title{min-height:0;margin-bottom:16px}
+ .plan-card h3{font-size:22px}
+ .price{margin-top:14px}
+ .price strong{font-size:46px}
+ .price-total{min-height:44px;font-size:13px}
+ .plan-capacity{min-height:84px;padding-block:14px;margin-block:12px 20px}
+ .plan-card ul{gap:12px;margin-top:20px}
+ .plan-card li{font-size:14px}
+ .free-card .free-plan-visual{display:none}
+ .free-card>.button{margin-top:18px}
+ .free-card .price-total{min-height:0}
+ .free-manager-note{margin-top:18px;padding-top:14px}
+ .billing-row{margin-bottom:24px}
+ .pricing-heading>div>p{font-size:16px;line-height:1.65;max-width:38ch}
+ .faq-list summary{font-size:16px}
+}
+@media(max-width:380px){
+ .product-panel{grid-template-columns:1fr 43%;column-gap:12px}
+ .mini-social .plan-badge svg{display:none}
+ .mini-social .portrait{width:24px;height:24px}
+ .mini-social>div{gap:4px}
+ .catalog-search label{gap:7px;padding-inline:10px}
+ .catalog-search input{font-size:14px}
+ .catalog-filters label span{font-size:12px;padding-inline:8px}
+ .plan-card{padding:22px}
+ .plan-capacity{gap:30px}
+}

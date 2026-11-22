@@ -23,7 +23,7 @@ export function setupSkinDemo({toast,motion}){
  $('#skin-paint').addEventListener('click',()=>mode(true));$('#skin-orbit').addEventListener('click',()=>mode(false));
  const rotate=amount=>{cancelAnimationFrame(turnTimer);if(viewer)viewer.playerObject.rotation.y+=amount;};$('#skin-left').addEventListener('click',()=>rotate(-Math.PI/4));$('#skin-right').addEventListener('click',()=>rotate(Math.PI/4));
  canvas.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();rotate(e.key==='ArrowLeft'?-.25:.25);}});
- $$('[data-skin-preset]').forEach(b=>b.addEventListener('click',()=>{remember();preset=b.dataset.skinPreset;color=presets[preset].coat;texture=createTexture(preset);refresh();$$('[data-skin-preset]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$$('[data-color]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.color===color)));}));
+ $$('[data-skin-preset]').forEach(b=>b.addEventListener('click',()=>{remember();preset=b.dataset.skinPreset;color=presets[preset].coat;texture=createTexture(preset);refresh();syncChoices();}));
  $$('[data-color]').forEach(b=>b.addEventListener('click',()=>{if(!paint)remember();color=b.dataset.color;$$('[data-color]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));if(!paint){texture=createTexture(preset,color);refresh();}}));
  function pixel(event){
   if(!viewer||!paint)return;const r=canvas.getBoundingClientRect(),ray=new api.Raycaster();ray.setFromCamera(new api.Vector2((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1),viewer.camera);

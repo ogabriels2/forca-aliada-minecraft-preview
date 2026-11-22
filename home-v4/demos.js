@@ -2,11 +2,25 @@ export function setupDemos({toast,animate,motion}) {
   const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
   const query=$('#catalog-query'), filters=$$('[name="category"]'), tiles=$$('.catalog-tile'), cat=$('.catalog-window');
   let catPhase=0;
+  const results=$('.catalog-results'),grid=$('.catalog-tiles'),empty=$('.catalog-empty');
+  // Reserve the full preview height so its automatic filters never move the page.
+  let catalogWidth=0,catalogMeasure;
+  new ResizeObserver(entries=>{
+    const width=entries[0].contentRect.width;if(!width||Math.abs(width-catalogWidth)<1)return;
+    catalogWidth=width;cancelAnimationFrame(catalogMeasure);
+    catalogMeasure=requestAnimationFrame(()=>{
+      const hidden=tiles.map(t=>t.hidden);
+      grid.style.minHeight='0';tiles.forEach(t=>t.hidden=false);
+      const height=grid.getBoundingClientRect().height;
+      tiles.forEach((t,i)=>t.hidden=hidden[i]);grid.style.minHeight=`${Math.ceil(height)}px`;
+    });
+  }).observe(grid);
   const clean=s=>s.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   function filterCatalog(manual=false){
     const term=clean(query.value.trim()), category=filters.find(x=>x.checked)?.value||'Todos';let count=0;
     tiles.forEach(tile=>{const visible=(!term||clean(tile.dataset.name+' '+tile.dataset.category).includes(term))&&(category==='Todos'||tile.dataset.category===category);tile.hidden=!visible;if(visible)count++;});
-    $('#catalog-status').textContent=count?'': 'Nenhum exemplo encontrado. Tente Survival, Criativo ou limpe a busca.';
+    empty.hidden=count>0;results.dataset.empty=String(!count);
+    $('#catalog-status').textContent=count?'':'Nenhum exemplo encontrado com essa combinação.';
     if(manual)catalogLoop.setPaused();
   }
   const catalogLoop=motion.register('catalog',cat,()=>{
@@ -18,6 +32,7 @@ export function setupDemos({toast,animate,motion}) {
     filterCatalog();
   },4800);
   query.addEventListener('input',()=>filterCatalog(true));
+  $('#catalog-reset').addEventListener('click',()=>{query.value='';filters[0].checked=true;filterCatalog(true);query.focus({preventScroll:true});});
   $('#catalog-search').addEventListener('submit',e=>{e.preventDefault();filterCatalog(true);});
   filters.forEach(r=>r.addEventListener('change',()=>filterCatalog(true)));
   $$('.favorite').forEach(b=>b.addEventListener('click',()=>{catalogLoop.setPaused();const saved=b.getAttribute('aria-pressed')!=='true',name=b.closest('.catalog-tile').dataset.name;b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',saved?`Remover ${name} dos favoritos`:`Favoritar ${name}`);b.title=b.getAttribute('aria-label');animate(b);toast(saved?'Adicionado aos favoritos desta demonstração.':'Removido dos favoritos desta demonstração.');}));
