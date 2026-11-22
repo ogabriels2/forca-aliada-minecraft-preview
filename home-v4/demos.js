@@ -37,40 +37,88 @@ export function setupDemos({toast,animate,motion}) {
   filters.forEach(r=>r.addEventListener('change',()=>filterCatalog(true)));
   $$('.favorite').forEach(b=>b.addEventListener('click',()=>{catalogLoop.setPaused();const saved=b.getAttribute('aria-pressed')!=='true',name=b.closest('.catalog-tile').dataset.name;b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',saved?`Remover ${name} dos favoritos`:`Favoritar ${name}`);b.title=b.getAttribute('aria-label');animate(b);toast(saved?'Salvo nos favoritos da prévia.':'Removido dos favoritos da prévia.');}));
 
-  let socialPhase=0;
-  const phone=$('.phone'), phoneTabs=$$('[data-phone-tab]');
+  const phone = $('.phone');
+  const phoneFeed = $('#phone-feed');
+  const phoneChat = $('#phone-chat');
+  const phoneTabs = $$('[data-phone-tab]');
+  const chatTab = $('[data-phone-tab="chat"]');
   const feedScroll = $('.phone-feed-scroll');
   const messages = $('.phone-messages');
-  function showPhone(tab,manual=false){$('#phone-feed').hidden=tab!=='feed';$('#phone-chat').hidden=tab!=='chat';phoneTabs.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.phoneTab===tab)));if(manual)socialLoop.setPaused();animate(tab==='feed'?$('#phone-feed'):$('#phone-chat'));}
-  const socialLoop=motion.register('community',phone,()=>{socialPhase=(socialPhase+1)%4;if(socialPhase===1){$('.phone-feed-scroll').scrollTo({top:170,behavior:motion.instant()?'instant':'smooth'});}else if(socialPhase===2){showPhone('chat');$('#incoming-message').hidden=true;}else if(socialPhase===3){$('#incoming-message').hidden=false;animate($('#incoming-message'));}else{showPhone('feed');$('.phone-feed-scroll').scrollTop=0;}},5500);
-  showPhone('feed');
-  phoneTabs.forEach(b=>b.addEventListener('click',()=>{showPhone(b.dataset.phoneTab,true);$('#incoming-message').hidden=false;}));
-  feedScroll.addEventListener('wheel',()=>socialLoop.setPaused(),{passive:true});
-  phone.addEventListener('pointerdown',()=>socialLoop.setPaused(),{passive:true});
-  $('#post-like').addEventListener('click',e=>{socialLoop.setPaused();const b=e.currentTarget,liked=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(liked));b.setAttribute('aria-label',liked?'Descurtir publicação de exemplo':'Curtir publicação de exemplo');animate(b);});
-  $('#post-comment').addEventListener('click', () => {
+  function showPhone(tab) {
+    const chat = tab === 'chat';
+    const current = phoneChat.hidden ? 'feed' : 'chat';
+    if (current === tab) return;
+    phoneChat.hidden = !chat;
+    phoneFeed.hidden = chat;
+    phoneTabs.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.phoneTab === tab)));
+    if (chat) messages.scrollTop = messages.scrollHeight;
+    animate(chat ? phoneChat : phoneFeed);
+  }
+  const socialLoop = motion.register('community', phone, () => {
+    if (phoneChat.hidden) {
+      showPhone('chat');
+    } else {
+      showPhone('feed');
+      socialLoop.setPaused();
+    }
+  }, 6800);
+  phoneTabs.forEach(button => button.addEventListener('click', () => {
     socialLoop.setPaused();
-    const comment = $('#sample-comment');
-    comment.hidden = !comment.hidden;
-    $('#post-comment').setAttribute('aria-expanded', String(!comment.hidden));
-    if (comment.hidden) return;
-    const offset = comment.getBoundingClientRect().bottom - feedScroll.getBoundingClientRect().bottom;
-    if (offset > 0) feedScroll.scrollBy({top: offset + 8, behavior: motion.instant() ? 'instant' : 'smooth'});
-    animate(comment);
+    showPhone(button.dataset.phoneTab);
+  }));
+  $('.hero-message').addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    socialLoop.setPaused();
+    showPhone('chat');
+    requestAnimationFrame(() => chatTab.focus({ preventScroll: true }));
   });
+  phone.addEventListener('wheel', () => socialLoop.setPaused(), { passive: true });
+  phone.addEventListener('pointerdown', () => socialLoop.setPaused(), { passive: true });
+  phone.addEventListener('pointerenter', event => {
+    if (event.pointerType === 'mouse') socialLoop.setPaused();
+  });
+  for (const button of $$('[data-post-like]', feedScroll)) {
+    button.addEventListener('click', () => {
+      const liked = button.getAttribute('aria-pressed') !== 'true';
+      button.setAttribute('aria-pressed', String(liked));
+      animate(button);
+    });
+  }
+  for (const button of $$('[aria-controls]', feedScroll)) {
+    const comment = document.getElementById(button.getAttribute('aria-controls'));
+    button.addEventListener('click', () => {
+      comment.hidden = !comment.hidden;
+      button.setAttribute('aria-expanded', String(!comment.hidden));
+      if (comment.hidden) return;
+      const offset = comment.getBoundingClientRect().bottom - feedScroll.getBoundingClientRect().bottom;
+      if (offset > 0) feedScroll.scrollBy({top: offset + 8, behavior: motion.instant() ? 'instant' : 'smooth'});
+      animate(comment);
+    });
+  }
 
-  $('#demo-message-form').addEventListener('submit', event => {
+  const messageForm = $('#demo-message-form');
+  const field = $('#demo-message');
+  const send = $('button', messageForm);
+  function syncComposer() { send.disabled = !field.value.trim(); }
+  field.addEventListener('input', syncComposer);
+  messageForm.addEventListener('submit', event => {
     event.preventDefault();
-    const field = $('#demo-message');
     const value = field.value.trim();
     if (!value) return;
     socialLoop.setPaused();
     const line = document.createElement('p');
     line.className = 'outgoing';
-    line.textContent = value;
+    line.dataset.draftMessage = '';
+    const sender = document.createElement('span');
+    sender.className = 'sr-only';
+    sender.textContent = 'Você: ';
+    line.append(sender, value);
     messages.append(line);
     field.value = '';
-    while (messages.children.length > 7) $('.outgoing', messages).remove();
+    field.focus({ preventScroll: true });
+    syncComposer();
+    const drafts = $$('[data-draft-message]', messages);
+    if (drafts.length > 12) drafts[0].remove();
     messages.scrollTop = messages.scrollHeight;
     animate(line);
   });

@@ -437,5 +437,41 @@
     ],
     "bytes": 2268,
     "rights": "Criação publicada por joopedro_xesquq no catálogo da Força Aliada. Curadoria da vitrine da home."
+  },
+  {
+    "file": "community-lia.webp",
+    "source": "https://commons.wikimedia.org/wiki/File:O_RLY.jpg",
+    "credit": "SPUI, a partir da foto de John e Karen Hollingsworth (USFWS)",
+    "size": [
+      144,
+      144
+    ],
+    "bytes": 7390,
+    "rights": "Domínio público conforme a ficha do Wikimedia Commons",
+    "modifications": "Recorte quadrado e conversão para WebP."
+  },
+  {
+    "file": "community-rui.webp",
+    "source": "https://unsplash.com/photos/a-close-up-of-a-cat-sticking-its-tongue-out--L9o0wRE0lE",
+    "credit": "Soliman Cifuentes",
+    "size": [
+      144,
+      144
+    ],
+    "bytes": 6300,
+    "rights": "Unsplash License",
+    "modifications": "Recorte quadrado e conversão para WebP."
+  },
+  {
+    "file": "community-noa.webp",
+    "source": "https://unsplash.com/photos/a-close-up-of-a-llama-looking-at-the-camera-4YRRp7jzN20",
+    "credit": "Julian Zwengel",
+    "size": [
+      144,
+      144
+    ],
+    "bytes": 5286,
+    "rights": "Unsplash License",
+    "modifications": "Recorte quadrado e conversão para WebP."
   }
 ]

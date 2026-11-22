@@ -43,6 +43,8 @@ No celular, o hero empilha os elementos, a visão de produtos conserva miniatura
 
 ## Movimento com função
 
+A demonstração do Community usa as proporções físicas do [iPhone 16](https://support.apple.com/pl-pl/121029), 71,6 × 147,6 mm. Feed e chat dividem a mesma área, com rolagem interna e navegação fixa. A mensagem do hero abre a conversa de exemplo com a mesma pessoa. Os perfis fictícios usam fotografias e um meme identificados nos créditos.
+
 A abertura conserva profundidade e deslocamento fotográfico discreto. A janela do Manager se endireita ao entrar em cena; a janela do hero alterna visão geral, terminal e arquivos. O catálogo alterna busca, filtro e favorito. O Community demonstra feed e mensagem. A skin gira e muda de cor quando acionada. Trocas usam CSS/WAAPI, com WebGL carregado apenas para o editor e alternativa 2D e sem rolagem sequestrada.
 
 Ciclos só executam visíveis, com aba ativa e sem foco de edição. Interação manual pausa a demonstração correspondente. Há uma pausa geral compacta; controles repetidos de reprodução foram retirados. Preferência de movimento reduzido e economia de dados desligam os ciclos. Isso também evita que a página dispute atenção enquanto a pessoa lê ou usa controles.

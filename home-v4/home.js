@@ -1,5 +1,5 @@
 import { setupMotion } from './motion.js';
-import { setupDemos } from './demos.js?v=20261122-studio';
+import { setupDemos } from './demos.js?v=20261122-social';
 import { setupPresentation } from './presentation.js';
 import { setupSkinDemo } from './skin-demo.js?v=20261122-catalog-picks';
 (() => {
