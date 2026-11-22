@@ -6,7 +6,7 @@ Atualizado em 22/11/2026. Nenhuma conta real, credencial ou mensagem privada foi
 
 O clone autorizado do aplicativo, commit 6745fc6 (2.4.18), foi consultado para entender a interface. O código privado não é distribuído. A pasta `manager/` reaproveita a [exportação estrutural pública do site](https://forcaaliada.com/assets/manager-native/): DOM e estilos reais, com estado fictício. A fonte original e hashes estão em `manager/source.json`.
 
-Adaptações da v4: caminhos relativos, enquadramento, navegação compacta no celular, semântica/contraste, edição local de nome/MOTD e desativação dos ciclos que inventavam entradas de jogadores. Latência, TPS e tempo de sessão não são apresentados como medições reais. O hero mostra a janela completa em escala; abaixo, a janela pode ser usada e ampliada em outra aba.
+Adaptações da v4: caminhos relativos, enquadramento, navegação compacta no celular, semântica/contraste, edição local de nome/MOTD e desativação dos ciclos que inventavam entradas de jogadores. Latência, TPS e tempo de sessão não são apresentados como medições reais. O hero alterna três capturas reais da exportação nativa (visão geral, terminal e backups), comprimidas em WebP. Isso evita carregar uma segunda aplicação completa na abertura. Abaixo, o HTML nativo pode ser usado e ampliado em outra aba.
 
 Terminal e backups alteram somente a demonstração. Configurações do Windows, instalação, autenticação, criação efetiva, compartilhamento e rotinas reais exigem o aplicativo. A política de conteúdo bloqueia conexões e envios de formulário. Não há ponte Electron, acesso ao disco ou chamadas de produção.
 

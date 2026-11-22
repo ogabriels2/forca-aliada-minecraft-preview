@@ -1,16 +1,14 @@
 export function setupPresentation({motion,toast}){
  const frames=[...document.querySelectorAll('[data-manager-frame]')];
  window.addEventListener('message',e=>{const full=frames.find(f=>f.dataset.managerFrame==='full');if(e.origin===location.origin&&e.source===full?.contentWindow&&e.data?.type==='manager-preview'&&e.data.event==='activity'&&typeof e.data.message==='string')toast(e.data.message);});
- const heroFrame=frames.find(f=>f.dataset.managerFrame==='hero');
- if(heroFrame)new ResizeObserver(()=>{heroFrame.style.transform=`scale(${heroFrame.parentElement.clientWidth/1000})`;}).observe(heroFrame.parentElement);
- if(heroFrame){
-  const scenes=['overview','terminal','files'];let scene=0;
-  motion.register('hero-product',heroFrame.parentElement,()=>{
-   scene=(scene+1)%scenes.length;
-   heroFrame.contentWindow?.postMessage({type:'manager-preview-control',view:scenes[scene],playing:false},location.origin);
-   heroFrame.animate([{opacity:.65},{opacity:1}],{duration:350,easing:'ease-out'});
-  },6200);
- }
+ const hero=document.querySelector('.hero-app-preview'),scenes=[...hero.querySelectorAll('[data-manager-scene]')];let scene=0;
+ const heroLoop=motion.register('hero-product',hero,async()=>{
+  const next=scenes[(scene+1)%scenes.length];
+  if(next.dataset.src){next.src=next.dataset.src;delete next.dataset.src;}
+  try{await next.decode();}catch{return;}
+  if(!heroLoop.canRun())return;
+  scene=(scene+1)%scenes.length;scenes.forEach(img=>img.classList.toggle('is-active',img===next));hero.dataset.scene=next.dataset.managerScene;
+ },6200);
  const start=frame=>{if(!frame.src&&frame.dataset.src)frame.src=frame.dataset.src;};
  const observer=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
   if(isIntersecting)start(target);

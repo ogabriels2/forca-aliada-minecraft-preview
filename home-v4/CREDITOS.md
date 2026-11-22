@@ -2,6 +2,7 @@
 
 - **Fotos do mundo:** imagens do próprio projeto Força Aliada, reutilizadas com autorização do titular. Fontes: assets/images/galeria14.webp (cidade central), galeria10.webp (ruas), galeria4.jpeg (MASP), galeria7.jpeg (prefeitura), galeria19.webp (casa); coliseu de home-v2/media/forca-aliada-coliseu.webp. Minecraft e texturas pertencem à Mojang/Microsoft; não há vínculo oficial.
 - **Derivados:** os recortes WebP/AVIF, miniaturas e tamanhos responsivos foram herdados da v3. Não há geração ou adição de construções. Relação individual em media/provenance.json.
+- **Capturas do Manager:** manager-hero-*.webp são capturas de navegador da exportação pública com dados de exemplo, sem conta real.
 - **Interfaces:** código próprio da Força Aliada, referência do Manager 2.4.18 e páginas existentes. Recortes HTML demonstrativos descritos em CAPTURAS.md. Código completo privado do Manager e capturas de contas reais não são distribuídos.
 - **Skins:** texturas pixel art originais 64×64 para a demonstração (Órbita, Aurora e Trilha), exportadas por skin-textures.js. Os PNGs de base Steve herdados da v3 foram removidos desta variante.
 - **Avatares:** portrait-lia.svg, portrait-rui.svg e portrait-noa.svg são desenhos SVG próprios; avatar-demo.svg é o monograma herdado da v3. Pessoas e perfis fictícios, sem depoimentos atribuídos a clientes.

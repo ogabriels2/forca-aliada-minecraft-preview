@@ -2,7 +2,7 @@
 
 [Abrir a prévia](https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v4/) · [Versão anterior preservada](https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v3/)
 
-Revisão de apresentação de 22/11/2026. Evolução da v4 aprovada: abertura mais compacta, prioridade para cadastro, interface real do Manager e skins Minecraft 64×64. Público jovem, sem estética infantil. Produção, catálogo, v2 e v3 preservados.
+Revisão de apresentação de 22/11/2026. Evolução da v4 aprovada: abertura mais compacta, prioridade para cadastro, interface real do Manager e skins Minecraft 64×64. O hero usa capturas reais animadas e a seção Manager carrega o demonstrador interativo sob demanda. Público jovem, sem estética infantil. Produção, catálogo, v2 e v3 preservados.
 
 ## Executar
 
