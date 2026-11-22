@@ -397,5 +397,45 @@
     ],
     "bytes": 1832,
     "rights": "Criação publicada por gabalarca no catálogo da Força Aliada. Uso na prévia autorizado pelo titular do projeto."
+  },
+  {
+    "file": "skin-pato-detetive.png",
+    "source": "https://forcaaliada.com/minecraft#/skins/54510d2a-6240-4bad-9a6f-fa8a973a0be6",
+    "size": [
+      64,
+      64
+    ],
+    "bytes": 1648,
+    "rights": "Criação publicada por joopedro_xesquq no catálogo da Força Aliada. Curadoria da vitrine da home."
+  },
+  {
+    "file": "skin-pato-detetive-front.png",
+    "source": "skin-pato-detetive.png",
+    "size": [
+      96,
+      128
+    ],
+    "bytes": 1623,
+    "rights": "Criação publicada por joopedro_xesquq no catálogo da Força Aliada. Curadoria da vitrine da home."
+  },
+  {
+    "file": "skin-seguidor.png",
+    "source": "https://forcaaliada.com/minecraft#/skins/8fefede4-9db1-4293-bba2-775b2041e3e4",
+    "size": [
+      64,
+      64
+    ],
+    "bytes": 4946,
+    "rights": "Criação publicada por joopedro_xesquq no catálogo da Força Aliada. Curadoria da vitrine da home."
+  },
+  {
+    "file": "skin-seguidor-front.png",
+    "source": "skin-seguidor.png",
+    "size": [
+      96,
+      128
+    ],
+    "bytes": 2268,
+    "rights": "Criação publicada por joopedro_xesquq no catálogo da Força Aliada. Curadoria da vitrine da home."
   }
 ]

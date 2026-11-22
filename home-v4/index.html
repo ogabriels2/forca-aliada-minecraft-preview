@@ -9,8 +9,8 @@
   <link rel="icon" href="media/fa-icon-64.webp"><link rel="preload" href="media/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" as="image" media="(min-width: 761px)" href="media/scene-1280.webp" imagesrcset="media/scene-640.webp 640w, media/scene-1280.webp 1280w, media/scene-1920.webp 1920w" imagesizes="100vw" fetchpriority="high">
   <link rel="preload" as="image" type="image/avif" media="(max-width: 760px)" href="media/scene-mobile-800.avif" imagesrcset="media/scene-mobile-480.avif 480w, media/scene-mobile-800.avif 800w" imagesizes="100vw" fetchpriority="high">
-  <link rel="stylesheet" href="home.css"><link rel="stylesheet" href="v4.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="presentation.css?v=20261122-plan-layout"><link rel="stylesheet" href="studio-demo.css?v=20261122-catalog"><link rel="stylesheet" href="shared/fa-account-menu.css">
-  <script src="shared/fa-account-menu.js" defer></script><script src="home.js?v=20261122-catalog" type="module"></script>
+  <link rel="stylesheet" href="home.css"><link rel="stylesheet" href="v4.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="presentation.css?v=20261122-plan-layout"><link rel="stylesheet" href="studio-demo.css?v=20261122-catalog-picks"><link rel="stylesheet" href="shared/fa-account-menu.css">
+  <script src="shared/fa-account-menu.js" defer></script><script src="home.js?v=20261122-catalog-picks" type="module"></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -73,11 +73,24 @@
 <section class="skins-row" id="skins" aria-labelledby="skins-title">
   <div class="skins-copy">
     <h3 id="skins-title">Crie sua skin em 3D</h3>
-    <p>Experimente roupas do catálogo, pinte pixel por pixel e baixe sua skin para usar no Minecraft.</p>
+    <p>Experimente skins do catálogo, pinte pixel por pixel e baixe seu visual para usar no Minecraft.</p>
   </div>
   <div class="skin-choices js-only" role="group" aria-labelledby="skin-choices-label">
-    <div class="skin-choices-heading"><span id="skin-choices-label">Escolha um visual</span><a id="skin-catalog-credit" href="https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d" hidden>Original no catálogo</a></div>
-    <div class="studio-demo-outfits"><button type="button" data-skin-preset="orbita" aria-pressed="true"><img src="media/skin-orbita-front.png?v=studio" width="96" height="128" alt="" loading="lazy"><span>Órbita</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg></button><button type="button" data-skin-preset="gabalarca" aria-pressed="false"><img src="media/skin-gabalarca-front.png" width="96" height="128" alt="" loading="lazy"><span>Gabalarca</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg></button><button type="button" data-skin-preset="trilha" aria-pressed="false"><img src="media/skin-trilha-front.png?v=studio" width="96" height="128" alt="" loading="lazy"><span>Trilha</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg></button></div>
+    <div class="skin-choices-heading"><span id="skin-choices-label">Escolha um visual</span><a id="skin-catalog-credit" href="https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d">Original no catálogo</a></div>
+    <div class="studio-demo-outfits">
+      <button type="button" data-skin-preset="gabalarca" data-author="gabalarca" data-catalog-url="https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d" aria-pressed="true">
+        <img src="media/skin-gabalarca-front.png" width="96" height="128" alt="" loading="lazy">
+        <span>Gabalarca</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg>
+      </button>
+      <button type="button" data-skin-preset="pato-detetive" data-author="joopedro_xesquq" data-catalog-url="https://forcaaliada.com/minecraft#/skins/54510d2a-6240-4bad-9a6f-fa8a973a0be6" aria-pressed="false">
+        <img src="media/skin-pato-detetive-front.png" width="96" height="128" alt="" loading="lazy">
+        <span>Pato detetive</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg>
+      </button>
+      <button type="button" data-skin-preset="seguidor" data-author="joopedro_xesquq" data-catalog-url="https://forcaaliada.com/minecraft#/skins/8fefede4-9db1-4293-bba2-775b2041e3e4" aria-pressed="false">
+        <img src="media/skin-seguidor-front.png" width="96" height="128" alt="" loading="lazy">
+        <span>Seguidor</span><svg class="icon outfit-check" aria-hidden="true"><use href="#check"/></svg>
+      </button>
+    </div>
   </div>
   <div class="skin-editor-window real-skin-editor" data-mode="dress" role="group" aria-label="Demonstração do editor de skins">
     <div class="studio-demo-heading">
@@ -96,7 +109,7 @@
     <div class="studio-demo-stage">
       <div class="studio-demo-floor" aria-hidden="true"></div>
       <div class="real-skin-stage" id="skin-canvas-wrap">
-        <img id="skin-poster" src="media/skin-orbita-front.png?v=studio" width="96" height="128" alt="Skin Órbita vista de frente" loading="lazy">
+        <img id="skin-poster" src="media/skin-gabalarca-front.png" width="96" height="128" alt="Skin Gabalarca vista de frente" loading="lazy">
         <canvas id="skin-canvas" aria-label="Personagem em 3D. Use as setas do teclado para girar." tabindex="-1"></canvas>
       </div>
       <div class="studio-demo-camera js-only">
@@ -108,7 +121,7 @@
     <div class="studio-demo-tray js-only">
       <div class="studio-demo-palette" role="group" aria-labelledby="skin-color-label">
         <span id="skin-color-label">Cor da roupa</span>
-        <div class="studio-demo-swatches"><button type="button" data-color="#3665ac" style="--swatch:#3665ac" aria-label="Azul" aria-pressed="true"></button><button type="button" data-color="#b86738" style="--swatch:#b86738" aria-label="Terracota" aria-pressed="false"></button><button type="button" data-color="#8656b7" style="--swatch:#8656b7" aria-label="Roxo" aria-pressed="false"></button><button type="button" data-color="#317553" style="--swatch:#317553" aria-label="Verde" aria-pressed="false"></button><button type="button" data-color="#ffe600" style="--swatch:#ffe600" aria-label="Amarelo" aria-pressed="false"></button></div>
+        <div class="studio-demo-swatches"><button type="button" data-color="#3665ac" style="--swatch:#3665ac" aria-label="Azul" aria-pressed="false"></button><button type="button" data-color="#b86738" style="--swatch:#b86738" aria-label="Terracota" aria-pressed="false"></button><button type="button" data-color="#8656b7" style="--swatch:#8656b7" aria-label="Roxo" aria-pressed="false"></button><button type="button" data-color="#317553" style="--swatch:#317553" aria-label="Verde" aria-pressed="false"></button><button type="button" data-original-swatch data-color="#ffe600" style="--swatch:#ffe600" aria-label="Cor original da roupa" aria-pressed="true"></button></div>
       </div>
     </div>
   </div>

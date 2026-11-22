@@ -59,6 +59,7 @@
 }
 
 .studio-download { padding-inline: 8px; }
+.studio-download:disabled { opacity: .5; }
 .studio-download:hover,
 .studio-undo:hover:not(:disabled) { background: #edf3ee; }
 .studio-undo:disabled { color: #818982; }
@@ -164,7 +165,7 @@
   min-height: 118px;
   padding: 8px 4px;
   justify-items: center;
-  align-content: center;
+  align-content: start;
   gap: 4px;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -176,6 +177,7 @@
 .studio-demo-outfits button[aria-pressed="true"] { background: #fff; border-color: #826494; }
 .studio-demo-outfits button:hover:not([aria-pressed="true"]) { background: #fffbff; }
 .studio-demo-outfits img { width: 63px; height: 84px; object-fit: contain; image-rendering: pixelated; }
+.studio-demo-outfits button > span { text-wrap: balance; }
 .studio-demo-outfits .outfit-check {
   display: none;
   position: absolute;

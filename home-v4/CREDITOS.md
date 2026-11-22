@@ -4,7 +4,7 @@
 - **Derivados:** os recortes WebP/AVIF, miniaturas e tamanhos responsivos foram herdados da v3. Não há geração ou adição de construções. Relação individual em media/provenance.json.
 - **Capturas do Manager:** manager-hero-*.webp são capturas de navegador da exportação pública com dados de exemplo, sem conta real.
 - **Interfaces:** código próprio da Força Aliada, referência do Manager 2.4.18 e páginas existentes. Recortes HTML demonstrativos descritos em CAPTURAS.md. Código completo privado do Manager e capturas de contas reais não são distribuídos.
-- **Skins:** Órbita e Trilha usam bases originais 64×64 e peças próprias da Força Aliada. O terceiro visual é a [skin publicada por gabalarca no catálogo](https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d), exibida com link para o original.
+- **Skins da vitrine:** [Skin de Gabalarca](https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d), por gabalarca, e [Pato detetive](https://forcaaliada.com/minecraft#/skins/54510d2a-6240-4bad-9a6f-fa8a973a0be6) e [Seguidor](https://forcaaliada.com/minecraft#/skins/8fefede4-9db1-4293-bba2-775b2041e3e4), por joopedro_xesquq. A vitrine carrega as texturas públicas e leva à publicação de cada visual.
 - **Avatares:** portrait-lia.svg, portrait-rui.svg e portrait-noa.svg são desenhos SVG próprios; avatar-demo.svg é o monograma herdado da v3. Pessoas e perfis fictícios, sem depoimentos atribuídos a clientes.
 - **Marca:** fa-icon-64.webp, identidade da Força Aliada fornecida pelo projeto, usada com autorização.
 - **Fonte:** Manrope local, SIL Open Font License; licença integral em media/Manrope-OFL.txt. Segoe UI usa a fonte do sistema disponível no aparelho, sem redistribuir o arquivo.

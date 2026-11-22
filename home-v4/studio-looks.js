@@ -1,49 +1,36 @@
-import { SAMPLE_PARTS } from '../skin-parts.mjs?v=wardrobe-20261113';
-import { faces, overlay } from '../skin-pixels.mjs?v=creations-20261113';
+import { faces } from '../skin-pixels.mjs?v=creations-20261113';
 import { drawSkinFront, imagePixels, pixelCanvas } from '../skin-viewer.mjs';
-import { createTexture, presets as originalPresets } from './skin-textures.js?v=studio';
 
-// Use the pieces shipped in the Minecraft catalog, on the home's original bases.
-const outfits = {
-  orbita: ['fa-jacket-denim', 'fa-jeans', 'fa-sneakers'],
-  aurora: ['fa-hair-curls', 'fa-sweater-plum', 'fa-shorts-coast', 'fa-sneakers'],
-  trilha: ['fa-shirt-flannel', 'fa-cargo', 'fa-boots'],
-};
-
-export const presets = {
-  ...originalPresets,
-  gabalarca: {name: 'Gabalarca', coat: '#ffe600'},
-};
 export { drawSkinFront, pixelCanvas };
 
-function recolorFabric(pixels, original, color, allowedPixels) {
-  const rgb = hex => hex.slice(1).match(/../g).map(value => parseInt(value, 16));
-  const from = rgb(original);
-  const to = rgb(color);
-  const result = new Uint8ClampedArray(pixels);
-  for (let i = 0; i < result.length; i += 4) {
-    if (!result[i + 3] || (allowedPixels && !allowedPixels.has(i / 4))) continue;
-    const distance = Math.max(...from.map((value, channel) => Math.abs(value - result[i + channel])));
-    if (distance > 55) continue;
-    for (let channel = 0; channel < 3; channel++) {
-      result[i + channel] += to[channel] - from[channel];
-    }
-  }
-  return result;
-}
+export const presets = {
+  gabalarca: {
+    name: 'Gabalarca', coat: '#ffe600',
+    fabric: (r, g, b) => r > 200 && g > 170 && b < 70,
+  },
+  'pato-detetive': {
+    name: 'Pato detetive', coat: '#9a8165',
+    fabric: (r, g, b) => r > g + 12 && g > b + 12,
+  },
+  seguidor: {
+    name: 'Seguidor', coat: '#174a32',
+    fabric: (r, g, b) => g > r + 8 && g > b + 8,
+  },
+};
 
-let catalogTexture;
-export function loadCatalogLook() {
-  catalogTexture ||= imagePixels(new URL('media/skin-gabalarca.png', import.meta.url))
-    .catch(error => {
-      catalogTexture = undefined;
+const textures = new Map();
+export function loadCatalogLook(name) {
+  if (!textures.has(name)) {
+    const image = new URL(`media/skin-${name}.png`, import.meta.url);
+    textures.set(name, imagePixels(image).catch(error => {
+      textures.delete(name);
       throw error;
-    });
-  return catalogTexture;
+    }));
+  }
+  return textures.get(name);
 }
 
-// The catalog skin has its own UV texture. Recolor the yellow fabric on its
-// body and arms, leaving the face, legs and emblems intact.
+// Restrict recoloring to the coat on both layers of the torso and arms.
 const shirtPixels = new Set();
 for (const layer of ['base', 'outer']) {
   const layout = faces('classic', layer);
@@ -56,19 +43,22 @@ for (const layer of ['base', 'outer']) {
   }
 }
 
-export const recolorCatalogLook = (pixels, color) =>
-  recolorFabric(pixels, presets.gabalarca.coat, color, shirtPixels);
+function rgb(hex) {
+  return hex.slice(1).match(/../g).map(value => parseInt(value, 16));
+}
 
-export function dressLook(name, color = presets[name].coat) {
-  const base = createTexture(name, color);
-  let pixels = base.getContext('2d').getImageData(0, 0, 64, 64).data;
-  for (const id of outfits[name]) {
-    const part = SAMPLE_PARTS.find(item => item.id === id);
-    const layer = part.pixelsFor('classic');
-    const adjusted = part.category === 'tops'
-      ? recolorFabric(layer, part.color, color)
-      : layer;
-    pixels = overlay(pixels, adjusted);
+export function recolorCatalogLook(name, pixels, color) {
+  const { coat, fabric } = presets[name];
+  if (color === coat) return pixels;
+  const target = rgb(color);
+  const original = rgb(coat);
+  const result = new Uint8ClampedArray(pixels);
+  for (const point of shirtPixels) {
+    const offset = point * 4;
+    if (!pixels[offset + 3] || !fabric(pixels[offset], pixels[offset + 1], pixels[offset + 2])) continue;
+    for (let channel = 0; channel < 3; channel++) {
+      result[offset + channel] += target[channel] - original[channel];
+    }
   }
-  return pixels;
+  return result;
 }
