@@ -76,4 +76,4 @@ A comparação de planos usa três colunas acima de 1000px. Entre 761 e 1000px, 
 
 Os ícones de interface usam formas familiares e traço uniforme. O monitor identifica o Manager, o bloco identifica Minecraft e a camiseta identifica skins. Os servidores de exemplo usam iniciais discretas. Community e Team conservam seus símbolos aprovados, e o cartão do servidor da equipe usa o brasão com o selo dourado.
 
-Na demonstração de skins, a janela segue a organização do editor de Minecraft da Força Aliada. Vestir e Pintar ocupam a mesma barra, o personagem tem o palco inteiro e a prateleira reúne visuais e cores. As três combinações usam peças do catálogo. A paleta indica se altera a roupa ou a cor do pincel. No celular, o texto de apresentação precede a janela, inclusive na ordem de foco.
+Na demonstração de skins, Vestir, Pintar, Desfazer e Baixar PNG ficam na mesma barra. A paleta abaixo do personagem indica se altera a roupa ou a cor do pincel. Os três visuais, montados com peças do catálogo, ficam junto da apresentação e funcionam como escolha para a prévia. No celular, a ordem é apresentação, visuais, janela e links dos produtos.

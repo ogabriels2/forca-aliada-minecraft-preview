@@ -6,7 +6,7 @@ export function setupSkinDemo({ toast, motion }) {
   const host = byId('skin-canvas-wrap');
   const canvas = byId('skin-canvas');
   const poster = byId('skin-poster');
-  const looks = [...editor.querySelectorAll('[data-skin-preset]')];
+  const looks = [...editor.closest('#skins').querySelectorAll('[data-skin-preset]')];
   const swatches = [...editor.querySelectorAll('[data-color]')];
   const front = document.createElement('canvas');
   front.width = 96;
