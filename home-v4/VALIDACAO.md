@@ -15,6 +15,12 @@ Um aviso de ciclo de redimensionamento no WebKit foi corrigido separando leitura
 
 Evidências: `*-refinement-check.json`, `chromium-refinement-regression.json`, `finished-*.png`. O plano e a inspeção ficam em `home-research/v4/REFINAMENTO-2026-11-22.md`. São testes de laboratório; não equivalem a aprovação por participantes externos.
 
+### Conferência pública desta passagem
+
+Implementação publicada: `e62dbc8`. GitHub Pages respondeu HTTP 200 com os novos controles. Limpar busca, filtro, terminal nativo, Pro anual e PNG 64×64 conferidos online, sem imagens quebradas ou erros JavaScript; noindex preservado.
+
+**Lighthouse 13.6 móvel, publicação refinada: 100 desempenho / 100 acessibilidade / 100 boas práticas. LCP 1,8s, TBT 0ms, CLS 0.** Resultado de uma execução de laboratório, com variação normal entre medições. Relatório local `lighthouse-public-refinement.json`; confirmação funcional `chromium-public-refinement.json`. As medições abaixo pertencem às versões anteriores.
+
 ## Revisão de apresentação — 22/11/2026
 
 A revisão atual substitui o simulador aproximado pelo HTML/CSS nativos do Manager e as figuras CSS por texturas Minecraft 64×64. A abertura ficou mais compacta, com cadastro prioritário. Publicações/mensagens são navegadas dentro do telefone. Controles repetidos de reprodução foram removidos.
