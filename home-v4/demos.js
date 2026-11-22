@@ -37,18 +37,43 @@ export function setupDemos({toast,animate,motion}) {
   filters.forEach(r=>r.addEventListener('change',()=>filterCatalog(true)));
   $$('.favorite').forEach(b=>b.addEventListener('click',()=>{catalogLoop.setPaused();const saved=b.getAttribute('aria-pressed')!=='true',name=b.closest('.catalog-tile').dataset.name;b.setAttribute('aria-pressed',String(saved));b.setAttribute('aria-label',saved?`Remover ${name} dos favoritos`:`Favoritar ${name}`);b.title=b.getAttribute('aria-label');animate(b);toast(saved?'Salvo nos favoritos da prévia.':'Removido dos favoritos da prévia.');}));
 
-  let phoneTab='feed', socialPhase=0;
+  let socialPhase=0;
   const phone=$('.phone'), phoneTabs=$$('[data-phone-tab]');
-  function showPhone(tab,manual=false){phoneTab=tab;$('#phone-feed').hidden=tab!=='feed';$('#phone-chat').hidden=tab!=='chat';phoneTabs.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.phoneTab===tab)));if(manual)socialLoop.setPaused();animate(tab==='feed'?$('#phone-feed'):$('#phone-chat'));}
+  const feedScroll = $('.phone-feed-scroll');
+  const messages = $('.phone-messages');
+  function showPhone(tab,manual=false){$('#phone-feed').hidden=tab!=='feed';$('#phone-chat').hidden=tab!=='chat';phoneTabs.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.phoneTab===tab)));if(manual)socialLoop.setPaused();animate(tab==='feed'?$('#phone-feed'):$('#phone-chat'));}
   const socialLoop=motion.register('community',phone,()=>{socialPhase=(socialPhase+1)%4;if(socialPhase===1){$('.phone-feed-scroll').scrollTo({top:170,behavior:motion.instant()?'instant':'smooth'});}else if(socialPhase===2){showPhone('chat');$('#incoming-message').hidden=true;}else if(socialPhase===3){$('#incoming-message').hidden=false;animate($('#incoming-message'));}else{showPhone('feed');$('.phone-feed-scroll').scrollTop=0;}},5500);
   showPhone('feed');
   phoneTabs.forEach(b=>b.addEventListener('click',()=>{showPhone(b.dataset.phoneTab,true);$('#incoming-message').hidden=false;}));
-  $('.phone-feed-scroll').addEventListener('wheel',()=>socialLoop.setPaused(),{passive:true});
-  $('.phone-feed-scroll').addEventListener('touchstart',()=>socialLoop.setPaused(),{passive:true});
+  feedScroll.addEventListener('wheel',()=>socialLoop.setPaused(),{passive:true});
+  phone.addEventListener('pointerdown',()=>socialLoop.setPaused(),{passive:true});
   $('#post-like').addEventListener('click',e=>{socialLoop.setPaused();const b=e.currentTarget,liked=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(liked));b.setAttribute('aria-label',liked?'Descurtir publicação de exemplo':'Curtir publicação de exemplo');animate(b);});
-  $('#post-comment').addEventListener('click',()=>{socialLoop.setPaused();const comment=$('#sample-comment');comment.hidden=!comment.hidden;if(!comment.hidden){animate(comment);comment.scrollIntoView({block:'nearest',behavior:motion.instant()?'instant':'smooth'});}$('#post-comment').setAttribute('aria-expanded',String(!comment.hidden));});
+  $('#post-comment').addEventListener('click', () => {
+    socialLoop.setPaused();
+    const comment = $('#sample-comment');
+    comment.hidden = !comment.hidden;
+    $('#post-comment').setAttribute('aria-expanded', String(!comment.hidden));
+    if (comment.hidden) return;
+    const offset = comment.getBoundingClientRect().bottom - feedScroll.getBoundingClientRect().bottom;
+    if (offset > 0) feedScroll.scrollBy({top: offset + 8, behavior: motion.instant() ? 'instant' : 'smooth'});
+    animate(comment);
+  });
 
-  $('#demo-message-form').addEventListener('submit',e=>{e.preventDefault();const field=$('#demo-message'),value=field.value.trim();if(!value)return;socialLoop.setPaused();const line=document.createElement('p');line.className='outgoing';line.textContent=value;$('.phone-messages').append(line);field.value='';while($('.phone-messages').children.length>7)$('.phone-messages .outgoing').remove();line.scrollIntoView({block:'nearest'});animate(line);});
+  $('#demo-message-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const field = $('#demo-message');
+    const value = field.value.trim();
+    if (!value) return;
+    socialLoop.setPaused();
+    const line = document.createElement('p');
+    line.className = 'outgoing';
+    line.textContent = value;
+    messages.append(line);
+    field.value = '';
+    while (messages.children.length > 7) $('.outgoing', messages).remove();
+    messages.scrollTop = messages.scrollHeight;
+    animate(line);
+  });
   const prices={pro:{monthly:29.9,annual:299},team:{monthly:79.9,annual:799}};
   const money=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   $$('[data-billing]').forEach(b=>b.addEventListener('click',()=>{

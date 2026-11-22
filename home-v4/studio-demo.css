@@ -1,0 +1,235 @@
+.discovery-section .skins-row {
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: clamp(32px, 4.5vw, 66px);
+  scroll-margin-block-start: 70px;
+}
+
+.skins-row .skins-copy { display: block; }
+.skins-copy h3 { text-wrap: balance; }
+.skins-copy > p:not(.product-name) { max-width: 38ch; }
+
+.skin-editor-window.real-skin-editor {
+  --studio-line: #e0e4e3;
+  --studio-ink: #263a30;
+  width: 100%;
+  max-width: 760px;
+  border: 1px solid #cdd5d1;
+  border-radius: 15px;
+  color: var(--ink);
+  box-shadow: 0 18px 48px #26364213;
+}
+
+.studio-demo-heading,
+.studio-demo-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 16px;
+}
+
+.studio-demo-heading {
+  min-height: 60px;
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.studio-demo-heading strong,
+.studio-download,
+.studio-demo-modes button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studio-demo-heading strong { font-size: 16px; }
+.studio-demo-heading strong .icon,
+.studio-demo-tools .icon,
+.studio-download .icon { width: 18px; height: 18px; flex: none; }
+
+.studio-download,
+.studio-undo,
+.studio-demo-camera button {
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--studio-ink);
+  font: 700 13px Manrope, sans-serif;
+}
+
+.studio-download { padding-inline: 8px; }
+.studio-download:hover,
+.studio-undo:hover:not(:disabled) { background: #edf3ee; }
+.studio-undo:disabled { color: #818982; }
+
+.studio-demo-tools {
+  min-height: 59px;
+  border-bottom: 1px solid var(--studio-line);
+  background: #fafbf9;
+}
+
+.studio-demo-modes {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #edf1ed;
+}
+
+.studio-demo-modes button {
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--studio-ink);
+  font: 700 13px Manrope, sans-serif;
+}
+
+.studio-demo-modes button[aria-pressed="true"] { background: #24382d; color: #fff; }
+.studio-demo-modes button[aria-pressed="false"]:hover:not(:disabled) { background: #e0e9e0; }
+.studio-demo-modes button:disabled { color: #717a73; }
+
+.studio-demo-stage {
+  position: relative;
+  height: clamp(350px, 33vw, 440px);
+  isolation: isolate;
+  background: radial-gradient(ellipse at 49% 43%, #f4eff7 10%, #e7dfee 87%);
+  overflow: hidden;
+}
+
+.studio-demo-model {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #faf8fbe8;
+  color: #554561;
+  font-size: 13px;
+}
+
+.studio-demo-floor {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  width: clamp(142px, 30%, 240px);
+  height: 28px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, #77678747 0%, #77678722 41%, transparent 71%);
+  pointer-events: none;
+}
+
+.studio-demo-stage .real-skin-stage { inset: 33px 0 38px; }
+.studio-demo-stage #skin-poster { height: 84%; }
+.studio-demo-stage .real-skin-stage canvas { touch-action: pan-y; }
+
+.studio-demo-camera {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: min(100% - 16px, 294px);
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  transform: translateX(-50%);
+  color: #54475e;
+  font-size: 13px;
+  text-align: center;
+}
+
+.studio-demo-camera button { color: inherit; }
+.studio-demo-camera button:hover:not(:disabled) { background: #ffffff80; }
+.studio-demo-camera button:disabled { opacity: .35; }
+.real-skin-editor[data-ready="false"] .studio-demo-camera button { visibility: hidden; }
+.studio-demo-camera button:first-child .icon { transform: scaleX(-1); }
+.studio-demo-camera .icon { width: 19px; height: 19px; }
+
+.studio-demo-tray {
+  padding: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--studio-line);
+}
+
+.studio-demo-outfits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  flex: 1;
+  max-width: 360px;
+}
+
+.studio-demo-outfits button {
+  display: flex;
+  min-width: 0;
+  min-height: 54px;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #f4f5f4;
+  color: var(--studio-ink);
+  font: 650 13px Manrope, sans-serif;
+}
+
+.studio-demo-outfits button[aria-pressed="true"] { background: #eaf2ea; border-color: #8daa96; }
+.studio-demo-outfits button:hover:not([aria-pressed="true"]) { background: #ebeeec; }
+.studio-demo-outfits img { width: 24px; height: 40px; object-fit: contain; image-rendering: pixelated; }
+
+.studio-demo-palette { display: grid; gap: 2px; min-width: 0; }
+.studio-demo-palette > span { color: #4c5d53; font-size: 13px; font-weight: 650; }
+.studio-demo-swatches { display: flex; }
+.studio-demo-swatches button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.studio-demo-swatches button::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px solid white;
+  border-radius: inherit;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px #8f9d96;
+}
+
+.studio-demo-swatches button[aria-pressed="true"]::before { box-shadow: 0 0 0 2px #304d40; }
+.studio-demo-swatches button:hover::before { inset: 7px; }
+
+@media (min-width: 981px) {
+  .skins-row .skins-copy { grid-area: 1 / 2; }
+  .skins-row .real-skin-editor { grid-area: 1 / 1; }
+}
+
+@media (max-width: 980px) {
+  .discovery-section .skins-row { display: flex; flex-direction: column; align-items: stretch; gap: 30px; }
+}
+
+@media (max-width: 600px) {
+  .studio-demo-stage { height: clamp(310px, 78vw, 385px); }
+  .studio-demo-tray { flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 12px; }
+  .studio-demo-outfits { max-width: none; }
+  .studio-demo-palette { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
+  .studio-demo-heading, .studio-demo-tools { padding-inline: 12px; }
+  .studio-demo-model { top: 10px; left: 12px; }
+  .studio-demo-outfits button { gap: 3px; }
+  .studio-demo-outfits img { width: 19px; height: 32px; }
+  .studio-demo-heading strong { font-size: 15px; }
+}
+
+@media (scripting: none) {
+  .studio-demo-stage .real-skin-stage { inset-block-end: 18px; }
+}

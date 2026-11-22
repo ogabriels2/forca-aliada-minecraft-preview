@@ -3,7 +3,7 @@
 export const presets={
  orbita:{name:'Órbita',coat:'#3665ac',skin:'#c58d67',hair:'#40352d',pants:'#293c54',trim:'#e1c382'},
  aurora:{name:'Aurora',coat:'#8656b7',skin:'#926044',hair:'#29283a',pants:'#33374c',trim:'#d6b5d9'},
- trilha:{name:'Trilha',coat:'#317553',skin:'#e0b38c',hair:'#62432c',pants:'#4d5141',trim:'#d5bd7c'}
+ trilha:{name:'Trilha',coat:'#b86738',skin:'#e0b38c',hair:'#62432c',pants:'#4d5141',trim:'#d5bd7c'}
 };
 const parts={head:[0,0,8,8,8],body:[16,16,8,12,4],rightArm:[40,16,4,12,4],leftArm:[32,48,4,12,4],rightLeg:[0,16,4,12,4],leftLeg:[16,48,4,12,4]};
 function faces([x,y,w,h,d]){return {top:[x+d,y,w,d],bottom:[x+d+w,y,w,d],right:[x,y+d,d,h],front:[x+d,y+d,w,h],left:[x+d+w,y+d,d,h],back:[x+d+w+d,y+d,w,h]};}
