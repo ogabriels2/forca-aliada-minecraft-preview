@@ -1,7 +1,7 @@
 import { setupMotion } from './motion.js';
-import { setupDemos } from './demos.js';
+import { setupDemos } from './demos.js?v=20261122-copy';
 import { setupPresentation } from './presentation.js';
-import { setupSkinDemo } from './skin-demo.js';
+import { setupSkinDemo } from './skin-demo.js?v=20261122-copy';
 (() => {
   'use strict';
   const $ = (s, root = document) => root.querySelector(s);
