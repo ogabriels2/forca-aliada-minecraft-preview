@@ -1,5 +1,7 @@
 import { setupMotion } from './motion.js';
 import { setupDemos } from './demos.js';
+import { setupPresentation } from './presentation.js';
+import { setupSkinDemo } from './skin-demo.js';
 (() => {
   'use strict';
   const $ = (s, root = document) => root.querySelector(s);
@@ -58,4 +60,6 @@ import { setupDemos } from './demos.js';
   document.documentElement.classList.add('enhanced');
   const motion = setupMotion();
   setupDemos({toast, animate, motion});
+  setupPresentation({motion,toast});
+  setupSkinDemo({toast,motion});
 })();

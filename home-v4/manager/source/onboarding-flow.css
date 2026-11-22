@@ -1,0 +1,229 @@
+/* A continuous first-run experience, using the Manager's Windows surfaces. */
+:root { --journey-accent: #ddbf77; --journey-ink: #211c10; }
+/* Restore a saved session without flashing the first-use sign-in artwork. */
+body.account-session-restoring #accountDialogOverlay { visibility: hidden; pointer-events: none; }
+.session-restore-splash { display: none; }
+body.account-session-restoring .session-restore-splash { position: fixed; inset: var(--app-titlebar-height, 32px) 0 0; z-index: 100000; display: grid; place-items: center; background: var(--bg-primary, #202020); color: var(--text-secondary); font: 500 15px 'Segoe UI', sans-serif; letter-spacing: .2px; }
+.session-restore-indicator { position: absolute; left: calc(50% - 13px); top: calc(50% - 58px); width: 26px; height: 26px; opacity: 0; animation: restore-indicator-reveal 220ms ease-out 1s both; }
+.session-restore-indicator::before { content: ''; display: block; box-sizing: border-box; width: 100%; height: 100%; border: 2px solid var(--win-border, #ffffff18); border-top-color: var(--accent, #3dba5f); border-right-color: var(--accent, #3dba5f); border-radius: 50%; animation: restore-indicator-spin 900ms linear 1s infinite; }
+@keyframes restore-indicator-reveal { from { opacity: 0; } to { opacity: 1; } }
+@keyframes restore-indicator-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .session-restore-indicator { animation-duration: 1ms; } .session-restore-indicator::before { animation: none; } }
+[data-theme="light"] { --journey-accent: #826018; --journey-ink: #fff; }
+#welcomeJourney[hidden], #welcomeLimitView[hidden] { display: none !important; }
+body > #saasFirstServerView { display: none; }
+/* The workspace cannot bleed through while a presentation view is mounted. */
+body.presentation-flow-active::before { content: ''; position: fixed; inset: var(--app-titlebar-height) 0 0; z-index: 1999; background: var(--win-bg); pointer-events: none; }
+body.native-first-server > #saasFirstServerView {
+    position: fixed; inset: var(--app-titlebar-height) 0 0; z-index: 2000;
+    display: flex !important; flex-direction: column; align-items: stretch;
+    padding: 0 clamp(24px, 4.5vw, 72px); overflow: auto; background: var(--win-bg);
+    --welcome-gold: var(--journey-accent);
+}
+body.welcome-journey-open > #saasFirstServerView { visibility: hidden; }
+.welcome-journey { position: fixed; inset: var(--app-titlebar-height) 0 0; z-index: 2100; display: flex; flex-direction: column; padding: 0 clamp(24px, 4.5vw, 72px); background: var(--win-bg); color: var(--text-primary); }
+.welcome-header { width: 100%; max-width: 1200px; margin: 0 auto; }
+.welcome-tools { align-items: center; }
+.welcome-header .account-menu-anchor { position: relative; }
+.welcome-header .ui-account-button { padding: 6px 9px; border: 1px solid transparent; background: transparent; display: flex; align-items: center; gap: 9px; }
+.welcome-header .ui-account-button:hover { background: var(--win-surface); border-color: var(--win-border); }
+.welcome-header .ui-account-status { display: block !important; max-width: 140px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+.welcome-header .account-avatar { width: 30px; height: 30px; }
+.welcome-header .account-chevron { display: block !important; width: 12px; }
+.welcome-header .manager-account-menu { z-index: 2150; }
+.welcome-header .manager-account-menu button { text-align: left; }
+.welcome-header .account-menu-person { min-width: 0; }
+.welcome-header .account-menu-person strong { overflow-wrap: anywhere; }
+#welcomeSignIn { color: var(--journey-accent); font-weight: 600; border-color: var(--win-border); background: var(--win-surface); }
+.journey-layout { display: grid; grid-template-columns: minmax(190px, .78fr) minmax(0, 1.5fr); gap: clamp(28px, 5vw, 70px); width: min(100%, 1120px); margin: auto; flex: 1; min-height: 0; padding: 12px 0 28px; }
+.journey-story { display: flex; flex-direction: column; align-items: flex-start; padding: 0 0 24px; min-width: 0; }
+.journey-back { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 5px; padding: 8px 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; cursor: pointer; }
+.journey-back::before { content: '\E72B'; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; font-size: 13px; }
+.journey-back:hover { color: var(--text-primary); }
+.journey-back:disabled { opacity: .45; cursor: default; }
+#journeyArt { width: 100%; max-width: 240px; margin: 22px 0 12px -10px; }
+#journeyArt .welcome-art { height: 145px; }
+.journey-eyebrow { color: var(--journey-accent); font-size: 10px; letter-spacing: 1.4px; font-weight: 650; margin: 0 0 12px; }
+.journey-story h1 { font-size: clamp(24px, 2.65vw, 32px); line-height: 1.16; letter-spacing: -.7px; font-weight: 600; margin: 0 0 14px; max-width: 300px; }
+.journey-story > p:not(.journey-eyebrow) { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.75; max-width: 275px; }
+#journeySteps { margin: 26px 0 0; padding: 0; list-style: none; display: grid; gap: 16px; font-size: 12px; }
+#journeySteps li { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); }
+#journeySteps li > span { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid var(--win-border); border-radius: 50%; font-size: 11px; }
+#journeySteps li.is-current { color: var(--text-primary); font-weight: 600; }
+#journeySteps li.is-current > span { color: var(--journey-ink); background: var(--journey-accent); border-color: transparent; }
+#journeySteps li.is-complete > span { color: var(--journey-accent); border-color: var(--journey-accent); }
+.journey-content { min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 10px 6px 12px; scrollbar-gutter: stable; }
+.journey-mounted.saas-modal-overlay { position: static; display: block; padding: 0; background: none; backdrop-filter: none; }
+.journey-mounted > .saas-modal { width: 100%; max-width: none; max-height: none; box-shadow: none; background: none; border: 0; border-radius: 0; overflow: visible; }
+.journey-mounted > .saas-modal > .saas-modal-head { display: none; }
+.journey-mounted > .saas-modal > .saas-modal-body { padding: 0; overflow: visible; }
+.journey-section-title { font-size: clamp(22px, 2.3vw, 28px); font-weight: 600; line-height: 1.25; letter-spacing: -.55px; margin: 0 0 10px; outline: none; color: var(--text-primary); }
+.journey-section-description { font-size: 12px; color: var(--text-secondary); line-height: 1.7; margin: 0 0 24px; }
+.journey-mounted .wizard-step-label { font-size: 10px; letter-spacing: 1.2px; color: var(--text-secondary); margin: 0 0 12px; }
+.creation-flow .saas-modal { width: min(100%, 650px); }
+.creation-flow .wizard-editions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin: 0 0 18px; }
+.creation-flow .wizard-editions legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.creation-flow .wizard-edition { position: relative; display: flex; flex-direction: column; align-items: stretch; padding: 16px 14px; background: var(--win-surface); border: 1px solid var(--win-border); border-radius: 9px; min-height: 160px; transition: border-color 150ms, background 150ms; }
+.creation-flow .wizard-edition input { position: absolute; top: 14px; right: 12px; width: 14px; height: 14px; accent-color: var(--journey-accent); }
+.creation-flow .wizard-edition > span { display: flex; flex-direction: column; gap: 8px; }
+.creation-flow .wizard-edition .edition-symbol { display: block; font-size: 24px; color: var(--text-secondary); margin: 0 0 13px; }
+.creation-flow .wizard-edition strong { font-size: 13px; color: var(--text-primary); }
+.creation-flow .wizard-edition small { font-size: 11px; color: var(--text-secondary); line-height: 1.55; }
+.creation-flow .wizard-edition:has(input:checked) { border-color: var(--journey-accent); background: color-mix(in srgb, var(--journey-accent) 5%, var(--win-surface)); }
+.creation-flow .wizard-edition:has(input:checked) .edition-symbol { color: var(--journey-accent); }
+.creation-flow .wizard-edition:focus-within { outline: 2px solid var(--journey-accent); outline-offset: 3px; }
+.creation-flow .wizard-choice-grid { grid-template-columns: 1fr 1fr; margin-top: 14px; }
+.creation-flow .wizard-choice { background: var(--win-surface); border-color: var(--win-border); color: var(--text-primary); padding: 13px; }
+.creation-flow .wizard-choice small, .creation-flow .wizard-edition-summary { color: var(--text-secondary); }
+.creation-flow .wizard-choice.is-selected { border-color: var(--journey-accent); background: var(--win-surface-alt); }
+.creation-flow input { accent-color: var(--journey-accent); }
+.journey-mounted .saas-button-primary, .creation-flow .saas-button-primary { background: var(--journey-accent); color: var(--journey-ink); border-color: transparent; box-shadow: none; }
+.journey-mounted .saas-button-primary:hover, .creation-flow .saas-button-primary:hover { filter: brightness(1.07); }
+.journey-mounted button:focus-visible, .creation-flow button:focus-visible, .welcome-journey .journey-back:focus-visible { outline: 2px solid var(--journey-accent); outline-offset: 3px; }
+.journey-mounted .saas-link-button { color: var(--text-secondary); }
+.journey-mounted .wizard-field input, .creation-flow .wizard-field input { min-height: 40px; background: var(--win-surface); border-color: var(--win-border); color: var(--text-primary); }
+.wizard-personalization, .creation-flow .wizard-optional-tools { margin: 14px 0; padding: 0; border: 1px solid var(--win-border); border-radius: 7px; background: var(--win-surface); }
+.wizard-personalization > summary, .creation-flow .wizard-optional-tools > summary { cursor: pointer; padding: 13px 14px; font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.wizard-personalization > summary small, .wizard-optional-tools > summary small { font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; }
+.wizard-personalization > :not(summary), .creation-flow .wizard-optional-tools > :not(summary) { margin: 0 14px 14px; }
+.wizard-personalization[open] > summary, .wizard-optional-tools[open] > summary { margin-bottom: 6px; }
+.journey-mounted .server-profile-row { margin: 16px 0; padding: 14px; background: var(--win-surface); border-color: var(--win-border); }
+.journey-mounted .server-profile-avatar { width: 52px; height: 52px; flex: 0 0 52px; }
+.journey-mounted .server-profile-copy small { font-size: 11px; line-height: 1.5; }
+.journey-mounted .wizard-actions { position: sticky; bottom: -12px; padding: 18px 0 4px; margin-top: 24px; background: var(--win-bg); border-top: 1px solid var(--win-border); z-index: 2; }
+.wizard-review { margin: 20px 0; border: 1px solid var(--win-border); border-radius: 8px; background: var(--win-surface); overflow: hidden; }
+.wizard-review > div { padding: 12px 16px; display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 14px; border-bottom: 1px solid var(--win-border); font-size: 12px; }
+.wizard-review > div:last-child { border: 0; }
+.wizard-review dt { color: var(--text-secondary); }
+.wizard-review dd { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.wizard-start-option { display: flex; align-items: flex-start; gap: 10px; margin: 22px 0; font-size: 12px; cursor: pointer; }
+.wizard-start-option input { margin-top: 2px; }
+.wizard-start-option small { display: block; font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+.wizard-terms-intro { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.journey-mounted [data-wizard-step="progress"], .journey-mounted [data-wizard-step="done"], .journey-mounted [data-wizard-step="error"] { padding-top: 40px; }
+.journey-install-mark, .journey-state-icon { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid var(--win-border); border-radius: 15px; color: var(--journey-accent); background: var(--win-surface); font-size: 28px; margin-bottom: 24px; }
+.journey-install-mark { animation: journey-breathe 2s ease-in-out infinite; }
+.creation-flow .wizard-progress-fill { background: var(--journey-accent); transition: width 250ms ease; }
+.creation-flow .wizard-progress-track { height: 5px; margin: 32px 0 14px; background: var(--win-surface-alt); }
+#wizardProgressLabel { font-size: 12px; color: var(--text-secondary); }
+.journey-limit { padding: 48px 0 0; }
+.journey-limit h2 { font-size: 26px; font-weight: 600; letter-spacing: -.6px; }
+.journey-limit p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 16px 0 24px; }
+.journey-limit-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.journey-mounted .saas-add-server-choice { padding: 19px; background: var(--win-surface); border-color: var(--win-border); }
+.journey-mounted .saas-add-server-choice-icon { color: #a7bfd0; }
+.journey-mounted .welcome-existing-server { padding: 14px; background: var(--win-surface); }
+.journey-mounted .welcome-existing-server:hover { background: var(--win-surface-alt); }
+.journey-mounted .welcome-existing-action { color: var(--journey-accent); }
+.journey-search { display: flex; align-items: center; gap: 9px; margin: 14px 0 12px; padding: 10px 12px; border: 1px solid var(--win-border); border-radius: 6px; background: var(--win-surface); color: var(--text-secondary); }
+.journey-search input { width: 100%; background: none; border: 0; outline: none; color: var(--text-primary); font: inherit; font-size: 12px; }
+.journey-search:focus-within { outline: 2px solid var(--journey-accent); outline-offset: 2px; }
+.journey-feedback { font-size: 12px; line-height: 1.6; color: var(--text-secondary); padding: 12px; background: var(--win-surface); border-radius: 6px; }
+.journey-feedback[data-error="true"] { color: var(--danger, #ff9393); }
+.import-file-summary { display: flex; gap: 12px; padding: 14px; background: var(--win-surface); border: 1px solid var(--win-border); border-radius: 7px; margin: 0 0 22px; }
+.import-file-summary > .saas-icon { font-size: 24px; color: #a7bfd0; }
+.import-file-summary span:last-child { min-width: 0; }
+.import-file-summary strong { font-size: 12px; }
+.import-file-summary small { display: block; overflow-wrap: anywhere; color: var(--text-secondary); font-size: 11px; margin-top: 5px; line-height: 1.6; }
+.journey-preserve-note { display: flex; gap: 8px; color: var(--text-secondary); font-size: 11px; line-height: 1.65; margin: 18px 0; }
+.journey-preserve-note .saas-icon { color: var(--journey-accent); }
+.journey-mounted .wizard-step:not([hidden]) { animation: welcome-arrive 240ms cubic-bezier(.2,.8,.2,1); }
+.account-welcome-header, .account-welcome-story, .account-welcome-help { display: none; }
+#accountDialogOverlay[data-required="true"] { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); grid-template-rows: 88px minmax(min-content,1fr); align-items: center; gap: 0 clamp(28px,5vw,80px); padding: 0 clamp(32px,6vw,96px) 32px; background: var(--win-bg); backdrop-filter: none; overflow-y: auto; }
+#accountDialogOverlay[data-required="true"] .account-welcome-header { display: flex; grid-column: 1 / -1; }
+#accountDialogOverlay[data-required="true"] .account-welcome-story { display: flex; flex-direction: column; justify-content: center; grid-column: 2; grid-row: 2; justify-self: center; width: min(100%,560px); padding: 0 0 22px; }
+#accountDialogOverlay[data-required="true"] .account-dialog { grid-column: 1; grid-row: 2; width: min(100%,440px); max-height: none; overflow: visible; border: 0; background: transparent; box-shadow: none; border-radius: 0; justify-self: end; }
+#accountDialogOverlay[data-required="true"] .account-dialog-header { padding: 0; border: 0; }
+#accountDialogOverlay[data-required="true"] .account-dialog-header h2 { font-size: clamp(29px,3.5vw,44px); font-weight: 600; line-height: 1.12; letter-spacing: -1.2px; text-wrap: balance; }
+#accountDialogOverlay[data-required="true"] .account-dialog-header p { font-size: 14px; line-height: 1.7; margin-top: 20px; max-width: 360px; color: var(--text-secondary); }
+#accountDialogOverlay[data-required="true"] .account-dialog-body { padding: 28px 0 0; }
+#accountDialogOverlay[data-required="true"] .account-signin-note { background: transparent; padding: 0 0 20px; border: 0; align-items: center; gap: 12px; }
+#accountDialogOverlay[data-required="true"] .account-signin-mark { display: grid; width: 34px; height: 38px; flex: 0 0 34px; color: var(--journey-accent); background: transparent; border: 0; }
+#accountDialogOverlay[data-required="true"] .account-signin-note strong { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+#accountDialogOverlay[data-required="true"] .account-signin-note small { display: block; font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+#accountDialogOverlay[data-required="true"] .account-login-button { background: var(--accent); color: var(--btn-accent-text, #071b0d); min-height: 46px; border-radius: 6px; font-size: 13px; box-shadow: inset 0 1px #ffffff25; transition: filter 150ms, transform 150ms; }
+[data-theme="light"] #accountDialogOverlay[data-required="true"] .account-login-button { color: #fff; }
+#accountDialogOverlay[data-required="true"] .account-login-button:hover { filter: brightness(1.08); }
+#accountDialogOverlay[data-required="true"] .account-login-button:active { transform: translateY(1px); }
+#accountDialogOverlay[data-required="true"] .account-login-button span { margin-left: auto; }
+#accountDialogOverlay[data-required="true"] .account-auth-pending { background: var(--win-bg); border-color: var(--win-border); padding: 18px; }
+#accountDialogOverlay[data-required="true"] .account-auth-code { color: var(--journey-accent); letter-spacing: 3px; font-size: 19px; padding: 9px 12px; }
+#accountDialogOverlay[data-required="true"] .account-welcome-help { display: block; font-size: 12px; line-height: 1.8; color: var(--text-secondary); margin: 24px 0 0; border-top: 1px solid var(--win-border); padding-top: 17px; }
+.account-welcome-help p { margin: 0 0 12px; }
+.account-welcome-help > div { display: flex; align-items: center; gap: 12px; font-size: 11px; }
+.account-welcome-help button { border: 0; background: none; padding: 3px 0; font: inherit; color: var(--text-primary); cursor: pointer; }
+.account-welcome-help p button { color: var(--journey-accent); }
+.account-welcome-help button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.account-browser-hint { display: none; }
+#accountDialogOverlay[data-required="true"] .account-browser-hint { display: block; color: var(--text-secondary); font-size: 11px; line-height: 1.65; margin: 12px 0 0; }
+#accountDialogOverlay[data-auth-status="pending"] .account-browser-hint { display: none; }
+.account-welcome-editions { color: var(--text-secondary); font-size: 10px; letter-spacing: 1.6px; }
+.account-product-scene { position: relative; width: 100%; padding-bottom: 46px; perspective: 900px; }
+.account-world-art { display: block; width: 100%; overflow: visible; color: var(--text-primary); translate: var(--scene-x, 0px) var(--scene-y, 0px); transform: rotateX(var(--scene-rx, 0deg)) rotateY(var(--scene-ry, 0deg)); transition: translate 650ms cubic-bezier(.2,.8,.2,1), transform 650ms cubic-bezier(.2,.8,.2,1); }
+.account-art-console { position: relative; margin: -21px auto 0; width: 88%; background: var(--win-surface); border: 1px solid var(--win-border); border-top-color: color-mix(in srgb,var(--text-primary) 25%,transparent); border-radius: 9px; box-shadow: 0 18px 36px #00000018; transform: rotate(-3deg); }
+.account-art-caption { display: flex; align-items: center; gap: 10px; padding: 15px 18px; border-bottom: 1px solid var(--win-border); font-size: 13px; }
+.account-art-caption > .saas-icon { color: var(--journey-accent); font-size: 20px; }
+.account-art-control { margin-left: auto; width: 34px; height: 27px; display: grid; place-items: center; background: #35bb6420; color: #35bb64; border: 1px solid #35bb6435; border-radius: 5px; }
+.account-art-tools { display: flex; justify-content: space-between; padding: 15px 18px; font-size: 10px; color: var(--text-secondary); }
+.account-art-tools > span { display: flex; align-items: center; gap: 7px; }
+.account-art-tools .saas-icon { font-size: 14px; }
+.account-art-copy { text-align: center; }
+.account-art-copy strong { font-size: 15px; font-weight: 600; }
+.account-art-copy p { margin: 9px 0 0; font-size: 12px; line-height: 1.7; color: var(--text-secondary); }
+.account-world-art .account-island { animation: login-world-arrive 1100ms cubic-bezier(.2,.8,.2,1) both, login-world-float 6s ease-in-out 2100ms infinite; }
+.account-world-house { animation: login-piece-arrive 950ms cubic-bezier(.16,1,.3,1) 350ms both; }
+.account-world-roof { animation: login-piece-arrive 1050ms cubic-bezier(.16,1,.3,1) 650ms both; }
+.account-world-tree { transform-box: fill-box; transform-origin: bottom center; animation: login-piece-arrive 850ms cubic-bezier(.16,1,.3,1) both, login-tree-sway 7s ease-in-out 2100ms infinite; }
+.account-world-tree-near { animation-delay: 700ms, 2100ms; }
+.account-world-tree-far { animation-delay: 850ms, 2600ms; }
+.account-art-console { translate: calc(var(--scene-x, 0px) * -0.65) calc(var(--scene-y, 0px) * -0.5); transition: translate 700ms cubic-bezier(.2,.8,.2,1), border-color 500ms, box-shadow 500ms; animation: login-console-arrive 1000ms cubic-bezier(.2,.8,.2,1) 1000ms both, login-console-float 7s ease-in-out 2100ms infinite; }
+.account-world-cloud path { animation: login-cloud-drift 12s ease-in-out 2100ms infinite; }
+.account-world-cloud path:nth-child(2) { animation-duration: 15s; animation-direction: reverse; }
+.account-water-ripple { animation: login-water-flow 4s ease-in-out 2100ms infinite; }
+.account-world-shadow { transform-box: fill-box; transform-origin: center; animation: login-shadow-breathe 6s ease-in-out 2100ms infinite; }
+.account-house-window { transition: fill 650ms, filter 650ms; }
+.account-world-sparks { opacity: 0; transition: opacity 800ms; }
+.account-world-sparks circle { animation: login-firefly 4s ease-in-out infinite; }
+.account-world-sparks circle:nth-child(2n) { animation-delay: -1.4s; animation-duration: 5.5s; }
+.account-world-sparks circle:nth-child(3n) { animation-delay: -2.6s; }
+.account-product-scene.is-exploring .account-house-window { fill: #ffe1a0; filter: drop-shadow(0 0 4px #eaba5860); }
+.account-product-scene.is-exploring .account-world-sparks { opacity: 1; }
+.account-product-scene.is-exploring .account-art-console { border-color: color-mix(in srgb,var(--journey-accent) 48%,var(--win-border)); box-shadow: 0 22px 38px #00000025; }
+.account-art-tools > span { transition: color 350ms, translate 350ms; }
+.account-product-scene.is-exploring .account-art-tools > span { color: var(--text-primary); translate: 0 -2px; }
+.account-product-scene.is-exploring .account-art-tools > span:nth-child(2) { transition-delay: 80ms; }
+.account-product-scene.is-exploring .account-art-tools > span:nth-child(3) { transition-delay: 160ms; }
+.account-product-scene.is-paused * { animation-play-state: paused !important; }
+@keyframes login-world-arrive { from { opacity: 0; transform: translateY(55px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes login-piece-arrive { 0% { opacity: 0; transform: translateY(-54px); } 68% { opacity: 1; transform: translateY(3px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes login-console-arrive { from { opacity: 0; transform: translateY(24px) rotate(-3deg); } to { opacity: 1; transform: translateY(0) rotate(-3deg); } }
+@keyframes login-world-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes login-console-float { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(-1.5deg); } }
+@keyframes login-cloud-drift { 0%,100% { transform: translateX(0); } 50% { transform: translateX(22px); } }
+@keyframes login-water-flow { 0%,100% { opacity: .6; transform: translate(0,0); } 50% { opacity: .25; transform: translate(6px,3px); } }
+@keyframes login-tree-sway { 0%,100% { transform: rotate(0); } 50% { transform: rotate(1.5deg); } }
+@keyframes login-shadow-breathe { 0%,100% { opacity: .12; transform: scaleX(1); } 50% { opacity: .08; transform: scaleX(.92); } }
+@keyframes login-firefly { 0%,100% { opacity: .2; transform: translate(0,0); } 50% { opacity: .9; transform: translate(5px,-12px); } }
+@media (prefers-reduced-motion: reduce) { .account-world-art, .account-art-console { translate: none !important; } .account-world-art { transform: none !important; } }
+@media (max-height: 740px) { .account-world-art { max-height: 280px; } .account-product-scene { padding-bottom: 28px; } #accountDialogOverlay[data-required="true"] { grid-template-rows: 74px minmax(min-content,1fr); } }
+@media (max-width: 760px) { #accountDialogOverlay[data-required="true"] .account-welcome-story { display: none; } #accountDialogOverlay[data-required="true"] .account-dialog { grid-column: 1; } .account-welcome-editions { display: none; } }
+.account-access-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0; }
+.account-access-actions[hidden] { display: none; }
+@keyframes journey-breathe { 50% { transform: translateY(-4px); border-color: var(--journey-accent); } }
+@media (max-height: 680px) { #journeyArt { margin-top: 8px; } #journeyArt .welcome-art { height: 110px; } #journeySteps { margin-top: 18px; gap: 11px; } .welcome-journey .welcome-header { min-height: 68px; } .journey-layout { padding-top: 6px; } }
+@media (max-width: 760px) { .journey-layout { grid-template-columns: 1fr; gap: 12px; overflow-y: auto; } .journey-content { overflow: visible; } #journeyArt, .journey-story h1, #journeyDescription, #journeyEyebrow { display: none; } .journey-story { padding: 0; } #journeySteps { display: flex; gap: 16px; margin-top: 10px; } #journeySteps li { font-size: 11px; gap: 6px; } .journey-mounted .wizard-editions { gap: 8px; } .journey-mounted .wizard-edition { padding-inline: 10px; } #accountDialogOverlay[data-required="true"] { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 20px; padding: 0 24px 30px; } #accountDialogOverlay[data-required="true"] .account-welcome-story { display: none; } #accountDialogOverlay[data-required="true"] .account-dialog { justify-self: center; } }
+@media (prefers-reduced-motion: reduce) { .welcome-journey *, .account-dialog-overlay * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* Keep the back action anchored; inherited modal links were centered. */
+.creation-flow .wizard-actions > .saas-link-button { margin: 0; padding: 10px 0; }
+#welcomeAccountSlot { order: 3; }
+#welcomeClose { order: 2; }
+#welcomeSettings { order: 1; }
+#welcomeJourney .manager-account-menu button:disabled { opacity: .45; cursor: default; }
+#accountDialogOverlay[data-auth-status="pending"] .account-signin-note { display: none; }
+/* The first-run connection destination uses the same account-sharing workspace. */
+.welcome-journey[data-route="remote"] .journey-layout { grid-template-columns:1fr; gap:8px; max-width:1180px; width:100%; }
+.welcome-journey[data-route="remote"] .journey-story { padding:0; }
+.welcome-journey[data-route="remote"] .journey-story > :not(.journey-back) { display:none; }
+.welcome-journey[data-route="remote"] .journey-content { padding-top:0; }
+.welcome-journey[data-route="remote"] #shareWorkspace { display:block!important; width:100%; }

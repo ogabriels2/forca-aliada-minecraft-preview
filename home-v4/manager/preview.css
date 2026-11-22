@@ -1,0 +1,286 @@
+/* Only the isolated public-demo boundary. Application styles live in source/. */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  min-width: 0 !important;
+}
+body > .app-body {
+  height: calc(100% - 32px) !important;
+  min-height: 0;
+}
+.titlebar {
+  height: 32px !important;
+}
+.titlebar .titlebar-btn,
+.titlebar .titlebar-icon {
+  height: 32px !important;
+}
+#previewDialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  max-height: calc(100% - 40px);
+  overflow: auto;
+  color: var(--text-primary);
+  background: var(--win-elevated);
+  border: 1px solid var(--win-border-focus);
+  border-radius: 12px;
+  width: min(420px, calc(100% - 60px));
+  padding: 25px;
+  box-shadow: 0 20px 70px #0008;
+}
+#previewDialog button {
+  width: auto;
+  min-width: 88px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font: 600 12px/1.4 var(--font);
+}
+#previewDialog::backdrop {
+  background: #0006;
+}
+#previewDialog h2 {
+  font: 650 18px/1.3 var(--font);
+  margin: 0 0 12px;
+  padding-right: 28px;
+}
+#previewDialog .preview-dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  width: 36px;
+  padding: 8px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+}
+#previewDialog .preview-dialog-close:hover {
+  color: var(--text-primary);
+  background: var(--win-hover);
+}
+#previewDialog p {
+  color: var(--text-secondary);
+  font: 13px/1.7 var(--font);
+  margin: 0 0 20px;
+}
+svg.preview-player-face {
+  image-rendering: pixelated;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px;
+  flex: 0 0 28px;
+}
+.preview-log-line {
+  font: 12px/1.9 var(--font-mono);
+  padding: 2px 15px;
+  color: var(--console-text);
+}
+.preview-log-line time {
+  color: var(--text-tertiary);
+  margin-right: 12px;
+}
+.preview-log-line b {
+  color: var(--accent-light);
+  font-weight: 400;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessibility adaptations to the public export only. Never changes the app repository. */
+body.manager-public-preview {
+  --text-secondary: #b5b5b5;
+  --text-tertiary: #a6a6a6;
+  --saas-dim: #a6a6a6;
+}
+.manager-public-preview
+  :is(
+    .nav-section-title,
+    .nav-brand-copy small,
+    #saasActiveServerMeta,
+    #saasServerAddressHelp,
+    #saasOverviewFolder,
+    #saasOverviewBackup,
+    .online-players-title,
+    .online-player-session,
+    .overview-settings small
+  ) {
+  color: #aaa !important;
+}
+.manager-public-preview :is(.status-online, .tps-badge, .online-players-count) {
+  color: #81df99 !important;
+}
+@media (max-width: 760px) {
+  /* Readable excerpts of the actual desktop UI; full desktop layout remains available via zoom. */
+  body.manager-public-preview > .titlebar,
+  body.manager-public-preview .nav-rail {
+    display: none !important;
+  }
+  body.manager-public-preview > .app-body {
+    height: 100% !important;
+    min-width: 0 !important;
+  }
+  body.manager-public-preview .panel {
+    min-width: 0;
+    width: 100%;
+    flex: 1;
+  }
+  body.manager-public-preview .workspace-heading {
+    min-height: 64px;
+    padding: 12px 14px;
+  }
+  body.manager-public-preview #workspaceTitle {
+    font-size: 20px;
+  }
+  body.manager-public-preview .workspace-heading-copy p,
+  body.manager-public-preview .workspace-heading-actions {
+    display: none;
+  }
+  body.manager-public-preview #tab-server .server-page-scroll {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  body.manager-public-preview #tab-server .saas-overview-identity {
+    padding: 12px;
+  }
+  body.manager-public-preview .server-summary-top {
+    flex-wrap: wrap;
+  }
+  body.manager-public-preview
+    :is(
+      .server-summary-folder,
+      .saas-overview-identity-actions,
+      .overview-runtime,
+      .overview-history,
+      .overview-settings
+    ) {
+    display: none !important;
+  }
+  body.manager-public-preview .overview-players {
+    order: 1;
+  }
+  body.manager-public-preview .overview-performance {
+    order: 2;
+  }
+  body.manager-public-preview .server-summary-links {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  body.manager-public-preview .server-control-bar {
+    padding: 10px 12px !important;
+  }
+  body.manager-public-preview #tab-players,
+  body.manager-public-preview #tab-schedule {
+    padding: 12px;
+  }
+  body.manager-public-preview .saas-overview-identity-copy {
+    min-width: 0;
+  }
+  body.manager-public-preview #saasOverviewMotd {
+    font-size: 12px;
+    white-space: normal;
+  }
+  body.manager-public-preview .online-player-session {
+    font-size: 12px;
+  }
+  body.manager-public-preview
+    :is(.online-player-name, .panel-section-label, .card-row-label) {
+    font-size: 13px;
+  }
+  body.manager-public-preview .server-summary-foot {
+    display: none;
+  }
+  #previewDialog {
+    width: calc(100% - 24px);
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  body.manager-public-preview #saasOverviewIdentity {
+    min-height: 0 !important;
+  }
+  body.manager-public-preview .server-summary-main {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 7px 10px;
+    align-items: center;
+    padding: 0;
+  }
+  body.manager-public-preview .server-summary-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  body.manager-public-preview .server-summary-stats {
+    grid-column: 1/-1;
+    display: flex !important;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+  }
+  body.manager-public-preview .server-summary-metrics {
+    display: flex;
+    gap: 14px;
+  }
+  body.manager-public-preview .server-summary-toggle {
+    display: none;
+  }
+  body.manager-public-preview .server-summary-footer {
+    display: none;
+  }
+  body.manager-public-preview .server-summary-address {
+    margin-top: 8px;
+    padding: 8px 0 0;
+  }
+  body.manager-public-preview .server-summary-address-line {
+    gap: 5px;
+    flex-wrap: nowrap;
+  }
+  body.manager-public-preview #saasServerAddressValue {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+  body.manager-public-preview .server-summary-address-help {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  body.manager-public-preview .server-summary-motd {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  body.manager-public-preview .players-commandbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-block: 12px;
+  }
+  body.manager-public-preview .players-commands {
+    justify-content: space-between;
+  }
+  body.manager-public-preview .players-sub-tabs {
+    width: 100%;
+    flex: auto;
+  }
+  body.manager-public-preview #tab-players {
+    --players-gutter: 14px;
+  }
+}

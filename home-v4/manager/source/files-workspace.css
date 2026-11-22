@@ -1,0 +1,67 @@
+/* Light refresh of the original file editor; preserve its continuous sections. */
+#tab-fileeditor.files-workspace,
+.files-workspace .file-editor-page,
+.files-workspace #fePropsContent,
+.files-workspace #feVelocityContent { min-height: 0; }
+.files-workspace [hidden], .files-workspace .files-legacy-empty { display: none !important; }
+.files-workspace #feTabsBar { flex: 0 0 auto; padding: 18px 0 12px; }
+.files-workspace .fe-section-label + .fe-row { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.files-workspace .fe-row[hidden] { display: none !important; }
+/* Dock to the editor edge; the inner grid follows the fields, including their scroll gutter. */
+body.simple-shell-mode #tab-fileeditor.files-workspace { --files-content-width: min(calc(100% - 56px), calc(var(--simple-content-max) - 56px)); }
+body.simple-shell-mode #tab-fileeditor.files-workspace:has(> :is(#fePage-props, #fePage-velocity).active) { padding-bottom: 0; overflow: hidden; }
+body.simple-shell-mode #tab-fileeditor.files-workspace > :is(#fePage-props, #fePage-velocity) { width: 100%; }
+.files-workspace :is(#fePropsContent, #feVelocityContent) > div:first-child { min-height: 0; scrollbar-gutter: stable; }
+body.simple-shell-mode .files-workspace :is(#fePropsContent, #feVelocityContent) > div:first-child { width: var(--files-content-width); box-sizing: border-box; margin-inline: auto; }
+.files-workspace .fe-save-bar { padding: 0; background: var(--win-surface); gap: 0; }
+.files-workspace .fe-save-bar-inner { display: flex; align-items: center; gap: 20px; width: var(--files-content-width, 100%); min-width: 0; margin-inline: auto; padding: 12px; box-sizing: border-box; overflow: hidden; scrollbar-gutter: stable; }
+.files-workspace .fe-save-context { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.files-workspace .fe-save-status { min-width: 0; gap: 7px; font-size: 12px; line-height: 18px; color: var(--text-secondary); }
+.files-workspace .fe-save-status > svg { flex: 0 0 auto; width: 14px; height: 14px; }
+.files-workspace .fe-save-status.saved { color: var(--accent); }
+.files-workspace .fe-save-status.unsaved { color: var(--yellow); }
+.files-workspace .fe-save-status.is-saving { color: var(--text-secondary); }
+.files-workspace .fe-save-status.is-saving > svg { display: none; }
+.files-workspace .fe-save-status.is-saving::before { content: ''; flex: 0 0 auto; width: 14px; height: 14px; box-sizing: border-box; border: 2px solid var(--accent); border-right-color: transparent; border-radius: 50%; animation: files-spin 900ms linear infinite; }
+.files-workspace .fe-path-hint { max-width: none; min-width: 0; padding-left: 21px; font-family: var(--font); font-size: 11px; line-height: 16px; color: var(--text-secondary); }
+.files-workspace .fe-path-hint:empty { display: none; }
+.files-workspace .fe-save-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+.files-workspace .fe-save-actions .btn { min-width: 88px; white-space: nowrap; }
+/* Override the light theme's forced white accent text only for this neutral disabled state. */
+.files-workspace .fe-save-actions .btn-accent:disabled { background: var(--win-elevated); color: var(--text-tertiary) !important; border-color: var(--win-border); opacity: 1; box-shadow: none; }
+@media (max-width: 700px) {
+    .files-workspace .fe-save-bar-inner { flex-wrap: wrap; gap: 10px; }
+    .files-workspace .fe-save-context { flex-basis: 100%; }
+    .files-workspace .fe-save-actions { margin-left: auto; }
+}
+.files-workspace .icon-row-preview-wrap { background: var(--win-bg); border-color: var(--win-border-focus); }
+.files-workspace .icon-row-preview-wrap > svg { color: var(--text-secondary); }
+.files-workspace :is(button,input,select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.files-workspace #fePage-backups > section { flex: 0 0 auto; }
+.files-workspace .backup-workspace-footer { flex-wrap: wrap; }
+.files-workspace .backup-workspace-footer > div { flex: 1 1 220px; }
+.files-workspace .backup-workspace-footer .btn { white-space: nowrap; }
+.files-workspace .files-read-state { flex: 1; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 24px; text-align: center; color: var(--text-secondary); font-size: 12px; }
+.files-read-state > svg { width: 32px; height: 32px; color: var(--text-tertiary); }
+.files-read-state > strong { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.files-read-state > span { max-width: 420px; line-height: 1.6; overflow-wrap: anywhere; }
+.files-read-state button { margin-top: 7px; }
+.files-skeleton { width: min(80%, 440px); display: grid; gap: 9px; margin-top: 15px; }
+.files-skeleton i { display: block; height: 42px; border-radius: 5px; background: linear-gradient(100deg, var(--win-surface-alt) 15%, var(--win-elevated) 45%, var(--win-surface-alt) 70%); background-size: 220% 100%; animation: files-shimmer 1.8s ease-in-out infinite; }
+.files-loading-ring { display: inline-block; flex: 0 0 auto; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: files-spin 900ms linear infinite; }
+.files-read-state > .files-loading-ring { width: 24px; height: 24px; color: var(--accent); margin-bottom: 4px; }
+.files-backup-progress { max-width: 920px; padding: 16px 18px; border: 1px solid var(--win-border); border-radius: 8px; background: var(--win-surface); }
+.files-backup-progress > div { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.files-backup-progress .files-loading-ring { color: var(--accent); }
+.files-backup-percent { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.files-backup-progress progress { display: block; appearance: none; width: 100%; height: 4px; margin: 14px 0 10px; overflow: hidden; border: 0; border-radius: 4px; background: var(--win-border); }
+.files-backup-progress progress::-webkit-progress-bar { background: var(--win-border); }
+.files-backup-progress progress::-webkit-progress-value { background: var(--accent); transition: width 300ms ease-out; }
+.files-backup-progress progress:indeterminate { background: linear-gradient(90deg, transparent 20%, var(--accent) 50%, transparent 80%) 0 0/50% 100% no-repeat, var(--win-border); animation: files-indeterminate 1.8s ease-in-out infinite; }
+.files-backup-progress small { color: var(--text-secondary); font-size: 11px; }
+@keyframes files-spin { to { transform: rotate(360deg); } }
+@keyframes files-shimmer { to { background-position: -200% 0; } }
+@keyframes files-indeterminate { from { background-position: -100% 0; } to { background-position: 200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .files-workspace *, .files-workspace *::before, .files-workspace *::after { animation: none !important; transition: none !important; }
+}

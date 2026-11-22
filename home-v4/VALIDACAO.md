@@ -1,5 +1,24 @@
 # Validação da home v4
 
+## Revisão de apresentação — 22/11/2026
+
+A revisão atual substitui o simulador aproximado pelo HTML/CSS nativos do Manager e as figuras CSS por texturas Minecraft 64×64. A abertura ficou mais compacta, com cadastro prioritário. Publicações/mensagens são navegadas dentro do telefone. Controles repetidos de reprodução foram removidos.
+
+Verificações executadas nesta revisão:
+
+- **32 verificações de uso** passaram em Chromium, Firefox e WebKit: edição de nome/MOTD, iniciar/parar, terminal, backup, pausa de agenda, busca/filtro/favorito, textura/cor/preset/rotação/pintura/desfazer/PNG, nove mensagens seguidas e nova troca de aba, curtir/comentar, cobrança anual, galeria, conta aprovada, menu mobile e cadastro sem cortes.
+- No Chromium, **zero apontamentos do axe** na home móvel e nos sete painéis nativos: visão geral, terminal, jogadores, arquivos, agenda, mods e acesso entre PCs. Corrigidos contraste de dois botões, títulos e regiões semânticas da exportação.
+- **14 verificações de resistência** passaram: pausa geral, movimento somente visível, preferência de movimento reduzido, cadastro/menu/FAQ/imagens sem JavaScript, WebGL indisponível com prévia 2D/cores/download e economia de dados.
+- Sete larguras de 320 a 2560px sem transbordamento da página. Cadastro com largura legível e altura de 48–54px. Editor exporta PNG cuja dimensão foi lida no próprio arquivo: 64×64.
+- Sintaxe de sete módulos conferida. Auditoria estática: 81 IDs únicos, 219 referências, 30 imagens com alt, sem arquivos/âncoras faltantes. Conta compartilhada idêntica à v3.
+- Revisão visual por seção em 1440 e 390px. Corrigidos enquadramento nativo do hero, limite entre Manager/Minecraft, CTA comprimido no celular, navegação móvel do terminal, formulário bloqueado pelo iframe e compositor de mensagens sobreposto à navegação.
+
+Os testes em Firefox/WebKit detectaram e ajudaram a localizar uma região semântica duplicada, corrigida posteriormente. A conferência final dos sete painéis foi feita em Chromium. Um carregamento Chromium durante testes simultâneos falhou; a execução isolada carregou todos os recursos e passou. Esses resultados são de laboratório, não certificação de acessibilidade ou teste com usuários.
+
+Evidências locais: `*-presentation-final*.json`, `chromium-native-panels-final.json`, `chromium-presentation-fallback2.json`, `section-{1440,390}-*.png`, `static-check.json`, em home-research/v4. As medições de desempenho abaixo são da revisão anterior; a nova entrega é registrada separadamente ao final.
+
+## Histórico da revisão anterior
+
 21/11/2026. Registro do que foi executado; não é certificação, teste de conversão ou garantia de perfeição. Prévia isolada, sem alterações em produção, v2, v3 ou aplicação Minecraft.
 
 ## Primeira revisão — construção e responsividade

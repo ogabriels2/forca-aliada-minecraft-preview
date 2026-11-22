@@ -1,0 +1,130 @@
+/* First server: one full-window decision, with the existing authorized flows. */
+.app-body > .panel > #saasFirstServerView { display: none; }
+body.simple-shell-mode.native-first-server .nav-rail,
+body.simple-shell-mode.native-first-server .workspace-heading,
+body.simple-shell-mode.native-first-server .account-recovery-banner,
+body.simple-shell-mode.native-first-server .app-body > .main-area,
+body.simple-shell-mode.native-first-server .panel > .tab-page,
+body.simple-shell-mode.native-first-server #serverActionDock,
+body.simple-shell-mode.native-first-server .main-controls { display: none !important; }
+body.simple-shell-mode.native-first-server .panel > #saasFirstServerView:not([hidden]),
+body.simple-shell-mode.native-first-server .panel > #saasFirstServerView.is-preview {
+    --welcome-gold: #ddbf77;
+    display: flex !important; flex: 1; flex-direction: column; align-items: stretch;
+    padding: 0 clamp(24px, 4.5vw, 72px); min-height: 0; overflow: auto;
+    background: var(--win-bg); color: var(--text-primary);
+}
+#saasFirstServerView [hidden] { display: none !important; }
+.welcome-header, .welcome-bottom { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 20px; }
+.welcome-header { min-height: 88px; }
+.welcome-brand { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 650; }
+.welcome-brand img { width: 33px; height: 38px; object-fit: contain; }
+.welcome-brand b { display: block; font-size: 11px; font-weight: 400; color: var(--text-secondary); margin-top: 2px; }
+.welcome-tools { display: flex; gap: 8px; }
+.welcome-tools button, .welcome-bottom button { border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12px; padding: 9px 12px; cursor: pointer; transition: background 150ms ease, color 150ms ease; }
+.welcome-tools button:hover, .welcome-bottom button:hover { background: var(--win-surface-alt); color: var(--text-primary); }
+.welcome-tools button:focus-visible, .welcome-bottom button:focus-visible { outline: 2px solid var(--welcome-gold); outline-offset: 2px; }
+body #saasFirstServerView .saas-first-server-card { width: min(100%, 1120px); max-width: none; margin: auto; padding: 25px 0 34px; border: 0; background: transparent; box-shadow: none; text-align: left; }
+#saasFirstServerView .saas-first-server-card .saas-eyebrow { max-width: none; color: var(--welcome-gold); font-size: 11px; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; margin: 0 0 12px; }
+#saasFirstServerView .saas-first-server-card h1 { max-width: none; font-size: clamp(28px, 3.4vw, 42px); font-weight: 600; letter-spacing: -1.2px; line-height: 1.16; margin: 0 0 12px; color: var(--text-primary); outline: none; }
+#saasFirstServerView .saas-first-server-card > p:not(.saas-eyebrow) { max-width: none; margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+#saasFirstServerView .saas-first-server-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+#saasFirstServerView .saas-first-server-choice {
+    --art-accent: #b7c4cd; --art-top: #737f88; --art-front: #404b53; --art-side: #323b42;
+    position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 0;
+    min-width: 0; min-height: 310px; padding: 20px 23px 18px; border: 1px solid var(--win-border);
+    border-radius: 12px; background: var(--win-surface); color: var(--text-primary);
+    transition: border-color 180ms ease, background 180ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease;
+    animation: welcome-arrive 500ms cubic-bezier(.2,.8,.2,1) backwards;
+}
+#saasFirstServerView .saas-first-server-choice.is-primary { --art-accent: #e4c883; --art-top: #b99a53; --art-front: #786134; --art-side: #4f422b; border-color: color-mix(in srgb, var(--welcome-gold) 44%, var(--win-border)); background: var(--win-surface); }
+#saasFirstServerView .saas-first-server-choice:nth-child(2) { animation-delay: 75ms; }
+#saasFirstServerView .saas-first-server-choice:nth-child(3) { --art-accent: #9dc9b4; --art-top: #86ad9b; --art-front: #405d50; --art-side: #37463f; animation-delay: 150ms; }
+#saasFirstServerView .saas-first-server-choice:hover { transform: translateY(-4px); background: var(--win-surface-alt); border-color: var(--art-accent); box-shadow: 0 10px 22px #00000015; }
+#saasFirstServerView .saas-first-server-choice:focus-visible { outline: 2px solid var(--art-accent); outline-offset: 4px; }
+#saasFirstServerView .saas-first-server-choice:active { transform: translateY(-1px) scale(.99); }
+#saasFirstServerView .saas-first-server-choice .welcome-choice-copy { display: flex; flex-direction: column; gap: 9px; margin-top: 14px; }
+#saasFirstServerView .saas-first-server-choice strong { font-size: clamp(16px, 1.8vw, 21px); font-weight: 600; letter-spacing: -.35px; color: var(--text-primary); line-height: 1.3; }
+#saasFirstServerView .saas-first-server-choice small { font-size: 12px; line-height: 1.65; color: var(--text-secondary); }
+#saasFirstServerView .saas-first-server-choice .welcome-choice-action { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 24px; font-size: 12px; font-weight: 600; color: var(--text-primary); }
+#saasFirstServerView .saas-first-server-choice.is-primary .welcome-choice-action { color: var(--welcome-gold); }
+.welcome-choice-action svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; flex-shrink: 0; transition: transform 180ms ease; }
+.saas-first-server-choice:is(:hover, :focus-visible) .welcome-choice-action svg { transform: translateX(3px); }
+.welcome-art { display: block; height: 139px; }
+.welcome-art > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.art-top { fill: var(--art-top); stroke: var(--art-accent); stroke-width: .8; stroke-linejoin: round; }
+.art-front { fill: var(--art-front); stroke: var(--art-accent); stroke-width: .8; stroke-linejoin: round; }
+.art-side { fill: var(--art-side); stroke: var(--art-accent); stroke-width: .8; stroke-linejoin: round; }
+.art-line { stroke: var(--art-accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.art-shadow { fill: #000; opacity: .13; }
+.art-paper { fill: var(--win-surface-alt); stroke: var(--art-accent); stroke-width: 1; }
+.art-screen { fill: var(--win-bg); }
+.art-plus circle { fill: var(--win-surface); stroke: var(--art-accent); }
+.art-plus:not(.welcome-emblem) path { stroke: var(--art-accent); stroke-width: 1.8; stroke-linecap: round; }
+.welcome-block, .welcome-file, .welcome-link, .art-plus { transition: transform 450ms cubic-bezier(.2,.8,.2,1); transform-box: fill-box; transform-origin: center; }
+.block-top { animation: welcome-build 850ms cubic-bezier(.2,.8,.2,1) 200ms both; }
+.welcome-file { animation: welcome-file-in 850ms cubic-bezier(.2,.8,.2,1) 275ms both; }
+.welcome-connection { stroke: var(--art-accent); stroke-width: 2; stroke-dasharray: 3 5; animation: welcome-connect 1200ms ease 300ms both; }
+.saas-first-server-choice:is(:hover, :focus-visible) .block-top { transform: translateY(-6px); }
+.saas-first-server-choice:is(:hover, :focus-visible) .art-plus { transform: translateY(-2px) scale(1.06); }
+.saas-first-server-choice:is(:hover, :focus-visible) .welcome-file { transform: translateY(-8px) rotate(-3deg); }
+.saas-first-server-choice:is(:hover, :focus-visible) .welcome-link { transform: scale(1.12); }
+.saas-first-server-choice:is(:hover, :focus-visible) .welcome-connection { animation: welcome-connect 1100ms linear infinite; }
+.welcome-bottom { width: min(100%, 1120px); align-self: center; min-height: 64px; padding-bottom: 12px; border-top: 1px solid var(--win-border); color: var(--text-secondary); font-size: 11px; }
+.welcome-assurance { display: flex; align-items: center; gap: 8px; }
+.welcome-bottom .welcome-assurance { min-width: 0; padding-left: 0; text-align: left; }
+#welcomeAccountName { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#welcomeAccountPlan { padding-left: 10px; border-left: 1px solid var(--win-border); font-size: 11px; white-space: nowrap; }
+#welcomeAccountPlan:empty { display: none; }
+.welcome-choice-navigation { display: none; }
+.welcome-choice-navigation button { width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--win-border); background: var(--win-surface); color: var(--text-primary); cursor: pointer; }
+.welcome-choice-navigation button:disabled { opacity: .35; cursor: default; }
+.welcome-choice-navigation button:focus-visible { outline: 2px solid var(--welcome-gold); outline-offset: 2px; }
+.welcome-existing-dialog { width: min(100%, 540px); }
+.welcome-existing-dialog .saas-modal-body { overflow-y: auto; }
+.welcome-existing-hint { color: var(--text-secondary); font-size: 12px; line-height: 1.6; margin: 8px 0 16px; }
+.welcome-existing-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.welcome-existing-heading h3 { font-size: 13px; font-weight: 600; margin: 0; }
+.welcome-existing-heading button { margin: 0; font-size: 11px; }
+.welcome-existing-server { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; margin-top: 8px; border: 1px solid var(--win-border); border-radius: 7px; background: var(--win-surface-alt); color: var(--text-primary); cursor: pointer; text-align: left; font: inherit; }
+.welcome-existing-server:hover { border-color: var(--win-border-focus); background: var(--win-elevated); }
+.welcome-existing-server:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.welcome-existing-server > span:nth-child(2) { display: grid; gap: 4px; flex: 1; min-width: 0; }
+.welcome-existing-server strong { font-size: 13px; overflow-wrap: anywhere; }
+.welcome-existing-server small { color: var(--text-secondary); font-size: 11px; }
+.welcome-existing-action { font-size: 11px; flex-shrink: 0; }
+.welcome-assurance svg { width: 16px; height: 16px; flex-shrink: 0; }
+.welcome-revisit { margin-bottom: 12px !important; }
+.welcome-revisit .settings-row-text small { display: block; margin-top: 4px; color: var(--text-secondary); }
+body:not(.simple-shell-mode) .welcome-revisit { display: none; }
+[data-theme="light"] #saasFirstServerView { --welcome-gold: #876419 !important; }
+[data-theme="light"] .welcome-brand img { filter: brightness(0); }
+[data-theme="light"] .saas-first-server-choice { --art-accent: #536574; --art-top: #cad4dc; --art-front: #b8c6d0; --art-side: #a3b3be; }
+[data-theme="light"] .saas-first-server-choice.is-primary { --art-accent: #8d6c28; --art-top: #ead7ac; --art-front: #d6bc83; --art-side: #bda06a; }
+[data-theme="light"] .saas-first-server-choice:nth-child(3) { --art-accent: #486c58; --art-side: #c0d3c8; }
+@keyframes welcome-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes welcome-build { from { opacity: 0; translate: 0 -14px; } to { opacity: 1; translate: 0 0; } }
+@keyframes welcome-file-in { from { translate: 0 16px; } to { translate: 0 0; } }
+@keyframes welcome-connect { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+@media (max-height: 650px) {
+    .welcome-header { min-height: 68px; }
+    body #saasFirstServerView .saas-first-server-card { padding: 16px 0 24px; }
+    #saasFirstServerView .saas-first-server-choices { margin-top: 24px; }
+    #saasFirstServerView .saas-first-server-choice { min-height: 280px; padding: 16px 20px; }
+    .welcome-art { height: 112px; }
+}
+/* Keep the three choices together. Narrow/zoomed windows scroll horizontally. */
+@media (max-width: 760px) {
+    #saasFirstServerView .saas-first-server-choices { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 5px 16px; margin-inline: -5px; }
+    #saasFirstServerView .saas-first-server-choice { flex: 0 0 calc(100% - 40px); scroll-snap-align: center; }
+    .welcome-tools button { padding-inline: 7px; }
+    .welcome-brand span { font-size: 13px; }
+    .welcome-bottom { flex-wrap: wrap; gap: 0; padding-top: 12px; }
+    .welcome-choice-navigation { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 6px; font-size: 12px; color: var(--text-secondary); }
+    .welcome-header { flex-wrap: wrap; gap: 8px; padding-block: 12px; }
+    .welcome-tools { margin-left: auto; }
+    #welcomeAccountName { max-width: 145px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #saasFirstServerView *, #saasFirstServerView *::before, #saasFirstServerView *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

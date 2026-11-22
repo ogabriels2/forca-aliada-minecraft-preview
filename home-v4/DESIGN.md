@@ -29,7 +29,7 @@ Uma segunda fonte foi descartada: escala, peso e a interface nativa já fornecem
 Cabeçalho   marca / acesso direto aos produtos / entrar e criar conta
 Hero        fotografia própria + promessa / Manager legível + conversa curta
 Produtos    três áreas brancas / miniaturas de interfaces / uma conta
-Manager     campo verde claro / janela escura / quatro etapas e controles
+Manager     campo verde claro / janela escura / DOM nativo interativo e acesso aos planos
 Minecraft   branco / navegador de catálogo / busca, filtros e favoritos
 Skins       branco / editor 3D à esquerda / catálogo e acesso à direita
 Community   papel quente / benefício social à esquerda / telefone à direita
@@ -39,16 +39,30 @@ FAQ         papel claro / dúvidas de uso e cobrança
 Fechamento  fotografia e cadastro / rodapé completo
 ```
 
-No celular, o hero empilha os elementos, a visão de produtos conserva miniaturas ao lado da explicação, as etapas têm abas 2×2 e a janela mostra somente o recorte útil. Os planos formam uma coluna. Nenhum texto essencial depende de hover. A expansão teatral de cartões foi reduzida a elevação da prévia: mantém previsibilidade e evita a estética infantil apontada pelo usuário.
+No celular, o hero empilha os elementos, a visão de produtos conserva miniaturas ao lado da explicação, a janela do aplicativo usa navegação interna compacta. Os planos formam uma coluna. Nenhum texto essencial depende de hover. A expansão teatral de cartões foi reduzida a elevação da prévia: mantém previsibilidade e evita a estética infantil apontada pelo usuário.
 
 ## Movimento com função
 
-A abertura conserva profundidade e deslocamento fotográfico discreto. A janela do Manager se endireita ao entrar em cena; as etapas demonstram criar, conectar, operar e programar. O catálogo alterna busca, filtro e favorito. O Community demonstra feed e mensagem. A skin gira e muda de cor quando acionada. Trocas usam CSS/WAAPI, sem vídeo ou WebGL obrigatório e sem rolagem sequestrada.
+A abertura conserva profundidade e deslocamento fotográfico discreto. A janela do Manager se endireita ao entrar em cena; a janela do hero alterna visão geral, terminal e arquivos. O catálogo alterna busca, filtro e favorito. O Community demonstra feed e mensagem. A skin gira e muda de cor quando acionada. Trocas usam CSS/WAAPI, com WebGL carregado apenas para o editor e alternativa 2D e sem rolagem sequestrada.
 
-Ciclos só executam visíveis, com aba ativa e sem foco de edição. Interação manual pausa a demonstração correspondente. Há pausa geral e local. Preferência de movimento reduzido e economia de dados desligam os ciclos. Isso também evita que a página dispute atenção enquanto a pessoa lê ou usa controles.
+Ciclos só executam visíveis, com aba ativa e sem foco de edição. Interação manual pausa a demonstração correspondente. Há uma pausa geral compacta; controles repetidos de reprodução foram retirados. Preferência de movimento reduzido e economia de dados desligam os ciclos. Isso também evita que a página dispute atenção enquanto a pessoa lê ou usa controles.
 
 ## Texto que deve permanecer explícito
 
 Preço, total anual, capacidades, necessidade do PC ligado, ausência de hospedagem, diferenciação entre grátis e assinatura, e indicação de dados demonstrativos. Esses fatos não podem ser substituídos por símbolos. Ícones acompanham ações e rótulos; controles universais isolados recebem nome acessível e foco visível.
 
-Não afirmar que os recortes HTML são o aplicativo completo. O Manager real tem etapas adicionais e o terminal local não é o console remoto. CAPTURAS.md registra os recortes e limitações.
+A exportação nativa preserva a interface, mas suas operações são demonstrativas. O terminal local não é o console remoto. CAPTURAS.md registra os recortes e limitações.
+
+## Revisão de apresentação após avaliação da v4
+
+Direção autorizada: a home é apresentação e convencimento, não um painel de operação. Reduzir título do hero de ~80px para 58–62px, estreitar a coluna editorial e ampliar a cena do produto. Manter cadastro verde como ação dominante; animação de entrada conduz da promessa ao botão, sem pulsação permanente. Identificadores de produto e condições permanecem claros.
+
+Substituir o Manager aproximado pela exportação pública do HTML/CSS reais, interativa e isolada; os comandos nunca acessam o PC ou a rede de produção. Skins passam a texturas Minecraft 64×64 originais, renderizadas pelo mesmo visualizador 3D usado no editor do catálogo, com pintura e download local. Remover controles repetidos de reprodução; conservar um comando compacto de movimento sem ocupar uma faixa de layout. Ritmo e paleta aprovados permanecem.
+
+## Critério final de apresentação — 22/11/2026
+
+O título ocupa menos espaço e a ação de cadastro tem mais respiro. A imagem de fundo continua evidência própria, não o produto principal. A janela real do Manager substitui a interpretação aproximada. No hero ela apresenta; na seção do produto ela pode ser experimentada. A ausência de gráficos inventados não é preenchida com números artificiais.
+
+Substituições visuais: modelos 3D e amostras reais de skins, paleta de cores, ícones de pintar/girar/desfazer/download, reação visual ao favorito, selos e capacidades dos planos. A navegação entre feed e conversa fica no próprio telefone, não na área de convencimento. Preço, cobrança, PC ligado e diferença entre grátis/pago continuam escritos: omiti-los reduziria a clareza.
+
+Uma única pausa ocupa 44px no canto. Entradas finitas usam transform/opacity; o cadastro recebe um reflexo inicial breve, sem pulsação permanente. Hero alterna telas reais, catálogo demonstra busca/filtro/favorito e Community demonstra feed/conversa. Interação manual interrompe o ciclo correspondente. Não há controle de rolagem nem animação necessária para acessar conteúdo.

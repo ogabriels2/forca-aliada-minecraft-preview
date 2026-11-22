@@ -1,0 +1,20 @@
+/* Framing and demo-only forms. Original application CSS is retained in source/. */
+body.manager-public-preview{font-family:'Segoe UI',sans-serif}
+body.manager-public-preview :is(#btnOpenMotdModal,#btnOpenIconModal){color:#81df99}
+.local-demo-dialog{position:fixed;inset:0;margin:auto;height:fit-content;max-height:calc(100% - 32px);overflow:auto}
+.local-demo-dialog{color:var(--text-primary);background:var(--win-elevated);border:1px solid var(--win-border-focus);border-radius:12px;padding:24px;width:min(390px,calc(100% - 36px));box-sizing:border-box}
+.local-demo-dialog::backdrop{background:#0008}.local-demo-dialog h2{font-size:20px;margin:0 0 22px}.local-demo-dialog label{display:grid;gap:8px;font-size:14px}.local-demo-dialog input{min-height:42px;box-sizing:border-box;width:100%;border:1px solid #646b64;background:#222;color:#fff;border-radius:6px;padding:10px;font:inherit}.local-demo-dialog footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}.local-demo-dialog button{min-height:40px;padding:9px 16px;border-radius:6px;background:#333;color:#fff;border:1px solid #666}.local-demo-dialog button[type=submit]{background:#67c77e;color:#14221a;border-color:#67c77e}.local-demo-dialog p{font-size:13px;color:#b8c5b9;line-height:1.6;margin:14px 0 0}
+/* Small screens can explore the real panels without a desktop sidebar. */
+.demo-mobile-nav{display:none}
+@media(max-width:760px){
+ body.manager-public-preview{display:flex;flex-direction:column}
+ body.manager-public-preview>.app-body{height:0!important;min-height:0;flex:1;width:100%}
+ .demo-mobile-nav{display:flex;gap:4px;flex-shrink:0;padding:4px 10px 10px;border-bottom:1px solid #444;background:#292929;overflow:auto}
+ .demo-mobile-nav button{flex:1;white-space:nowrap;min-height:44px;padding:8px;border:0;border-radius:6px;background:transparent;color:#ccc;font:600 13px 'Segoe UI',sans-serif}
+ .demo-mobile-nav button[aria-pressed=true]{background:#304136;color:#91e3a5}
+ body.manager-public-preview .nav-btn{min-height:44px}
+ body.manager-public-preview #saasServerAddressValue{font-size:13px}
+ body.manager-public-preview #tab-server .server-page-scroll{overflow:auto}
+ .local-demo-dialog{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

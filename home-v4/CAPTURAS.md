@@ -1,30 +1,23 @@
-# Capturas, origem e fidelidade
+# Origem e fidelidade das demonstrações
 
-21/11/2026. Nenhuma conta real foi usada para produzir os demonstradores públicos. Não há credenciais na entrega.
+Atualizado em 22/11/2026. Nenhuma conta real, credencial ou mensagem privada foi usada na entrega.
 
-## Material obtido
+## Manager
 
-| Material | Origem e método | Uso |
-|---|---|---|
-| Produtos públicos | Navegador isolado, viewport 1440×1000, escala 2; arquivos source-manager/skins/editor/community/plans/company.png na pesquisa local | Conferência de layout, rótulos e comportamento. Fotos/perfis de terceiros não foram publicados |
-| Manager nativo | Clone isolado do repositório autorizado, commit 6745fc6 (2.4.18); index.html/CSS com scripts e conexões externas bloqueados, 2880×2000 | Captura de conferência native-manager-creation-2x.png; não é gravação de um servidor em execução |
-| Manager exportado | [Exportação pública](https://forcaaliada.com/assets/manager-native/), arquivos de estrutura e estilos no site | Referência da interface com dados demonstrativos |
-| Mundo | Imagens do próprio projeto já usadas na v2/v3; origens em CREDITOS.md | Hero, catálogo demonstrativo, posts e galeria |
-| Personagens | Geometria CSS 3D e SVG próprios, criados para a prévia | Skin e avatares fictícios; sem Steve/Alex/Creeper |
+O clone autorizado do aplicativo, commit 6745fc6 (2.4.18), foi consultado para entender a interface. O código privado não é distribuído. A pasta `manager/` reaproveita a [exportação estrutural pública do site](https://forcaaliada.com/assets/manager-native/): DOM e estilos reais, com estado fictício. A fonte original e hashes estão em `manager/source.json`.
 
-O diretório original do Manager no OneDrive não permitia leitura de alguns arquivos pela sincronização. O clone independente forneceu o código necessário, sem alterar a instalação do proprietário.
+Adaptações da v4: caminhos relativos, enquadramento, navegação compacta no celular, semântica/contraste, edição local de nome/MOTD e desativação dos ciclos que inventavam entradas de jogadores. Latência, TPS e tempo de sessão não são apresentados como medições reais. O hero mostra a janela completa em escala; abaixo, a janela pode ser usada e ampliada em outra aba.
 
-## Recortes editoriais, não reprodução integral
+Terminal e backups alteram somente a demonstração. Configurações do Windows, instalação, autenticação, criação efetiva, compartilhamento e rotinas reais exigem o aplicativo. A política de conteúdo bloqueia conexões e envios de formulário. Não há ponte Electron, acesso ao disco ou chamadas de produção.
 
-- Manager: tipografia, superfícies, nomes e primeira etapa vêm da interface existente. A criação é mostrada dentro da janela de demonstração, em vez de carregar o aplicativo inteiro e seus diálogos sobrepostos. O botão Continuar avança a apresentação; não executa as três etapas de criação. O aviso está no próprio recorte.
-- Visão geral: identidade, endereço e backup em foco; métricas, opções laterais e detalhes sem função explicativa foram omitidos. Não há contagem inventada de jogadores.
-- Terminal: logs fictícios e identificados. Não representa controle remoto conectado. Agenda mostra duas rotinas ilustrativas sem gravação em disco.
-- Catálogo: reproduz busca, seleção por estilo, favoritos e cartões, com quatro exemplos e fotos do próprio mundo; não representa quatro servidores reais abertos.
-- Editor: recorte de Pintar com rotação e cores, não o editor completo. O personagem é geometria CSS original, não uma skin exportável neste demonstrador.
-- Community: anatomia pública de feed e mensagens com Lia, Rui e Noa, personagens fictícios. Conteúdo e ações só mudam a demonstração. Não existem mensagens reais chegando.
+## Skins e editor
 
-Esses recortes foram adaptados para leitura no celular. Não são apresentados como réplicas indistinguíveis do aplicativo completo. A interface real continua disponível nos links de cada produto.
+Órbita, Aurora e Trilha usam texturas originais no padrão Minecraft 64×64 e proporções corretas de cabeça, tronco, braços e pernas. `skinview3d`, Three.js e skinview-utils vêm do mesmo visualizador usado pelo catálogo; licenças incluídas. Carregamento próximo da seção, renderização pausada fora da tela, densidade limitada.
 
-## O que não foi produzido
+Pintar e baixar produzem PNG válido, sem aplicar à conta. Esse recorte não substitui o editor completo do catálogo. PNGs frontais servem de alternativa estática. Não há geometria CSS fingindo ser uma skin.
 
-Não foi gravado o ciclo real de instalação/criação, console remoto autenticado ou aplicação de skin. Esses fluxos alteram estado e são desnecessários para avaliar esta landing page; a prévia usa recortes identificados. Nenhuma captura precisa ser enviada pelo Gabriel para abrir e avaliar esta versão. Se a direção aprovada exigir vídeo do aplicativo executando todo o fluxo, ele deverá ser produzido em ambiente local de teste, sem contas ou dados de produção, antes de substituir os recortes.
+## Outros materiais
+
+Fotos: capturas do próprio mundo, sem adição de construções. Catálogo: quatro exemplos identificados. Community: anatomia do produto com personagens SVG fictícios e mensagens locais; nenhuma notificação real. Interfaces públicas foram conferidas em navegador isolado, sem publicar fotos ou perfis de terceiros.
+
+Capturas de revisão, relatórios e pesquisas ficam no diretório local `home-research/v4`. Não foi gravado um vídeo do ciclo real de instalação nem aberta uma sessão remota autenticada. O menu de conta é o componente aprovado no Manager, sem redesenho.

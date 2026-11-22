@@ -1,0 +1,86 @@
+/* Keep Chromium's native scrolling, arrow repeat, paging and thumb dragging.
+   The transparent 12 px hit area leaves a 3 px inset around a 6 px thumb. */
+:root {
+    --scroll-thumb: #777777;
+    --scroll-thumb-hover: #999999;
+    --scroll-thumb-active: #b3b3b3;
+    --scroll-arrow-filter: none;
+}
+[data-theme="light"] {
+    --scroll-thumb: #989898;
+    --scroll-thumb-hover: #767676;
+    --scroll-thumb-active: #555555;
+    --scroll-arrow-filter: brightness(.55);
+}
+/* Standard scrollbar-width/color override the pseudo-elements in Chromium;
+   keep them automatic so that the native arrow buttons remain available. */
+* { scrollbar-width: auto; scrollbar-color: auto; }
+::-webkit-scrollbar { width: 12px; height: 12px; background: transparent; }
+::-webkit-scrollbar-track {
+    background: transparent;
+    border: 3px solid transparent;
+    border-radius: 7px;
+    margin: 0;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    background-clip: padding-box;
+    border: 3px solid transparent;
+    border-radius: 7px;
+}
+/* Compensate for the side-only border so the visible 6 px thumb has round
+   3 px end caps, rather than the elongated tips of an elliptical inner radius. */
+::-webkit-scrollbar-thumb:vertical {
+    min-height: 26px;
+    border-block-width: 0;
+    border-radius: 6px / 3px;
+}
+::-webkit-scrollbar-thumb:horizontal {
+    min-width: 26px;
+    border-inline-width: 0;
+    border-radius: 3px / 6px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--scroll-thumb-hover); }
+::-webkit-scrollbar-thumb:active { background-color: var(--scroll-thumb-active); }
+::-webkit-scrollbar-button {
+    display: block;
+    width: 12px;
+    height: 12px;
+    box-sizing: border-box;
+    border: 3px solid transparent;
+    border-radius: 3px;
+    background-color: transparent;
+    background-origin: content-box;
+    background-clip: padding-box;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: 9px 9px;
+    filter: var(--scroll-arrow-filter);
+}
+::-webkit-scrollbar-button:hover { background-color: var(--hover-overlay); }
+::-webkit-scrollbar-button:active { background-color: var(--win-border-focus); }
+::-webkit-scrollbar-button:vertical:decrement {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1.25 5.5 4 2.5 6.75 5.5Z' fill='%23b8b8b8'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:vertical:increment {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1.25 2.5 4 5.5 6.75 2.5Z' fill='%23b8b8b8'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:horizontal { width: 12px; height: 12px; }
+::-webkit-scrollbar-button:horizontal:decrement {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M5.5 1.25 2.5 4 5.5 6.75Z' fill='%23b8b8b8'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:horizontal:increment {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M2.5 1.25 5.5 4 2.5 6.75Z' fill='%23b8b8b8'/%3E%3C/svg%3E");
+}
+/* One arrow at each end, rather than Chromium's optional double-button pairs. */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement { display: none; }
+::-webkit-scrollbar-corner { background: transparent; }
+@media (forced-colors: active) {
+    * { scrollbar-width: auto; scrollbar-color: auto; }
+    ::-webkit-scrollbar,
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-thumb,
+    ::-webkit-scrollbar-button,
+    ::-webkit-scrollbar-corner { all: revert; }
+}

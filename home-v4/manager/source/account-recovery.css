@@ -1,0 +1,70 @@
+.account-sync-button { position: relative; display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--text-secondary); cursor: pointer; transition: background 120ms, border-color 120ms; }
+.account-sync-button:hover, .account-sync-button[aria-expanded="true"] { background: var(--win-surface-alt); border-color: var(--win-border); }
+.account-sync-button[data-state="ready"] { color: var(--accent); }
+.account-sync-button[data-state="busy"] { color: var(--blue, #71b7ff); }
+.account-sync-button:is([data-state="attention"], [data-state="waiting"]) { color: var(--yellow, #e7ad58); }
+.recovery-cloud-slash { display: none; }
+[data-state="offline"] .recovery-cloud-slash { display: block; }
+.account-sync-badge { display: none; position: absolute; right: 1px; bottom: 2px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: var(--win-surface); outline: 1.5px solid var(--win-surface); }
+.account-sync-badge svg, .recovery-summary-icon i svg { display: block; width: 100%; height: 100%; }
+.account-sync-button:is([data-state="ready"], [data-state="attention"], [data-state="waiting"]) .account-sync-badge { display: block; }
+.account-sync-button[data-state="busy"] .account-sync-badge { display: block; width: 11px; height: 11px; border: 1.5px solid var(--win-border-focus); border-top-color: var(--blue, #71b7ff); animation: recovery-spin .85s linear infinite; }
+.account-sync-flyout { position: fixed; z-index: 16000; display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto; padding: 5px; border: 1px solid var(--win-border); border-radius: 9px; background: var(--win-surface); color: var(--text-primary); box-shadow: 0 10px 32px #0004; font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif; animation: recovery-menu-in 140ms cubic-bezier(.2,.8,.2,1); }
+.account-sync-flyout[hidden], .account-sync-flyout [hidden], .account-recovery-banner[hidden] { display: none !important; }
+.account-sync-flyout > header { display: flex; align-items: center; padding: 12px 11px 4px; flex-shrink: 0; }
+.account-sync-flyout h2 { font-size: 13px; font-weight: 600; margin: 0; }
+.account-sync-flyout button { -webkit-app-region: no-drag; }
+.account-recovery-dismiss { display: grid; place-items: center; border: 0; background: transparent; color: var(--text-secondary); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; }
+.account-recovery-dismiss:hover { background: var(--hover-overlay); color: var(--text-primary); }
+.recovery-summary { display: flex; align-items: center; gap: 12px; padding: 12px 10px; }
+.recovery-summary-icon { position: relative; width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; border-radius: 7px; background: var(--win-surface-alt); color: var(--text-secondary); }
+.recovery-summary-icon > svg { width: 23px; height: 23px; }
+.recovery-summary-icon i { position: absolute; bottom: 0; right: 0; width: 13px; height: 13px; border-radius: 50%; background: var(--win-surface); outline: 2px solid var(--win-surface); color: inherit; }
+[data-state="ready"] .recovery-summary-icon { color: var(--accent); }
+[data-state="attention"] .recovery-summary-icon, [data-state="waiting"] .recovery-summary-icon { color: var(--yellow, #e7ad58); }
+[data-state="busy"] .recovery-summary-icon { color: var(--blue, #71b7ff); }
+[data-state="idle"] .recovery-summary-icon i { display: none; }
+[data-state="busy"] .recovery-summary-icon i { width: 11px; height: 11px; background: transparent; border: 2px solid var(--win-border-focus); border-top-color: var(--blue, #71b7ff); animation: recovery-spin .85s linear infinite; }
+.recovery-summary > div { min-width: 0; display: grid; gap: 4px; }
+.recovery-summary strong { font-size: 13px; font-weight: 600; }
+.recovery-summary small { color: var(--text-secondary); font-size: 11px; line-height: 1.5; }
+.recovery-services { display: grid; gap: 12px; padding: 10px; }
+.recovery-services > div { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 11px; }
+.recovery-services .saas-icon { color: var(--text-tertiary); width: 18px; font-size: 15px; }
+.recovery-services > div > span:nth-child(2) { flex: 1; }
+.recovery-service-state, .recovery-image-state { color: var(--text-secondary); font-size: 10px; }
+.recovery-last-check { color: var(--text-tertiary); font-size: 10px; margin: 4px 10px 12px; }
+.account-sync-flyout .recovery-action { display: flex; align-items: center; gap: 11px; width: 100%; flex-shrink: 0; min-height: 38px; box-sizing: border-box; padding: 8px 10px; border: 0; border-radius: 4px; background: transparent; color: var(--text-primary); text-align: left; font: 12px 'Segoe UI', sans-serif; cursor: pointer; }
+.recovery-action:hover:not(:disabled), .recovery-action[aria-expanded="true"] { background: var(--hover-overlay); }
+.recovery-action > .saas-icon { width: 18px; flex: 0 0 18px; text-align: center; font-size: 15px; color: var(--text-secondary); }
+.recovery-action > span:nth-child(2) { flex: 1; }
+.recovery-action > .saas-icon:last-child:not(:first-child) { font-size: 10px; }
+.recovery-action:disabled { opacity: .55; cursor: default; }
+.recovery-action-spinner { display: none; width: 12px; height: 12px; border: 1.5px solid var(--win-border-focus); border-top-color: var(--blue); border-radius: 50%; animation: recovery-spin .85s linear infinite; }
+.recovery-action.is-working .recovery-action-spinner { display: block; }
+.recovery-found-count { font: 600 10px 'Segoe UI', sans-serif; background: var(--accent-subtle); color: var(--accent); padding: 1px 6px; border-radius: 4px; }
+.recovery-details { margin: 4px 6px 8px; padding: 10px 4px; border-block: 1px solid var(--win-border); }
+.recovery-details h3 { font-size: 11px; font-weight: 600; margin: 0 0 6px; }
+.recovery-details p { font-size: 11px; line-height: 1.5; color: var(--text-secondary); margin: 0 0 10px; }
+.recovery-details section + section { margin-top: 16px; }
+.recovery-error { margin: 0 10px 8px; padding: 9px; font-size: 11px; line-height: 1.5; background: var(--yellow-subtle, #e7ad5810); color: var(--text-primary); border-left: 2px solid var(--yellow, #e7ad58); border-radius: 3px; overflow-wrap: anywhere; }
+.recovery-server-row { display: flex; align-items: center; gap: 9px; padding: 9px 6px; border-radius: 5px; margin-bottom: 3px; }
+.recovery-server-row:hover { background: var(--win-surface-alt); }
+.recovery-server-row > div { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.recovery-server-row strong { font-size: 11px; font-weight: 600; }
+.recovery-server-row small { font-size: 10px; color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recovery-server-row input { accent-color: var(--accent); }
+.recovery-server-avatar { width: 30px; height: 30px; flex: 0 0 30px; display: grid; place-items: center; background: var(--win-surface); border: 1px solid var(--win-border); border-radius: 4px; color: var(--text-secondary); }
+.recovery-server-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }
+.account-sync-flyout .btn { min-height: 30px; padding: 6px 10px; border: 1px solid var(--win-border); background: var(--win-surface); color: var(--text-primary); border-radius: 5px; font: 11px 'Segoe UI', sans-serif; cursor: pointer; }
+.account-sync-flyout .btn-accent { background: var(--accent); color: var(--btn-accent-text); border-color: transparent; }
+.account-sync-flyout .btn:disabled { opacity: .5; cursor: default; }
+.account-sync-flyout footer { display: flex; align-items: flex-start; gap: 10px; margin-top: 6px; padding: 12px 10px 8px; border-top: 1px solid var(--win-border); font-size: 10px; line-height: 1.5; color: var(--text-tertiary); }
+.account-sync-flyout footer .saas-icon { font-size: 13px; margin-top: 2px; }
+.account-sync-button:focus-visible, .account-sync-flyout button:focus-visible, .account-sync-flyout input:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.account-recovery-banner { display: flex; align-items: center; gap: 12px; padding: 12px 28px; border-bottom: 1px solid var(--win-border); background: var(--win-surface); color: var(--text-primary); }
+.account-recovery-banner > div { flex: 1; min-width: 0; display: grid; gap: 3px; font-size: 12px; }
+.account-recovery-banner span { color: var(--text-secondary); }
+@keyframes recovery-spin { to { transform: rotate(360deg); } }
+@keyframes recovery-menu-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .account-sync-flyout, .account-sync-badge, .recovery-summary-icon i, .recovery-action-spinner { animation: none !important; } }

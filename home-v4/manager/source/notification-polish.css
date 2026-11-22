@@ -1,0 +1,14 @@
+.notif-context { font-size: 10px; color: var(--text-secondary); margin: 3px 0 5px; overflow-wrap: anywhere; }
+.notif-panel { border-color: var(--win-border); border-radius: 9px; box-shadow: 0 10px 32px #0004; }
+.notif-bell-btn[data-attention="true"] { color: var(--yellow); }
+.notif-desc { overflow-wrap: anywhere; }
+.notif-item.is-unread { background: var(--hover-overlay); border-color: transparent; }
+.notif-item.is-unread:hover { background: var(--hover-overlay-strong); filter: none; }
+.notif-item.is-unread::before { height: 20px; background: var(--blue); }
+.notif-item.is-unread[data-severity="error"]::before { background: var(--red); }
+.notif-item.is-unread[data-severity="warn"]::before { background: var(--yellow); }
+.notif-item.is-unread[data-severity="success"]::before { background: var(--accent); }
+.notif-details-link { display: inline-flex; margin: 8px 0 2px; border: 0; padding: 0; background: transparent; color: var(--accent); font: 11px var(--font); cursor: pointer; }
+.notif-details-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.notif-details-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.notif-icon svg { width: 20px; height: 20px; flex-shrink: 0; }

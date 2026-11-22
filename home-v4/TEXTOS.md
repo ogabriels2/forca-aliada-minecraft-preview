@@ -1,10 +1,6 @@
-# Alterações de texto em relação à v3
+# Texto da home — comparação com a v3
 
-Comparação dos textos do HTML, em ordem de leitura; sinais `-` indicam remoção e `+` adição. Extração automática inclui rótulos das interfaces demonstrativas. Textos mantidos não são reescritos para soar jovens.
-
-As mudanças concentram-se na visão dos três produtos, recortes reais do Manager, exemplos do catálogo/editor/Community, faixa compacta do mundo e coluna gratuita dos planos. Permanecem a promessa do hero, a hierarquia de cadastro/planos, preços, condições e perguntas. A correção de direção de arte posterior não acrescentou promessas comerciais.
-
-Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum servidor criado; endereço de exemplo copiado; favorito restrito à demonstração; cor alterada; estado de cobrança mensal/anual. A orientação Java/Bedrock/ambos reproduz a lógica do Manager.
+Atualizado em 22/11/2026. Inclui rótulos das demonstrações no HTML principal. O HTML nativo do Manager fica isolado em manager/. A promessa, os preços e as condições comerciais foram preservados. Reduzidos textos de controle e trocada a interpretação do aplicativo por sua interface real.
 
 ```diff
 --- home-v3/index.html
@@ -14,12 +10,11 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 -Prévia da home · Variante 3
 +Prévia da home · Variante 4
  Ver versão anterior
-@@ -25,31 +25,46 @@
+@@ -25,31 +25,34 @@
  Criar conta grátis
 -Conhecer os planos
-+Ver planos
- A plataforma é grátis para entrar.
- O Manager faz parte da assinatura.
+-A plataforma é grátis para entrar.
+-O Manager faz parte da assinatura.
 -Força Aliada
 -Manager
 -Demonstração
@@ -32,24 +27,16 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 -Todos os dias, às 06h
 -Console remoto
 -Também no navegador
-+Força Aliada Manager
-+Visão geral
-+Status e controles do servidor selecionado.
-+Online
-+Vale dos Aliados
-+Um mundo para construir juntos.
-+Java
-+vale-demo.play.forcaaliada.com
-+Disponível pela Internet · endereço de exemplo
-+Último backup
-+Hoje, 06:00
- Experimente a demonstração
+-Experimente a demonstração
 -L
 -R
 -J
 -O próximo encontro começa aqui.
 -Servidor, amigos e chat na mesma plataforma.
-+Interface demonstrativa
++Ver planos
++Conta grátis. Manager incluído na assinatura.
++Força Aliada Manager
++Experimente abaixo
 +Lia
 +Community
 +O mundo está pronto. Vamos?
@@ -84,89 +71,12 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +Pro e Team ampliam o que você pode fazer.
 +Interfaces demonstrativas
  Força Aliada Manager
-@@ -57,110 +72,198 @@
+@@ -57,110 +60,119 @@
  começa no seu PC.
 -Crie ou importe o servidor, compartilhe o endereço e cuide de tudo em um só aplicativo.
 +Crie ou importe um servidor, compartilhe o endereço e cuide de tudo em um só aplicativo.
-+Interface demonstrativa
-+Força Aliada Manager
-+Força Aliada
-+Manager
-+Vale dos Aliados
-+Servidor de exemplo
-+Servidor
-+Visão geral
-+Jogadores
-+Terminal
-+Gerenciar
-+Agenda
-+Arquivos e backups
-+Mods e plugins
-+Criar novo servidor
-+1 de 3
-+Como vocês vão jogar?
-+Escolha a edição dos seus amigos. Nós preparamos o necessário.
-+Edição do Minecraft na demonstração
-+Java
-+No computador
-+Bedrock
-+Celular e Windows
-+As duas edições
-+No mesmo mundo
-+Paper · Recomendado
-+Desempenho e plugins
-+Vanilla
-+Regras originais
-+Continuar
-+Recorte da primeira etapa. Nenhum servidor é criado nesta prévia.
-+Visão geral
-+Status e controles do servidor selecionado.
-+Online
-+Vale dos Aliados
-+Um mundo para construir juntos.
-+Java
-+vale-demo.play.forcaaliada.com
-+Disponível pela Internet · endereço de exemplo
-+Último backup
-+Hoje, 06:00
-+Compartilhe o endereço. Seu IP fica protegido.
-+Endereço fictício. O servidor roda no computador do dono.
-+Terminal
-+Acompanhe o servidor e execute comandos.
-+Online
-+[Server]
-+Preparando o mundo…
-+[Server]
-+Mundo carregado.
-+[Server]
-+Servidor pronto.
-+> save-all
-+[Server]
-+Mundo salvo.
-+_
-+Comando do servidor
-+Logs demonstrativos. O console web também permite operar à distância.
-+Agenda
-+Automatize tarefas do seu servidor.
-+Criar backup
-+Usa as pastas de Arquivos e backups.
-+06:00
-+Todos os dias
-+Reiniciar servidor
-+Avisa antes de reiniciar.
-+04:30
-+Todos os dias
-+Uma rotina definida. Menos tarefas para lembrar.
-+Horários de exemplo. Backups usam as pastas configuradas no aplicativo.
-+1
-+Criar
-+2
-+Conectar
-+3
-+Operar
-+4
-+Programar
-+Escolha uma etapa para explorar.
++Interface real. Alterações apenas nesta demonstração.
++Ampliar
 +PC ligado e conectado.
 +Windows 10/11 · 64 bits.
 +Incluído no Pro e Team. Não é hospedagem na nuvem.
@@ -286,18 +196,17 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 -Encontre uma skin, personalize no editor e compartilhe sua criação.
 -Abrir editor de skins
 -L
-+Interface demonstrativa
-+Vestir
++Experimente
++Girar
 +Pintar
 +Rascunho local
 +Modelo
 +Clássico
-+Gire para ver
-+Pintar
-+Pincel
-+Cor da roupa
-+Peças de textura
-+PNG 64 × 64
++Arraste para girar
++Cor
++Baixar PNG
++64 × 64
++Pronta para Minecraft
 +Skins e editor
 +Crie uma skin
 +com a sua cara.
@@ -305,7 +214,7 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +Órbita
 +Aurora
 +Trilha
-+Criações originais para esta demonstração.
++Skins originais. Escolha, personalize e baixe.
 +Abrir editor grátis
 +Ver skins
 +Força Aliada Community
@@ -316,8 +225,6 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +No Pro: selo, destaques e insights no Community.
 +Entrar no Community
 +Ver planos
-+Publicações
-+Mensagens
 +Do perfil à conversa.
 +9:41
 +▰
@@ -360,7 +267,8 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +Terminei a ponte. Quer ver?
 +Quero! Já estou entrando.
 +Te encontro na praça.
-+Escreva uma mensagem
++Publicações
++Mensagens
 +Interface demonstrativa · perfis fictícios
 +Feito com a Força Aliada
  A gente também
@@ -382,13 +290,13 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +Arte e arquitetura
 +Prefeitura
  Uma assinatura.
-@@ -168,5 +271,2 @@
+@@ -168,5 +180,2 @@
  Manager, personalização da página do servidor e benefícios no Community. Escolha o espaço para sua equipe.
 -Só quer jogar e encontrar sua turma?
 -Explorar servidores, criar uma página básica, usar skins e participar do Community é grátis.
 -Criar conta grátis
  Mensal
-@@ -174,2 +274,15 @@
+@@ -174,2 +183,15 @@
  O anual custa o equivalente a 10 mensalidades.
 +Grátis
 +Para jogar e participar
@@ -404,17 +312,17 @@ Mensagens dinâmicas acrescentadas: feedback de edição selecionada/nenhum serv
 +Publicações, amigos e mensagens
 +O uso do Manager requer Pro ou Team. O instalador não tem cobrança separada.
  Pro
-@@ -188,3 +301,3 @@
+@@ -188,3 +210,3 @@
  Endereço protegido, backups e automações
 -Personalização avançada da página do servidor
 +Capa ampliada e ícone em alta resolução
  Selo, destaques e insights no Community
-@@ -207,3 +320,3 @@
+@@ -207,3 +229,3 @@
  O Manager roda no seu PC, que precisa ficar ligado e conectado à internet. A assinatura não inclui hospedagem em nuvem.
 -Valores de referência. No anual: Pro R$ 299/ano e Team R$ 799/ano.
 +Cancele a renovação quando precisar. Valores de referência. No anual: Pro R$ 299/ano e Team R$ 799/ano.
  Preço, disponibilidade e condições são confirmados na contratação.
-@@ -265,3 +378,3 @@
+@@ -265,3 +287,3 @@
  Sobre esta prévia e fontes
 -Variante independente; as demonstrações não criam servidores, não enviam mensagens e não acessam sua conta.
 +Variante 4; as demonstrações não criam servidores, não enviam mensagens e não acessam sua conta.

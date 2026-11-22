@@ -47,4 +47,12 @@ Não foram copiados os ativos comerciais desses sites. Framer/Webflow/Hostinger 
 
 ## Decisões que diferem do brief inicial
 
-Os grandes cartões coloridos e as sombras de botão foram retirados após feedback explícito. A animação permanece, mas a cor se concentra em produto e ação. A cena é fotografia do mundo real, com profundidade CSS; o editor usa geometria 3D original em CSS, não imagem sintética nem WebGL pesado. O telefone é genérico e sem marca. O terminal exibido é local, identificado como tal; o console web é citado e vinculado, sem simular uma sessão remota inexistente.
+Os grandes cartões coloridos e as sombras de botão foram retirados após feedback explícito. A animação permanece, mas a cor se concentra em produto e ação. A cena é fotografia do mundo real, com profundidade CSS; o editor passou a usar texturas originais no formato Minecraft e skinview3d sob demanda, com alternativa 2D. O telefone é genérico e sem marca. O terminal exibido é local, identificado como tal; o console web é citado e vinculado, sem simular uma sessão remota inexistente.
+
+## Revisão das demonstrações
+
+- [skinview3d](https://github.com/bs-community/skinview3d): formato real de skin e controles do visualizador já usado pela plataforma. Aplicação local, sem CDN adicional.
+- [WCAG — Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html): manter uma forma clara de interromper movimento prolongado; reduzir o peso visual dos controles não autoriza remover a pausa.
+- [Raycast](https://www.raycast.com/) e [Linear](https://linear.app/): referências de apresentação do produto por sua própria interface. A decisão de adaptar o Manager real é uma interpretação de design, não uma alegação de aumento comprovado de conversão.
+
+Não foram adicionadas bibliotecas externas de animação: CSS e Web Animations bastam para a coreografia desta página. O pacote adicional é o renderizador do produto Minecraft, utilizado para funcionalidade demonstrável, não decoração.

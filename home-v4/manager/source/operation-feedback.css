@@ -1,0 +1,39 @@
+/* Temporary, contextual activity. No layout shift or animation on idle data. */
+.fa-operation-live {
+    position: fixed; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; pointer-events: none;
+}
+.fa-operation-pending { position: relative; }
+.fa-operation-pending[data-operation-kind="button"]::after,
+.fa-operation-pending[data-operation-kind="region"]::after {
+    content: ""; position: absolute; pointer-events: none;
+    left: 1px; right: 1px; bottom: 0; height: 2px; border-radius: 999px;
+    background: linear-gradient(90deg, transparent 0%, var(--accent, #3dba5f) 45%, transparent 90%);
+    background-size: 180% 100%; animation: fa-operation-sweep 1.7s ease-in-out infinite;
+    opacity: .8;
+}
+.fa-operation-pending[data-operation-kind="region"]::after { bottom: auto; top: 0; }
+.fa-operation-pending:has(.fa-operation-icon)::after { display: none; }
+.fa-operation-icon { opacity: 0 !important; }
+.fa-operation-button-spinner {
+    position: absolute; left: 8px; top: calc(50% - 6.5px); width: 13px; height: 13px;
+    box-sizing: border-box; pointer-events: none;
+    border: 1.5px solid currentColor; border-right-color: transparent; border-radius: 50%;
+    animation: fa-operation-turn .85s linear infinite; opacity: .85;
+}
+.fa-operation-note {
+    display: flex; align-items: center; gap: 8px; padding: 9px 0 2px;
+    color: var(--text-secondary, #bbb); font: 12px/1.45 var(--font, 'Segoe UI', sans-serif);
+    animation: fa-operation-appear .16s ease-out;
+}
+.fa-operation-note-spinner {
+    width: 13px; height: 13px; flex: 0 0 13px; border: 1.5px solid var(--win-border-focus, #666);
+    border-top-color: var(--accent, #3dba5f); border-radius: 50%; animation: fa-operation-turn .85s linear infinite;
+}
+@keyframes fa-operation-turn { to { transform: rotate(360deg); } }
+@keyframes fa-operation-sweep { 0% { background-position: 180% 0; } 100% { background-position: -180% 0; } }
+@keyframes fa-operation-appear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+    .fa-operation-pending::after, .fa-operation-button-spinner, .fa-operation-note, .fa-operation-note-spinner { animation: none !important; }
+    .fa-operation-pending::after { background: var(--accent, #3dba5f); opacity: .55; }
+}
