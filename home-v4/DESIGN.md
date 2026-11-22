@@ -47,7 +47,7 @@ A demonstração do Community usa as proporções físicas do [iPhone 16](https:
 
 A abertura conserva profundidade e deslocamento fotográfico discreto. A janela do Manager se endireita ao entrar em cena; a janela do hero alterna visão geral, terminal e arquivos. O catálogo alterna busca, filtro e favorito. O Community demonstra feed e mensagem. A skin gira e muda de cor quando acionada. Trocas usam CSS/WAAPI, com WebGL carregado apenas para o editor e alternativa 2D e sem rolagem sequestrada.
 
-Ciclos só executam visíveis, com aba ativa e sem foco de edição. Interação manual pausa a demonstração correspondente. Há uma pausa geral compacta; controles repetidos de reprodução foram retirados. Preferência de movimento reduzido e economia de dados desligam os ciclos. Isso também evita que a página dispute atenção enquanto a pessoa lê ou usa controles.
+Ciclos só executam visíveis, com aba ativa e sem foco de edição. Interação manual pausa a demonstração correspondente. A pausa geral fica em “Sobre a prévia”, no rodapé. Preferência de movimento reduzido e economia de dados desligam os ciclos.
 
 ## Texto que deve permanecer explícito
 
@@ -67,7 +67,7 @@ O título ocupa menos espaço e a ação de cadastro tem mais respiro. A imagem 
 
 Substituições visuais: modelos 3D e amostras reais de skins, paleta de cores, ícones de pintar/girar/desfazer/download, reação visual ao favorito, selos e capacidades dos planos. A navegação entre feed e conversa fica no próprio telefone, não na área de convencimento. Preço, cobrança, PC ligado e diferença entre grátis/pago continuam escritos: omiti-los reduziria a clareza.
 
-Uma única pausa ocupa 44px no canto. Entradas finitas usam transform/opacity; o cadastro recebe um reflexo inicial breve, sem pulsação permanente. Hero alterna telas reais, catálogo demonstra busca/filtro/favorito e Community demonstra feed/conversa. Interação manual interrompe o ciclo correspondente. Não há controle de rolagem nem animação necessária para acessar conteúdo.
+Entradas finitas usam transform/opacity; o cadastro recebe um reflexo inicial breve, sem pulsação permanente. Hero alterna telas reais, catálogo demonstra busca/filtro/favorito e Community demonstra feed/conversa. Interação manual interrompe o ciclo correspondente. Não há controle de rolagem nem animação necessária para acessar conteúdo.
 
 
 ## Refinamento de composição — 22/11/2026
