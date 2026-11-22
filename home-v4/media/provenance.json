@@ -1,0 +1,291 @@
+[
+  {
+    "file": "scene-640.webp",
+    "source": "home-v2\\media\\forca-aliada-coliseu.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 45558,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "scene-1280.webp",
+    "source": "home-v2\\media\\forca-aliada-coliseu.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 172042,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "scene-1920.webp",
+    "source": "home-v2\\media\\forca-aliada-coliseu.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      1920,
+      1080
+    ],
+    "bytes": 191240,
+    "quality": 47,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "central-640.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria14.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 42300,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "central-1280.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria14.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 146296,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "ruas-640.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria10.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 50536,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "ruas-1280.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria10.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 144904,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "masp-640.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria4.jpeg",
+    "originalSize": [
+      1366,
+      768
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 25522,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "masp-1280.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria4.jpeg",
+    "originalSize": [
+      1366,
+      768
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 82740,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "prefeitura-640.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria7.jpeg",
+    "originalSize": [
+      1366,
+      768
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 31714,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "prefeitura-1280.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria7.jpeg",
+    "originalSize": [
+      1366,
+      768
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 93644,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "casa-640.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria19.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      640,
+      360
+    ],
+    "bytes": 39850,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "casa-1280.webp",
+    "source": "..\\account-broker-source\\assets\\images\\galeria19.webp",
+    "originalSize": [
+      1920,
+      1080
+    ],
+    "size": [
+      1280,
+      720
+    ],
+    "bytes": 112212,
+    "quality": 82,
+    "rights": "Imagem do projeto Força Aliada, reutilizada a pedido do titular. Minecraft e suas texturas pertencem à Mojang/Microsoft; não representa parceria ou produto oficial."
+  },
+  {
+    "file": "scene-mobile-480.webp",
+    "source": "scene-1920.webp",
+    "size": [
+      480,
+      768
+    ],
+    "bytes": 48808,
+    "rights": "Derivado responsivo da imagem própria documentada acima. Sem geração ou alteração de construções."
+  },
+  {
+    "file": "scene-mobile-800.webp",
+    "source": "scene-1920.webp",
+    "size": [
+      800,
+      1280
+    ],
+    "bytes": 112796,
+    "rights": "Derivado responsivo da imagem própria documentada acima. Sem geração ou alteração de construções."
+  },
+  {
+    "file": "server-thumb.webp",
+    "source": "central-640.webp",
+    "size": [
+      128,
+      128
+    ],
+    "bytes": 2964,
+    "rights": "Derivado responsivo da imagem própria documentada acima. Sem geração ou alteração de construções."
+  },
+  {
+    "file": "central-900.webp",
+    "source": "central-1280.webp",
+    "size": [
+      900,
+      506
+    ],
+    "bytes": 57214,
+    "rights": "Derivado responsivo da imagem própria documentada acima. Sem geração ou alteração de construções."
+  },
+  {
+    "file": "scene-mobile-480.avif",
+    "source": "scene-mobile-480.webp",
+    "bytes": 33557,
+    "rights": "Derivado responsivo da captura própria. Compressão AVIF sem conteúdo gerado."
+  },
+  {
+    "file": "scene-mobile-800.avif",
+    "source": "scene-mobile-800.webp",
+    "bytes": 79459,
+    "rights": "Derivado responsivo da captura própria. Compressão AVIF sem conteúdo gerado."
+  },
+  {
+    "file": "avatar-demo.svg",
+    "source": "Arquivo preservado de home-v3/media; direitos e licença em CREDITOS.md.",
+    "bytes": 243,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "fa-icon-64.webp",
+    "source": "Arquivo preservado de home-v3/media; direitos e licença em CREDITOS.md.",
+    "bytes": 1226,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "manrope-latin.woff2",
+    "source": "Arquivo preservado de home-v3/media; direitos e licença em CREDITOS.md.",
+    "bytes": 24532,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "Manrope-OFL.txt",
+    "source": "Arquivo preservado de home-v3/media; direitos e licença em CREDITOS.md.",
+    "bytes": 4386,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "portrait-lia.svg",
+    "source": "Desenho SVG autoral para esta demonstração, 17/11/2026.",
+    "bytes": 543,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "portrait-noa.svg",
+    "source": "Desenho SVG autoral para esta demonstração, 17/11/2026.",
+    "bytes": 543,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  },
+  {
+    "file": "portrait-rui.svg",
+    "source": "Desenho SVG autoral para esta demonstração, 17/11/2026.",
+    "bytes": 543,
+    "rights": "Uso no projeto Força Aliada conforme CREDITOS.md."
+  }
+]
