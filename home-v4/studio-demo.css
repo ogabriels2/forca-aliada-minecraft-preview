@@ -1,18 +1,24 @@
 .discovery-section .skins-row {
-  gap: 22px clamp(32px, 4.5vw, 64px);
-  scroll-margin-block-start: 70px;
+  gap: 22px clamp(28px, 4vw, 54px);
+  padding: clamp(24px, 3.2vw, 44px);
+  scroll-margin-block-start: 94px;
+  border: 0;
+  border-radius: 16px;
+  background: #e6dcec;
+  color: #2e2338;
 }
 
 .skins-row .skins-copy { display: block; }
 .skins-copy h3 { text-wrap: balance; }
-.skins-copy > p:not(.product-name) { max-width: 38ch; }
+.skins-row .skins-copy > p { max-width: 38ch; color: #554760; }
 
 .skin-editor-window.real-skin-editor {
   --studio-line: #e0e4e3;
   --studio-ink: #263a30;
   width: 100%;
   max-width: 760px;
-  border: 1px solid #cdd5d1;
+  container-type: inline-size;
+  border: 1px solid #c5b9ce;
   border-radius: 15px;
   color: var(--ink);
   box-shadow: 0 18px 48px #26364213;
@@ -84,7 +90,7 @@
   position: relative;
   height: clamp(338px, 29vw, 390px);
   isolation: isolate;
-  background: radial-gradient(ellipse at 49% 43%, #f4eff7 10%, #e7dfee 87%);
+  background: radial-gradient(ellipse at 49% 43%, #fcfafc 9%, #eee6f1 87%);
   overflow: hidden;
 }
 
@@ -132,7 +138,17 @@
 }
 
 .skin-choices { flex-direction: column; align-items: flex-start; gap: 10px; }
-.skin-choices > span { color: #4c5d53; font-size: 13px; font-weight: 700; }
+.skin-choices-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: min(100%, 350px);
+  font-size: 13px;
+  font-weight: 700;
+}
+.skin-choices-heading a { color: #513563; text-decoration: underline; text-underline-offset: 3px; }
+.skin-choices-heading a[hidden] { display: none; }
 
 .studio-demo-outfits {
   display: grid;
@@ -152,19 +168,19 @@
   gap: 4px;
   border: 1px solid transparent;
   border-radius: 10px;
-  background: #f4f5f4;
-  color: var(--studio-ink);
+  background: #f6f0f8;
+  color: #392c43;
   font: 650 13px Manrope, sans-serif;
 }
 
-.studio-demo-outfits button[aria-pressed="true"] { background: #eaf2ea; border-color: #8daa96; }
-.studio-demo-outfits button:hover:not([aria-pressed="true"]) { background: #ebeeec; }
+.studio-demo-outfits button[aria-pressed="true"] { background: #fff; border-color: #826494; }
+.studio-demo-outfits button:hover:not([aria-pressed="true"]) { background: #fffbff; }
 .studio-demo-outfits img { width: 63px; height: 84px; object-fit: contain; image-rendering: pixelated; }
 .studio-demo-outfits .outfit-check {
   display: none;
   position: absolute;
   inset: 7px 7px auto auto;
-  color: #265737;
+  color: #604172;
   width: 14px;
   height: 14px;
 }
@@ -198,6 +214,8 @@
 
 .skins-row .skins-actions { gap: 16px; }
 .skins-actions .text-link { font-size: 14px; }
+.skins-actions .button.dark { background: #4b325a; border-color: #4b325a; }
+.skins-actions .button.dark:hover { background: #5c3e6e; }
 
 @media (min-width: 1001px) {
   .discovery-section .skins-row {
@@ -215,21 +233,31 @@
   .discovery-section .skins-row { display: flex; flex-direction: column; align-items: stretch; gap: 22px; }
 }
 
+@container (max-width: 460px) {
+  .studio-demo-heading { padding-inline: 8px; }
+  .enhanced .studio-demo-heading strong, .studio-download span { display: none; }
+  .studio-demo-modes button { padding-inline: 8px; gap: 5px; }
+}
+
+@container (max-width: 300px) {
+  .studio-demo-heading { gap: 2px; padding-inline: 6px; }
+  .studio-demo-tools { gap: 0; }
+  .studio-demo-modes .icon { width: 15px; height: 15px; }
+}
+
 @media (max-width: 600px) {
+  .discovery-section .skins-row { padding: 24px 12px 18px; }
   .studio-demo-stage { height: clamp(310px, 78vw, 385px); }
   .studio-demo-outfits { max-width: none; }
   .studio-demo-outfits button { min-height: 103px; }
   .studio-demo-outfits img { width: 54px; height: 72px; }
-  .studio-demo-heading { padding-inline: 8px; }
-  .enhanced .studio-demo-heading strong, .studio-download span { display: none; }
-  .studio-demo-modes button { padding-inline: 8px; gap: 5px; }
   .studio-demo-tray { padding-inline: 8px; }
-  .studio-demo-palette { gap: 4px; }
+  .studio-demo-palette { flex-wrap: wrap; justify-content: center; gap: 2px 4px; }
 }
 
 @media (max-width: 380px) {
-  .skins-row .skins-actions { gap: 12px; }
-  .skins-actions .button { padding-inline: 12px; font-size: 14px; gap: 9px; }
+  .skins-row .skins-actions { justify-content: center; gap: 6px; }
+  .skins-actions .button { width: 100%; padding-inline: 12px; font-size: 14px; gap: 9px; }
 }
 
 @media (scripting: none) {

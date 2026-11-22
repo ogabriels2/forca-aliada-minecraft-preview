@@ -1,4 +1,4 @@
-import { dressLook, drawSkinFront, pixelCanvas, presets } from './studio-looks.js';
+import { dressLook, drawSkinFront, loadCatalogLook, pixelCanvas, presets, recolorCatalogLook } from './studio-looks.js?v=catalog';
 
 export function setupSkinDemo({ toast, motion }) {
   const byId = id => document.getElementById(id);
@@ -7,6 +7,7 @@ export function setupSkinDemo({ toast, motion }) {
   const canvas = byId('skin-canvas');
   const poster = byId('skin-poster');
   const looks = [...editor.closest('#skins').querySelectorAll('[data-skin-preset]')];
+  const catalogCredit = byId('skin-catalog-credit');
   const swatches = [...editor.querySelectorAll('[data-color]')];
   const front = document.createElement('canvas');
   front.width = 96;
@@ -23,6 +24,7 @@ export function setupSkinDemo({ toast, motion }) {
   let stroke;
   let visible = false;
   let loading = false;
+  let lookRequest = 0, catalogPixels;
   let viewer, api, turnFrame;
 
   function remember() {
@@ -39,6 +41,7 @@ export function setupSkinDemo({ toast, motion }) {
     for (const button of swatches) {
       button.setAttribute('aria-pressed', String(button.dataset.color === activeColor));
     }
+    catalogCredit.hidden = preset !== 'gabalarca';
     poster.alt = `Skin ${presets[preset].name} vista de frente`;
   }
 
@@ -152,13 +155,27 @@ export function setupSkinDemo({ toast, motion }) {
     rotate(event.key === 'ArrowLeft' ? -.25 : .25);
   });
 
-  for (const button of looks) button.addEventListener('click', () => {
+  for (const button of looks) button.addEventListener('click', async () => {
+    const request = ++lookRequest;
     const selected = button.dataset.skinPreset;
     if (selected === preset) return;
+    let next;
+    try {
+      if (selected === 'gabalarca') {
+        catalogPixels = await loadCatalogLook();
+        next = catalogPixels;
+      } else {
+        next = dressLook(selected);
+      }
+    } catch {
+      if (request === lookRequest) toast('Não foi possível abrir esta skin. Tente de novo.');
+      return;
+    }
+    if (request !== lookRequest) return;
     remember();
     preset = selected;
     garment = presets[preset].coat;
-    base = dressLook(preset, garment);
+    base = next;
     pixels = new Uint8ClampedArray(base);
     refresh();
     syncChoices();
@@ -171,7 +188,9 @@ export function setupSkinDemo({ toast, motion }) {
     } else if (color !== garment) {
       remember();
       garment = color;
-      const next = dressLook(preset, garment);
+      const next = preset === 'gabalarca'
+        ? recolorCatalogLook(catalogPixels, garment)
+        : dressLook(preset, garment);
       for (let i = 0; i < pixels.length; i += 4) {
         // Keep brush marks when changing clothes color.
         if ([0, 1, 2, 3].every(channel => pixels[i + channel] === base[i + channel])) {
@@ -230,6 +249,7 @@ export function setupSkinDemo({ toast, motion }) {
   }
 
   byId('skin-undo').addEventListener('click', () => {
+    ++lookRequest;
     const previous = history.pop();
     if (!previous) return;
     ({ preset, garment, brush, base, pixels } = previous);

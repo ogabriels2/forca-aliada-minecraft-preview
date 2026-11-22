@@ -377,5 +377,25 @@
     ],
     "bytes": 33488,
     "rights": "Força Aliada application interface, reused with owner authorization."
+  },
+  {
+    "file": "skin-gabalarca.png",
+    "source": "https://forcaaliada.com/minecraft#/skins/affc2895-ff96-43c7-af78-a93cb951484d",
+    "size": [
+      64,
+      64
+    ],
+    "bytes": 2985,
+    "rights": "Criação publicada por gabalarca no catálogo da Força Aliada. Uso na prévia autorizado pelo titular do projeto."
+  },
+  {
+    "file": "skin-gabalarca-front.png",
+    "source": "skin-gabalarca.png",
+    "size": [
+      96,
+      128
+    ],
+    "bytes": 1832,
+    "rights": "Criação publicada por gabalarca no catálogo da Força Aliada. Uso na prévia autorizado pelo titular do projeto."
   }
 ]
