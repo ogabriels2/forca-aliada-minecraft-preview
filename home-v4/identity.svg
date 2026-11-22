@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Product marks. These are specific to the home, not the navigation icon set. -->
+  <symbol id="manager-mark" viewBox="0 0 36 36">
+    <rect width="36" height="36" rx="9" fill="#e7f2eb"/>
+    <rect x="7" y="8" width="22" height="20" rx="4" fill="#244b38"/>
+    <path d="M7 18h22" stroke="#85af95"/>
+    <path d="M12 13h6m-6 10h6" stroke="#c3dfcd" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="24" cy="13" r="1.6" fill="#85edaa"/>
+    <circle cx="24" cy="23" r="1.6" fill="#85edaa"/>
+  </symbol>
+  <symbol id="minecraft-mark" viewBox="0 0 36 36">
+    <rect width="36" height="36" rx="9" fill="#eaf1fb"/>
+    <path d="m18 6 11 6v12l-11 6L7 24V12z" fill="#4d77ad"/>
+    <path d="m18 18 11-6v12l-11 6z" fill="#284b78"/>
+    <path d="m18 6 11 6-11 6-11-6z" fill="#a8c6ef"/>
+    <path d="m11 14 7 4 7-4" stroke="#e4efff" stroke-linejoin="round" fill="none"/>
+    <path d="m10 19 4 2m7 3 5-3" stroke="#a8c6ef" stroke-width="1.2" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="community-mark" viewBox="0 0 36 36">
+    <rect width="36" height="36" rx="9" fill="#f5ecd8"/>
+    <path d="M19 14h5a6 6 0 0 1 6 6v9l-4-3h-7a6 6 0 0 1-6-6 6 6 0 0 1 6-6Z" fill="#d2a54f"/>
+    <path d="M12 7h7a6 6 0 0 1 6 6v1a6 6 0 0 1-6 6h-7l-6 4V13a6 6 0 0 1 6-6Z" fill="#574522"/>
+    <path d="M11 12.5h9m-9 3.5h5" stroke="#fff2cc" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="skins-mark" viewBox="0 0 36 36">
+    <rect width="36" height="36" rx="9" fill="#eee8f7"/>
+    <path d="m12 9-6 4 3 5 3-1.5V28h12V16.5l3 1.5 3-5-6-4h-2a4 4 0 0 1-8 0z" fill="#674b89"/>
+    <path d="M16 18h4v4h-4z" fill="#dccaef"/>
+    <path d="M20 22h2v2h-2z" fill="#b795da"/>
+  </symbol>
+
+  <symbol id="server-valley" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="7" fill="#dce9e1"/>
+    <path d="M0 25 9 15l5 5 6-8 12 12v8H0Z" fill="#719580"/>
+    <path d="m11 9-6 8h3l-4 6h5v4h4v-4h5l-4-6h3z" fill="#244c3b"/>
+    <path d="m19 15 2-3 4 4-3 1z" fill="#f3f7f3"/>
+  </symbol>
+  <symbol id="server-atelier" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="7" fill="#ede7f5"/>
+    <path d="M7 15h8v11H7zm10-8h8v19h-8z" fill="#6c5089"/>
+    <path d="M10 18h2m8-7h2m-2 4h2m-2 4h2M5 26h22" stroke="#f8f4ff" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="server-bridge" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="7" fill="#e2edf5"/>
+    <path d="M4 15h24v4H4z" fill="#52748f"/>
+    <path d="M7 23v-4a9 9 0 0 1 18 0v4m-16-8v-4m7 4V8m7 7v-4" fill="none" stroke="#32526c" stroke-width="2" stroke-linecap="round"/>
+    <path d="M8 26h16" stroke="#7cacc4" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+</svg>
