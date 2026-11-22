@@ -10,4 +10,4 @@
 - **Ícones:** SVGs do próprio projeto, preservados/adaptados para esta interface. Símbolos de redes sociais identificam seus respectivos serviços; marcas pertencem aos titulares e não representam parceria.
 - **Conta:** componente próprio aprovado no Manager, copiado da v3 sem modificações internas.
 
-Nenhuma imagem gerada por IA, biblioteca de execução de animação ou ativo comercial das referências externas está incluído. Os desenhos e fotografias não tornam a Força Aliada proprietária da marca Minecraft. Mantido aviso de independência no rodapé.
+Não foram usados geradores de imagem: os avatares são SVG, os personagens 3D são geometria CSS e os cenários são capturas do mundo real. Nenhuma biblioteca de execução de animação ou ativo comercial das referências externas está incluído. Os desenhos e fotografias não tornam a Força Aliada proprietária da marca Minecraft. Mantido aviso de independência no rodapé.

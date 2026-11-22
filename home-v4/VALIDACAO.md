@@ -42,7 +42,13 @@ Evidências locais: r1/r2-{320,390,768,1024,1440,1920,2560}.png e section-{1440,
 
 ## Desempenho
 
-Primeira medição local móvel com servidor Python sem compressão: **92 desempenho / 100 acessibilidade / 100 boas práticas**; LCP 3,10s; CLS 0; TBT 6ms; transferência total observada 386KiB. Ainda não atingia o critério de LCP local. A medição da versão publicada e eventuais correções serão registradas abaixo.
+Primeira medição local móvel com servidor Python sem compressão: **92 desempenho / 100 acessibilidade / 100 boas práticas**; LCP 3,10s; CLS 0; TBT 6ms; transferência total observada 386KiB. Ainda não atingia o critério de LCP local.
+
+Medição final no GitHub Pages, commit de implementação `8e1d179`, Lighthouse 13.6, móvel com rede/CPU simuladas: **99 desempenho / 100 acessibilidade / 100 boas práticas**; LCP **1,55s**; CLS **0,00031**; TBT **69ms**; transferência total observada **239KiB**. Os critérios de laboratório de desempenho, LCP, estabilidade e orçamento inicial foram atendidos nesta execução. Não é uma medição de INP de campo. A compressão e entrega pública diferem do servidor Python local.
+
+Publicação conferida em https://ogabriels2.github.io/forca-aliada-minecraft-preview/home-v4/: HTTP 200, imagens visíveis sem falhas, filtro com um resultado, Pro anual exibindo R$24,92 equivalentes/mês e noindex preservado. Capturas públicas desktop/mobile e relatório `lighthouse-public-mobile-r1.json` arquivados na pesquisa local.
+
+Auditoria estática final: 78 IDs únicos, 252 referências, 30 imagens com alt; nenhuma âncora ou arquivo local ausente. Os dois arquivos compartilhados de conta são idênticos aos da v3. Nenhum arquivo da v2, v3 ou aplicação Minecraft foi alterado.
 
 ## Limites reais
 
